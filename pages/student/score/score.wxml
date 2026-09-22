@@ -1,0 +1,47 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">我的成绩</view>
+    <view class="hero-sub">{{examName}}</view>
+    <view class="score-banner card card-raised">
+      <view class="sb-cell">
+        <view class="sb-num">{{total}}</view>
+        <view class="sb-lb">总分</view>
+      </view>
+      <view class="sb-cell">
+        <view class="sb-num">{{avg}}</view>
+        <view class="sb-lb">平均分</view>
+      </view>
+      <view class="sb-cell">
+        <view class="sb-num sb-accent">5</view>
+        <view class="sb-lb">班级排名</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">各科成绩</view>
+    <chart type="bar" data="{{barData}}" />
+  </view>
+
+  <view class="card">
+    <view class="section-title">成绩明细</view>
+    <view class="sc-item" wx:for="{{scores}}" wx:key="subject">
+      <view class="sc-left">
+        <text class="sc-subject">{{item.subject}}</text>
+        <view class="sc-bar">
+          <view class="sc-bar-in" style="width: {{item.barPct}}%"></view>
+        </view>
+      </view>
+      <view class="sc-right">
+        <text class="sc-score">{{item.score}}</text>
+        <text class="sc-diff {{item.diff >= 0 ? 'up' : 'down'}}">
+          {{item.diff >= 0 ? '↑' : '↓'}}{{item.diff >= 0 ? item.diff : -item.diff}}
+        </text>
+        <text class="sc-rank muted">第{{item.classRank}}名</text>
+      </view>
+    </view>
+    <view class="sc-tip muted">↑↓ 表示该科与班级平均分的差值</view>
+  </view>
+
+  <bottom-nav role="student" active="{{1}}" />
+</view>

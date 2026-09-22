@@ -1,0 +1,46 @@
+.tab-row {
+  display: flex;
+  gap: 20rpx;
+  padding: 28rpx 28rpx 0;
+}
+.tab {
+  padding: 14rpx 32rpx;
+  background: #fff;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: #6B7180;
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+.tab--on { background: var(--primary); color: #fff; font-weight: 700; }
+
+.hw-item { margin: 22rpx 28rpx; }
+.hw-title { font-size: 30rpx; font-weight: 600; margin-left: 14rpx; }
+.hw-deadline { margin: 16rpx 0; }
+
+.progress-row { display: flex; align-items: center; }
+.progress-track {
+  flex: 1;
+  height: 16rpx;
+  background: #EEF0F5;
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #5B7CFF, #24C8A0);
+}
+.bar-red { background: linear-gradient(90deg, #FF8A5B, #FF5A5F); }
+.progress-text { font-size: 22rpx; color: #6B7180; margin-left: 16rpx; }
+
+.hw-foot { display: flex; justify-content: flex-end; margin-top: 20rpx; }
+.submit-mini {
+  padding: 12rpx 36rpx;
+  border-radius: 999rpx;
+  background: var(--primary-light);
+  color: var(--primary-deep);
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.empty { text-align: center; color: #A6ABC0; padding: 100rpx 0; }

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "查看点评",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/bottom-nav"
+  }
+}

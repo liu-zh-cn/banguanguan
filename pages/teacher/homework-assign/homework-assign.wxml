@@ -1,0 +1,60 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">布置作业</view>
+    <view class="hero-sub">快速下发任务，实时查看完成进度</view>
+  </view>
+
+  <!-- 布置表单 -->
+  <view class="card card-raised">
+    <view class="section-title">新建作业</view>
+
+    <view class="form-item">
+      <text class="form-label">学科</text>
+      <picker mode="selector" range="{{subjects}}" value="{{subjectIndex}}" bindchange="onSubject">
+        <view class="picker">{{subjects[subjectIndex]}} ›</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">标题</text>
+      <input class="form-input" placeholder="请输入作业标题" value="{{title}}" bindinput="onTitle" />
+    </view>
+
+    <view class="form-item column">
+      <text class="form-label">作业要求</text>
+      <textarea class="form-textarea" placeholder="选填，描述作业内容与要求" value="{{content}}" bindinput="onContent" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">截止时间</text>
+      <picker mode="date" value="{{deadline}}" bindchange="onDate">
+        <view class="picker">{{deadline || '选择日期'}}</view>
+      </picker>
+    </view>
+
+    <button class="btn-primary submit-btn" bindtap="submit">发布作业</button>
+  </view>
+
+  <!-- 已布置列表 -->
+  <view class="card">
+    <view class="section-title">已布置作业</view>
+    <view class="hw-item" wx:for="{{list}}" wx:key="id">
+      <view class="row-between">
+        <view class="row">
+          <text class="tag tag-blue">{{item.subject}}</text>
+          <text class="hw-title">{{item.title}}</text>
+        </view>
+        <text class="del" data-id="{{item.id}}" catchtap="remove">撤回</text>
+      </view>
+      <view class="hw-meta muted">截止 {{item.deadline}} · {{item.status}}</view>
+      <view class="progress-row">
+        <view class="progress-track">
+          <view class="progress-bar" style="width: {{item.done / item.total * 100}}%"></view>
+        </view>
+        <text class="progress-text">{{item.done}}/{{item.total}}</text>
+      </view>
+    </view>
+  </view>
+
+  <bottom-nav role="teacher" active="{{2}}" />
+</view>

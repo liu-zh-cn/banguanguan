@@ -1,0 +1,35 @@
+.form-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid #F2F3F7;
+}
+.form-item.column { flex-direction: column; align-items: stretch; }
+.form-label { width: 130rpx; color: #6B7180; font-size: 28rpx; }
+.form-item.column .form-label { width: auto; margin-bottom: 16rpx; }
+.form-input { flex: 1; font-size: 28rpx; }
+.form-textarea { width: 100%; height: 140rpx; font-size: 28rpx; }
+.picker { flex: 1; font-size: 28rpx; color: #1F2430; }
+
+.submit-btn { margin-top: 36rpx; }
+
+.hw-item { padding: 24rpx 0; border-bottom: 2rpx solid #F2F3F7; }
+.hw-item:last-child { border-bottom: none; }
+.hw-title { font-size: 30rpx; font-weight: 600; margin-left: 16rpx; }
+.del { font-size: 24rpx; color: var(--danger); }
+.hw-meta { margin: 10rpx 0 14rpx; }
+
+.progress-row { display: flex; align-items: center; }
+.progress-track {
+  flex: 1;
+  height: 16rpx;
+  background: #EEF0F5;
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #5B7CFF, #24C8A0);
+}
+.progress-text { font-size: 22rpx; color: #6B7180; margin-left: 16rpx; }

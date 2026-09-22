@@ -1,0 +1,47 @@
+<view class="page">
+  <view class="hero">
+    <view class="row-between">
+      <view>
+        <view class="hero-title">班级管理</view>
+        <view class="hero-sub">共 {{all.length}} 名学生 · 高三(2)班</view>
+      </view>
+      <view class="hero-create" bindtap="goCreate">＋ 创建班级</view>
+    </view>
+
+    <view class="search-box">
+      <text class="search-ico">🔍</text>
+      <input class="search-input" placeholder="搜索学生姓名" value="{{keyword}}" bindinput="onSearch" />
+    </view>
+  </view>
+
+  <!-- 筛选 -->
+  <view class="filter-row">
+    <view class="chip {{filter === 'all' ? 'chip--on' : ''}}" data-filter="all" bindtap="setFilter">全部</view>
+    <view class="chip {{filter === 'cadre' ? 'chip--on' : ''}}" data-filter="cadre" bindtap="setFilter">班委</view>
+    <view class="chip {{filter === 'warn' ? 'chip--on' : ''}}" data-filter="warn" bindtap="setFilter">需关注</view>
+  </view>
+
+  <!-- 学生列表 -->
+  <view class="stu-list">
+    <view class="stu-item card" wx:for="{{list}}" wx:key="id" data-name="{{item.name}}" bindtap="onView">
+      <view class="avatar" style="background: {{item.avatarColor}}">{{item.name[0]}}</view>
+      <view class="stu-main">
+        <view class="row">
+          <text class="stu-name">{{item.name}}</text>
+          <text class="stu-duty">{{item.duty}}</text>
+        </view>
+        <view class="muted">学号 {{item.no}} · {{item.gender}}</view>
+      </view>
+      <view class="stu-score">
+        <view class="score-num {{item.score < 60 ? 'score-warn' : ''}}">{{item.score}}</view>
+        <view class="muted">最新分</view>
+      </view>
+    </view>
+
+    <view class="empty" wx:if="{{!list.length}}">暂无符合条件的学生</view>
+  </view>
+
+  <view class="fab" bindtap="addStudent">＋</view>
+
+  <bottom-nav role="teacher" active="{{1}}" />
+</view>

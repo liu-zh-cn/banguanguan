@@ -1,0 +1,40 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">我的作业</view>
+    <view class="hero-sub">高三(2)班 · 刘同学</view>
+  </view>
+
+  <view class="tab-row">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="tab {{tab === item.key ? 'tab--on' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="setTab"
+    >{{item.label}}</view>
+  </view>
+
+  <view class="card hw-item" wx:for="{{list}}" wx:key="id">
+    <view class="row-between">
+      <view class="row">
+        <text class="tag tag-blue">{{item.subject}}</text>
+        <text class="hw-title">{{item.title}}</text>
+      </view>
+      <text class="tag {{item.status === '已完成' ? 'tag-green' : item.status === '已逾期' ? 'tag-red' : 'tag-orange'}}">{{item.status}}</text>
+    </view>
+    <view class="muted hw-deadline">⏰ 截止 {{item.deadline}}</view>
+    <view class="progress-row">
+      <view class="progress-track">
+        <view class="progress-bar {{item.status === '已逾期' ? 'bar-red' : ''}}" style="width: {{item.pct}}%"></view>
+      </view>
+      <text class="progress-text">{{item.pct}}%</text>
+    </view>
+    <view class="hw-foot" wx:if="{{item.status !== '已完成'}}">
+      <view class="submit-mini" data-id="{{item.id}}" catchtap="onSubmit">{{item.status === '已逾期' ? '补交' : '去提交'}}</view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{!list.length}}">该分类下暂无作业 🎉</view>
+
+  <bottom-nav role="student" active="{{0}}" />
+</view>

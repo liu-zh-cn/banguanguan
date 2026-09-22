@@ -1,0 +1,60 @@
+<view class="edit-page">
+  <!-- 头像 -->
+  <view class="avatar-row">
+    <view class="big-avatar">{{profile.name[0] || '?'}}</view>
+    <view class="avatar-tip muted">修改后点击底部「保存」</view>
+  </view>
+
+  <view class="card form-card">
+    <view class="f-row">
+      <text class="f-label">姓名</text>
+      <input class="f-input" data-field="name" value="{{profile.name}}" bindinput="onInput" placeholder="请输入姓名" />
+    </view>
+
+    <picker mode="selector" range="{{genders}}" value="{{genderIndex}}" bindchange="onGender">
+      <view class="f-row">
+        <text class="f-label">性别</text>
+        <view class="f-input f-picker">{{profile.gender}} ›</view>
+      </view>
+    </picker>
+
+    <view class="f-row">
+      <text class="f-label">手机号</text>
+      <input class="f-input" type="number" maxlength="11" data-field="phone" value="{{profile.phone}}" bindinput="onInput" placeholder="请输入手机号" />
+    </view>
+
+    <!-- 老师专属 -->
+    <block wx:if="{{role === 'teacher'}}">
+      <view class="f-row">
+        <text class="f-label">职称</text>
+        <input class="f-input" data-field="title" value="{{profile.title}}" bindinput="onInput" placeholder="如：班主任 / 教研组长" />
+      </view>
+      <view class="f-row">
+        <text class="f-label">任教学科</text>
+        <input class="f-input" data-field="subject" value="{{profile.subject}}" bindinput="onInput" placeholder="如：数学" />
+      </view>
+    </block>
+
+    <!-- 学生专属 -->
+    <block wx:else>
+      <view class="f-row">
+        <text class="f-label">学号</text>
+        <input class="f-input" data-field="studentNo" value="{{profile.studentNo}}" bindinput="onInput" placeholder="请输入学号" />
+      </view>
+    </block>
+
+    <view class="f-row">
+      <text class="f-label">所在班级</text>
+      <input class="f-input" data-field="className" value="{{profile.className}}" bindinput="onInput" placeholder="如：高三(2)班" />
+    </view>
+
+    <view class="f-row column">
+      <text class="f-label">个性签名</text>
+      <textarea class="f-textarea" data-field="signature" value="{{profile.signature}}" bindinput="onInput" placeholder="写点什么吧～" />
+    </view>
+  </view>
+
+  <view class="save-bar">
+    <button class="btn-primary" bindtap="save">保存</button>
+  </view>
+</view>

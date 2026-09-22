@@ -1,0 +1,65 @@
+<view class="cc-page">
+  <view class="hero">
+    <view class="hero-title">创建班级</view>
+    <view class="hero-sub">建立你自己的班级，生成邀请码招学生</view>
+  </view>
+
+  <view class="card card-raised">
+    <view class="section-title">班级信息</view>
+
+    <view class="f-row">
+      <text class="f-label">所属年级</text>
+      <picker mode="selector" range="{{grades}}" value="{{gradeIndex}}" bindchange="onGrade">
+        <view class="f-picker">{{grades[gradeIndex]}} ›</view>
+      </picker>
+    </view>
+
+    <view class="f-row">
+      <text class="f-label">班级序号</text>
+      <input class="f-input" placeholder="如 2 → 生成 高三(2)班" value="{{name}}" data-field="name" bindinput="onInput" />
+    </view>
+
+    <view class="f-row">
+      <text class="f-label">班主任</text>
+      <input class="f-input" placeholder="班主任姓名" value="{{teacher}}" data-field="teacher" bindinput="onInput" />
+    </view>
+
+    <view class="f-row">
+      <text class="f-label">学生人数</text>
+      <input class="f-input" type="number" placeholder="选填" value="{{count}}" data-field="count" bindinput="onInput" />
+    </view>
+
+    <view class="f-row column">
+      <text class="f-label">班级宣言</text>
+      <textarea class="f-textarea" placeholder="写一句班级口号吧～" value="{{motto}}" data-field="motto" bindinput="onInput" />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">班级邀请码</view>
+    <view class="code-card">
+      <text class="code-text">{{inviteCode}}</text>
+      <view class="code-actions">
+        <text class="code-link" bindtap="refreshCode">🔄 换一换</text>
+        <text class="code-link" data-code="{{inviteCode}}" bindtap="copyCode">📋 复制</text>
+      </view>
+    </view>
+    <view class="muted code-tip">学生注册时填写该邀请码即可加入你的班级</view>
+  </view>
+
+  <view class="submit-wrap">
+    <button class="btn-primary" bindtap="submit">创建班级</button>
+  </view>
+
+  <!-- 我创建的班级 -->
+  <view class="card" wx:if="{{myClasses.length}}">
+    <view class="section-title">我创建的班级（{{myClasses.length}}）</view>
+    <view class="my-item" wx:for="{{myClasses}}" wx:key="id">
+      <view class="flex-1">
+        <view class="my-name">{{item.name}}</view>
+        <view class="muted">班主任 {{item.teacher}} · 邀请码 {{item.inviteCode}}</view>
+      </view>
+      <text class="tag tag-green">已创建</text>
+    </view>
+  </view>
+</view>

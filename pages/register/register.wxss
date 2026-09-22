@@ -1,0 +1,84 @@
+.reg { min-height: 100vh; background: #fff; }
+.reg-hero {
+  background: linear-gradient(135deg, #5B7CFF 0%, #7E5BFF 100%);
+  padding: 70rpx 48rpx 130rpx;
+  color: #fff;
+}
+.reg-title { font-size: 50rpx; font-weight: 800; }
+.reg-sub { font-size: 26rpx; opacity: 0.9; margin-top: 12rpx; }
+
+.reg-card {
+  position: relative;
+  z-index: 2;
+  margin: -90rpx 32rpx 40rpx;
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 40rpx 36rpx 48rpx;
+  box-shadow: 0 16rpx 50rpx rgba(61, 90, 254, 0.12);
+}
+
+.role-seg {
+  display: flex;
+  background: #F0F2F8;
+  border-radius: 20rpx;
+  padding: 8rpx;
+  margin-bottom: 36rpx;
+}
+.role-seg-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 28rpx;
+  color: #6B7180;
+  border-radius: 16rpx;
+  transition: all 0.2s;
+}
+.role-seg-item.on {
+  background: #fff;
+  color: #3D5AFE;
+  font-weight: 700;
+  box-shadow: 0 6rpx 16rpx rgba(61, 90, 254, 0.15);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  border-bottom: 2rpx solid #F0F2F7;
+  padding: 8rpx 0;
+  margin-bottom: 12rpx;
+}
+.field-ico { font-size: 34rpx; margin-right: 20rpx; width: 44rpx; text-align: center; }
+.field-input { flex: 1; font-size: 30rpx; padding: 24rpx 0; }
+.code-btn {
+  font-size: 24rpx;
+  color: #3D5AFE;
+  background: #EAEEFF;
+  padding: 14rpx 24rpx;
+  border-radius: 999rpx;
+  white-space: nowrap;
+}
+.code-btn.disabled { color: #A6ABC0; background: #F0F2F7; }
+
+.agree { display: flex; align-items: center; margin: 30rpx 0 36rpx; }
+.checkbox {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 2rpx solid #C7CBDA;
+  margin-right: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: #fff;
+  flex-shrink: 0;
+}
+.checkbox.checked { background: var(--primary); border-color: var(--primary); }
+.agree-text { font-size: 24rpx; color: #8A90A2; }
+.link { color: #3D5AFE; }
+
+.submit { margin-top: 10rpx; }
+.to-login { text-align: center; font-size: 26rpx; color: #8A90A2; margin-top: 30rpx; }
+
+.wx-note { display: flex; align-items: center; gap: 8rpx; font-size: 22rpx; margin: 8rpx 0 30rpx; }
+.wx-note-text { flex: 1; line-height: 1.5; }

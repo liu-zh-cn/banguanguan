@@ -1,0 +1,61 @@
+.welcome {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #5B7CFF 0%, #7E5BFF 55%, #9B5BFF 100%);
+  padding: 120rpx 48rpx 60rpx;
+  display: flex;
+  flex-direction: column;
+}
+.brand { text-align: center; color: #fff; margin-bottom: 70rpx; }
+.logo {
+  width: 130rpx;
+  height: 130rpx;
+  line-height: 130rpx;
+  margin: 0 auto 24rpx;
+  border-radius: 36rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2rpx solid rgba(255, 255, 255, 0.4);
+  font-size: 68rpx;
+  font-weight: 800;
+  text-align: center;
+}
+.brand-name { font-size: 56rpx; font-weight: 800; letter-spacing: 4rpx; }
+.brand-slogan { font-size: 26rpx; opacity: 0.9; margin-top: 12rpx; }
+
+.choose-tip { color: rgba(255, 255, 255, 0.85); font-size: 26rpx; margin-bottom: 24rpx; }
+
+.role-card {
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 40rpx 36rpx;
+  display: flex;
+  align-items: center;
+  margin-bottom: 32rpx;
+  box-shadow: 0 20rpx 50rpx rgba(0, 0, 0, 0.15);
+}
+.role-icon {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52rpx;
+  margin-right: 28rpx;
+}
+.role-teacher .role-icon { background: #EAEEFF; }
+.role-student .role-icon { background: #D8F6EE; }
+.role-info { flex: 1; }
+.role-title { font-size: 36rpx; font-weight: 700; color: #1F2430; }
+.role-desc { font-size: 24rpx; color: #8A90A2; margin-top: 8rpx; }
+.role-arrow { font-size: 52rpx; color: #C7CBDA; }
+
+.reg-entry {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 26rpx;
+  margin-top: 16rpx;
+}
+.entry-dot { margin: 0 20rpx; opacity: 0.6; }
+.reg-link { font-weight: 700; text-decoration: underline; }
+
+.foot { margin-top: auto; text-align: center; color: rgba(255, 255, 255, 0.7); font-size: 22rpx; }

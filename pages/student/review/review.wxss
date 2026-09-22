@@ -1,0 +1,33 @@
+.timeline { padding-top: 8rpx; }
+.rv-card { margin: 22rpx 28rpx; }
+.rv-head { display: flex; align-items: center; }
+.rv-avatar {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 22rpx;
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 22rpx;
+}
+.rv-teacher { font-size: 30rpx; font-weight: 700; }
+.rv-content {
+  margin-top: 24rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: #3A4152;
+  background: #F7F8FC;
+  padding: 24rpx;
+  border-radius: 18rpx;
+}
+.rv-foot { display: flex; justify-content: flex-end; margin-top: 20rpx; }
+.reply-btn {
+  font-size: 26rpx;
+  color: var(--primary-deep);
+  padding: 10rpx 30rpx;
+  border: 2rpx solid var(--primary);
+  border-radius: 999rpx;
+}

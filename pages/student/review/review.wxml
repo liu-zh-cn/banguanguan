@@ -1,0 +1,27 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">老师点评</view>
+    <view class="hero-sub">共收到 {{list.length}} 条点评</view>
+  </view>
+
+  <view class="timeline">
+    <view class="rv-card card" wx:for="{{list}}" wx:key="id">
+      <view class="rv-head">
+        <view class="rv-avatar" style="background: {{item.avatarColor}}">{{item.teacher[0]}}</view>
+        <view class="flex-1">
+          <view class="row">
+            <text class="rv-teacher">{{item.teacher}}</text>
+            <text class="tag {{item.tagCls}}" style="margin-left:14rpx;">{{item.type}}</text>
+          </view>
+          <view class="muted">{{item.subject}} · {{item.time}}</view>
+        </view>
+      </view>
+      <view class="rv-content">{{item.content}}</view>
+      <view class="rv-foot">
+        <text class="reply-btn" data-id="{{item.id}}" bindtap="reply">回复老师</text>
+      </view>
+    </view>
+  </view>
+
+  <bottom-nav role="student" active="{{2}}" />
+</view>

@@ -1,0 +1,31 @@
+<view class="page">
+  <view class="profile">
+    <view class="p-avatar">{{profile.name[0] || '刘'}}</view>
+    <view class="p-info">
+      <view class="p-name">{{profile.name}}</view>
+      <view class="p-role">学生 · {{profile.className}}</view>
+    </view>
+    <view class="p-edit" bindtap="goEdit">编辑 ›</view>
+  </view>
+
+  <view class="card stat-card">
+    <view class="p-stat"><text class="p-num">5</text><text class="p-lb">班级排名</text></view>
+    <view class="p-stat"><text class="p-num">2</text><text class="p-lb">待交作业</text></view>
+    <view class="p-stat"><text class="p-num">3</text><text class="p-lb">收到点评</text></view>
+  </view>
+
+  <view class="card menu-card">
+    <view class="menu-item" wx:for="{{menus}}" wx:key="label" data-label="{{item.label}}" data-action="{{item.action}}" bindtap="onMenu">
+      <text class="menu-ico">{{item.icon}}</text>
+      <text class="menu-label">{{item.label}}</text>
+      <text class="menu-extra muted" wx:if="{{item.extra}}">{{item.extra}}</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="switch-btn" bindtap="switchRole">切换身份 / 退出登录</view>
+  </view>
+
+  <bottom-nav role="student" active="{{3}}" />
+</view>

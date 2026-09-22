@@ -1,0 +1,17 @@
+<view class="nav">
+  <view class="nav-inner">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="path"
+      class="nav-item {{active === index ? 'nav-item--active' : ''}}"
+      data-index="{{index}}"
+      bindtap="onTap"
+    >
+      <view class="nav-icon-wrap">
+        <text class="nav-icon">{{item.icon}}</text>
+        <view class="nav-dot" wx:if="{{active === index}}"></view>
+      </view>
+      <text class="nav-text">{{item.text}}</text>
+    </view>
+  </view>
+</view>

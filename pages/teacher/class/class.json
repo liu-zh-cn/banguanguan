@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "班级管理",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/bottom-nav"
+  }
+}

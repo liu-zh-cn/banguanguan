@@ -1,0 +1,26 @@
+<view class="reg">
+  <view class="reg-hero">
+    <view class="reg-title">欢迎回来</view>
+    <view class="reg-sub">登录班管管，继续管理你的班级</view>
+  </view>
+
+  <view class="reg-card">
+    <!-- 微信一键登录 -->
+    <button class="wx-btn" bindtap="wechatLogin" loading="{{logging}}">
+      <text class="wx-ico">💬</text> 微信一键登录
+    </button>
+    <view class="wx-tip muted">通过云开发获取 openid，无需注册密码，安全免费</view>
+
+    <view class="divider"><text>或</text></view>
+
+    <!-- 身份切换（用于本地体验） -->
+    <view class="role-seg">
+      <view class="role-seg-item {{role === 'teacher' ? 'on' : ''}}" data-role="teacher" bindtap="setRole">👩‍🏫 老师</view>
+      <view class="role-seg-item {{role === 'student' ? 'on' : ''}}" data-role="student" bindtap="setRole">🎓 学生</view>
+    </view>
+    <button class="btn-ghost demo" bindtap="quickDemo">以所选身份体验登录</button>
+
+    <view class="to-login">还没有账号？<text class="link" bindtap="goRegister">立即注册 ›</text></view>
+  </view>
+</view>
+<!--OVO-->

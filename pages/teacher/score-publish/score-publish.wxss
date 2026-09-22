@@ -1,0 +1,22 @@
+.sum-num { font-size: 28rpx; font-weight: 600; }
+.add-btn {
+  color: var(--primary-deep);
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.exam-item { padding: 28rpx 0; border-bottom: 2rpx solid #F2F3F7; }
+.exam-item:last-child { border-bottom: none; }
+.exam-name { font-size: 32rpx; font-weight: 700; }
+.exam-meta { margin: 12rpx 0 20rpx; }
+
+.exam-actions { display: flex; gap: 20rpx; }
+.mini-btn {
+  padding: 16rpx 30rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  background: #F0F2F8;
+  color: #5A6072;
+}
+.mini-btn--primary { background: var(--primary-light); color: var(--primary-deep); font-weight: 600; }
+.mini-btn--warn { background: #FFE9D6; color: #D9770A; font-weight: 600; }

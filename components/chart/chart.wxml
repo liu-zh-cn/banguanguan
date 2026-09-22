@@ -1,0 +1,9 @@
+<view class="chart-box">
+  <canvas type="2d" id="chartCanvas" class="chart-canvas"></canvas>
+  <view class="chart-legend" wx:if="{{type === 'pie'}}">
+    <view class="legend-item" wx:for="{{data.items}}" wx:key="name">
+      <view class="legend-dot" style="background: {{item.color}}"></view>
+      <text class="legend-text">{{item.name}}</text>
+    </view>
+  </view>
+</view>

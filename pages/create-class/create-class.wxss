@@ -1,0 +1,45 @@
+.cc-page {
+  min-height: 100vh;
+  padding-bottom: 60rpx;
+}
+
+.f-row {
+  display: flex;
+  align-items: center;
+  padding: 26rpx 0;
+  border-bottom: 2rpx solid #F2F3F7;
+}
+.f-row:last-child { border-bottom: none; }
+.f-row.column { flex-direction: column; align-items: stretch; }
+.f-label { width: 160rpx; font-size: 28rpx; color: #6B7180; }
+.f-row.column .f-label { width: auto; margin-bottom: 16rpx; }
+.f-input { flex: 1; font-size: 28rpx; color: #1F2430; }
+.f-picker { flex: 1; font-size: 28rpx; color: #1F2430; text-align: right; }
+.f-textarea { width: 100%; height: 120rpx; font-size: 28rpx; }
+
+.code-card {
+  background: linear-gradient(135deg, #EAEEFF, #F3EEFF);
+  border-radius: 24rpx;
+  padding: 36rpx;
+  text-align: center;
+}
+.code-text {
+  font-size: 64rpx;
+  font-weight: 800;
+  letter-spacing: 12rpx;
+  color: #3D5AFE;
+}
+.code-actions { display: flex; justify-content: center; gap: 48rpx; margin-top: 24rpx; }
+.code-link { font-size: 26rpx; color: #5A6072; }
+.code-tip { margin-top: 20rpx; text-align: center; }
+
+.submit-wrap { padding: 8rpx 28rpx 4rpx; }
+
+.my-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid #F2F3F7;
+}
+.my-item:last-child { border-bottom: none; }
+.my-name { font-size: 30rpx; font-weight: 700; margin-bottom: 6rpx; }

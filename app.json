@@ -1,0 +1,27 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/login",
+    "pages/register/register",
+    "pages/edit-profile/edit-profile",
+    "pages/create-class/create-class",
+    "pages/teacher/stats/stats",
+    "pages/teacher/class/class",
+    "pages/teacher/homework-assign/homework-assign",
+    "pages/teacher/score-publish/score-publish",
+    "pages/teacher/mine/mine",
+    "pages/student/homework/homework",
+    "pages/student/score/score",
+    "pages/student/review/review",
+    "pages/student/mine/mine"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#5B7CFF",
+    "navigationBarTitleText": "班管管",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F5F6FA",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

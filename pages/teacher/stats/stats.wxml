@@ -1,0 +1,75 @@
+<view class="page">
+  <!-- 头部 -->
+  <view class="hero">
+    <view class="row-between">
+      <view>
+        <view class="hero-title">高三(2)班</view>
+        <view class="hero-sub">数据统计 · 2026 秋季学期</view>
+      </view>
+      <view class="hero-badge">📊 数据看板</view>
+    </view>
+  </view>
+
+  <!-- 关键指标 -->
+  <view class="stat-grid card card-raised">
+    <view class="stat-cell">
+      <view class="stat-num">{{overview.studentCount}}</view>
+      <view class="stat-label">班级人数</view>
+    </view>
+    <view class="stat-cell">
+      <view class="stat-num">{{overview.avgScore}}</view>
+      <view class="stat-label">班级均分</view>
+    </view>
+    <view class="stat-cell">
+      <view class="stat-num text-green">{{overview.excellentRate}}%</view>
+      <view class="stat-label">优秀率</view>
+    </view>
+    <view class="stat-cell">
+      <view class="stat-num text-blue">{{overview.passRate}}%</view>
+      <view class="stat-label">及格率</view>
+    </view>
+  </view>
+
+  <!-- 图表切换入口 -->
+  <view class="card">
+    <view class="section-title">数据图表</view>
+    <view class="switch-bar">
+      <view
+        wx:for="{{segments}}"
+        wx:key="key"
+        class="switch-item {{current === item.key ? 'switch-item--on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="switchChart"
+      >
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+
+    <view class="chart-head">
+      <text class="chart-title">{{chartTitle}}</text>
+      <text class="chart-desc">{{chartDesc}}</text>
+    </view>
+    <chart type="{{current}}" data="{{chartData}}" />
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="card">
+    <view class="section-title">快捷操作</view>
+    <view class="quick-row">
+      <view class="quick-item" bindtap="nav" data-url="/pages/teacher/class/class">
+        <text class="quick-ico">👥</text>
+        <text>管理学生</text>
+      </view>
+      <view class="quick-item" bindtap="nav" data-url="/pages/teacher/homework-assign/homework-assign">
+        <text class="quick-ico">📝</text>
+        <text>布置作业</text>
+      </view>
+      <view class="quick-item" bindtap="nav" data-url="/pages/teacher/score-publish/score-publish">
+        <text class="quick-ico">📈</text>
+        <text>发布成绩</text>
+      </view>
+    </view>
+  </view>
+
+  <bottom-nav role="teacher" active="{{0}}" />
+</view>

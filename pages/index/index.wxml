@@ -1,0 +1,35 @@
+<view class="welcome">
+  <view class="brand">
+    <view class="logo">班</view>
+    <view class="brand-name">班管管</view>
+    <view class="brand-slogan">让班级管理，简单高效</view>
+  </view>
+
+  <view class="choose-tip">请选择进入的身份</view>
+
+  <view class="role-card role-teacher" bindtap="enter" data-role="teacher">
+    <view class="role-icon">👩‍🏫</view>
+    <view class="role-info">
+      <view class="role-title">老师端</view>
+      <view class="role-desc">统计数据 · 班级管理 · 布置作业 · 发布成绩</view>
+    </view>
+    <view class="role-arrow">›</view>
+  </view>
+
+  <view class="role-card role-student" bindtap="enter" data-role="student">
+    <view class="role-icon">🎓</view>
+    <view class="role-info">
+      <view class="role-title">学生端</view>
+      <view class="role-desc">查看作业 · 查看成绩 · 查看点评</view>
+    </view>
+    <view class="role-arrow">›</view>
+  </view>
+
+  <view class="reg-entry">
+    <text bindtap="goLogin">已有账号？登录 ›</text>
+    <text class="entry-dot">·</text>
+    <text bindtap="goRegister">还没有账号？注册 ›</text>
+  </view>
+
+  <view class="foot">© 2026 班管管 · 微信小程序</view>
+</view>

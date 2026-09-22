@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "查看作业",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/bottom-nav"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "统计数据",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/bottom-nav",
+    "chart": "/components/chart/chart"
+  }
+}

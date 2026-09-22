@@ -1,0 +1,34 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">发布成绩</view>
+    <view class="hero-sub">录入并管理各次考试成绩的发布状态</view>
+  </view>
+
+  <view class="card card-raised">
+    <view class="row-between">
+      <view class="sum-num">共 {{exams.length}} 次考试</view>
+      <view class="add-btn" bindtap="addExam">＋ 新建考试</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="exam-item" wx:for="{{exams}}" wx:key="id">
+      <view class="row-between">
+        <view class="exam-name">{{item.name}}</view>
+        <text class="tag {{item.published ? 'tag-green' : 'tag-orange'}}">
+          {{item.published ? '已发布' : '未发布'}}
+        </text>
+      </view>
+      <view class="exam-meta muted">考试日期：{{item.date}} · 平均分：{{item.avg || '—'}}</view>
+      <view class="exam-actions">
+        <view class="mini-btn" data-name="{{item.name}}" bindtap="inputScore">📥 录入成绩</view>
+        <view class="mini-btn {{item.published ? 'mini-btn--warn' : 'mini-btn--primary'}}"
+              data-id="{{item.id}}" bindtap="togglePublish">
+          {{item.published ? '撤回发布' : '发布给学生'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <bottom-nav role="teacher" active="{{3}}" />
+</view>
