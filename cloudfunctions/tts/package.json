@@ -1,0 +1,9 @@
+{
+  "name": "tts",
+  "version": "1.0.0",
+  "description": "文本转语音并上传云存储",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

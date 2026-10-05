@@ -29,6 +29,8 @@
     <text bindtap="goLogin">已有账号？登录 ›</text>
     <text class="entry-dot">·</text>
     <text bindtap="goRegister">还没有账号？注册 ›</text>
+    <text class="entry-dot">·</text>
+    <text bindtap="goScreen">🖥 大屏端 ›</text>
   </view>
 
   <view class="foot">© 2026 班管管 · 微信小程序</view>

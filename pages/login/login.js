@@ -26,8 +26,10 @@ Page({
           return;
         }
         if (r.user) {
-          // 已注册，直接进入对应端
-          this.enter(r.user.role || 'teacher');
+          // 已注册，拉取班级上下文后进入对应端
+          app.cloudMyClass()
+            .then(() => this.enter(r.user.role || 'teacher'))
+            .catch(() => this.enter(r.user.role || 'teacher'));
         } else {
           // 未注册，去完善资料
           wx.showModal({

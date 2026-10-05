@@ -1,4 +1,5 @@
 const mock = require('../../../utils/mock.js');
+const app = getApp();
 
 const CHARTS = {
   bar: { title: '各科目平均分', desc: '本班 vs 年级', data: mock.subjectAvg },
@@ -10,6 +11,7 @@ const CHARTS = {
 Page({
   data: {
     overview: mock.overview,
+    className: '未设置班级',
     segments: [
       { key: 'bar', label: '柱状图' },
       { key: 'line', label: '折线图' },
@@ -20,6 +22,16 @@ Page({
     chartTitle: CHARTS.bar.title,
     chartDesc: CHARTS.bar.desc,
     chartData: CHARTS.bar.data
+  },
+
+  onShow() {
+    const p = app.getProfile('teacher');
+    this.setData({ className: p.className || '未设置班级' });
+    app.cloudMyClass()
+      .then((r) => {
+        if (r.class && r.class.name) this.setData({ className: r.class.name });
+      })
+      .catch(() => {});
   },
 
   switchChart(e) {
@@ -36,5 +48,9 @@ Page({
 
   nav(e) {
     wx.reLaunch({ url: e.currentTarget.dataset.url });
+  },
+
+  goBroadcast() {
+    wx.navigateTo({ url: '/pages/teacher/broadcast/broadcast' });
   }
 });

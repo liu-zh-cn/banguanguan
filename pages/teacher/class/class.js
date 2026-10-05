@@ -1,11 +1,35 @@
 const mock = require('../../../utils/mock.js');
+const app = getApp();
 
 Page({
   data: {
     all: mock.students,
     list: mock.students,
     keyword: '',
-    filter: 'all'
+    filter: 'all',
+    className: '未设置班级'
+  },
+
+  onShow() {
+    const p = app.getProfile('teacher');
+    this.setData({ className: p.className || '未设置班级' });
+    app.cloudMyClass()
+      .then((r) => {
+        if (r.class && r.class.name) this.setData({ className: r.class.name });
+        if (r.students && r.students.length) {
+          const students = r.students.map((s, i) => ({
+            id: s._id,
+            name: s.name,
+            no: s.studentNo || String(i + 1).padStart(2, '0'),
+            gender: '—',
+            score: 0,
+            duty: '组员',
+            avatarColor: '#5B7CFF'
+          }));
+          this.setData({ all: students, list: students });
+        }
+      })
+      .catch(() => {});
   },
 
   onSearch(e) {

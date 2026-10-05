@@ -1,0 +1,9 @@
+{
+  "name": "joinClass",
+  "version": "1.0.0",
+  "description": "学生凭邀请码加入班级",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

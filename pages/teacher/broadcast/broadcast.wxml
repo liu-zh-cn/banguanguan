@@ -1,0 +1,40 @@
+<view class="bc-page">
+  <view class="hero">
+    <view class="hero-title">大屏广播</view>
+    <view class="hero-sub">发送后，教室大屏会立即显示并语音播报</view>
+  </view>
+
+  <!-- 快捷找人 -->
+  <view class="card card-raised">
+    <view class="section-title">找人通知</view>
+    <view class="quick-form">
+      <text class="q-text">请</text>
+      <input class="q-input" placeholder="学生姓名" value="{{name}}" data-field="name" bindinput="onInput" />
+      <text class="q-text">同学立即到</text>
+    </view>
+    <view class="quick-form">
+      <input class="q-input grow" placeholder="地点，如：办公室 / 广播室" value="{{location}}" data-field="location" bindinput="onInput" />
+      <text class="q-text">  。</text>
+    </view>
+  </view>
+
+  <!-- 自定义 -->
+  <view class="card">
+    <view class="section-title">自定义内容（优先）</view>
+    <textarea class="custom-area" placeholder="直接输入要播报的完整文字，例如：请张三来办公室" value="{{custom}}" data-field="custom" bindinput="onInput" />
+  </view>
+
+  <view class="send-wrap">
+    <button class="btn-primary send-btn" bindtap="send" loading="{{sending}}">📢 发送到大屏</button>
+    <view class="preview-link" bindtap="openScreen">🖥 打开大屏预览页</view>
+  </view>
+
+  <!-- 发送记录 -->
+  <view class="card" wx:if="{{history.length}}">
+    <view class="section-title">最近发送</view>
+    <view class="his-item" wx:for="{{history}}" wx:key="index">
+      <text class="his-time muted">{{item.time}}</text>
+      <text class="his-text">{{item.text}}</text>
+    </view>
+  </view>
+</view>

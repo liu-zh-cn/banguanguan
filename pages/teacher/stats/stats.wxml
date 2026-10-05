@@ -3,7 +3,7 @@
   <view class="hero">
     <view class="row-between">
       <view>
-        <view class="hero-title">高三(2)班</view>
+        <view class="hero-title">{{className}}</view>
         <view class="hero-sub">数据统计 · 2026 秋季学期</view>
       </view>
       <view class="hero-badge">📊 数据看板</view>
@@ -67,6 +67,10 @@
       <view class="quick-item" bindtap="nav" data-url="/pages/teacher/score-publish/score-publish">
         <text class="quick-ico">📈</text>
         <text>发布成绩</text>
+      </view>
+      <view class="quick-item" bindtap="goBroadcast">
+        <text class="quick-ico">📢</text>
+        <text>大屏广播</text>
       </view>
     </view>
   </view>

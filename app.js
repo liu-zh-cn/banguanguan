@@ -1,11 +1,12 @@
 // 若有多个云开发环境，填入对应环境 ID；只有一个环境时留空即可（使用默认环境）
-const CLOUD_ENV = '';
+const CLOUD_ENV = 'cloud1-d2gehv836076eaf14';
 
 App({
   globalData: {
     role: '',
     teacherName: '李老师',
-    className: '高三(2)班',
+    className: '',
+    classId: '',
     openid: '',
     userInfo: null
   },
@@ -52,6 +53,47 @@ App({
     );
   },
 
+  // 老师创建班级
+  cloudCreateClass(payload) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud.callFunction({ name: 'createClass', data: payload }).then(
+      (res) => (res && res.result) || {}
+    );
+  },
+
+  // 学生凭邀请码加入班级
+  cloudJoinClass(inviteCode) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud.callFunction({ name: 'joinClass', data: { inviteCode } }).then(
+      (res) => (res && res.result) || {}
+    );
+  },
+
+  // 拉取当前用户的班级上下文（classId / 班级信息 / 学生名单）
+  cloudMyClass() {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'myClass' })
+      .then((res) => (res && res.result) || {})
+      .then((r) => {
+        if (r && r.user) {
+          this.globalData.classId = r.user.classId || '';
+          this.globalData.className = r.user.className || '';
+          this.globalData.userInfo = r.user;
+          if (r.user.role) this.setRole(r.user.role);
+        }
+        return r;
+      });
+  },
+
+  // 老师发送广播到大屏
+  cloudSendBroadcast(text) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'sendBroadcast', data: { text } })
+      .then((res) => (res && res.result) || {});
+  },
+
   // ---------- 用户资料：默认值（本地缓存，用于个性化展示） ----------
   defaultProfile(role) {
     if (role === 'student') {
@@ -59,8 +101,8 @@ App({
         name: '刘同学',
         gender: '男',
         phone: '',
-        studentNo: '05',
-        className: '高三(2)班',
+        studentNo: '',
+        className: '',
         signature: '好好学习，天天向上～'
       };
     }
@@ -69,8 +111,8 @@ App({
       gender: '女',
       phone: '',
       title: '班主任',
-      subject: '数学',
-      className: '高三(2)班',
+      subject: '',
+      className: '',
       signature: '用心带好每一个班。'
     };
   },

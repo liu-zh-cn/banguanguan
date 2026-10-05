@@ -1,0 +1,21 @@
+<view class="screen">
+  <view class="scr-top">
+    <view class="scr-brand">📢 班管管 · 校园广播</view>
+    <view class="scr-status {{connected ? 'on' : ''}}">
+      <view class="dot"></view>{{status}}
+    </view>
+  </view>
+
+  <view class="scr-body">
+    <view class="scr-text {{text ? '' : 'placeholder'}}">
+      {{text || '等待老师发送广播…'}}
+    </view>
+    <view class="scr-wave {{speaking ? 'playing' : ''}}" wx:if="{{text}}">
+      <view class="bar" wx:for="{{[1,2,3,4,5]}}" wx:key="*this"></view>
+    </view>
+  </view>
+
+  <view class="scr-bottom">
+    <view class="replay" wx:if="{{text}}" bindtap="replay">🔊 重播语音</view>
+  </view>
+</view>

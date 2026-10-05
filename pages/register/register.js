@@ -7,7 +7,14 @@ Page({
     className: '',
     subject: '',
     studentNo: '',
+    inviteCode: '',
     submitting: false
+  },
+
+  onLoad(options) {
+    if (options && (options.role === 'teacher' || options.role === 'student')) {
+      this.setData({ role: options.role });
+    }
   },
 
   setRole(e) {
@@ -22,6 +29,7 @@ Page({
     const { role, name, className, subject, studentNo, submitting } = this.data;
     if (submitting) return;
     if (!name.trim()) return this.warn('请填写姓名');
+    if (!className.trim()) return this.warn('请填写所在班级');
 
     this.setData({ submitting: true });
     wx.showLoading({ title: '注册中...' });
@@ -44,19 +52,34 @@ Page({
         });
       })
       .then((res) => {
-        wx.hideLoading();
         if (!res.ok) {
+          wx.hideLoading();
           this.setData({ submitting: false });
-          return this.warn(res.msg || '注册失败');
+          this.warn(res.msg || '注册失败');
+          return false;
         }
-        // 3. 本地缓存一份资料，用于界面展示
+        // 学生填了邀请码 → 加入班级
+        const inviteCode = this.data.inviteCode.trim();
+        if (role === 'student' && inviteCode) {
+          return app.cloudJoinClass(inviteCode);
+        }
+        return { ok: true };
+      })
+      .then((j) => {
+        if (j === false) return;
+        wx.hideLoading();
+        if (j && j.ok === false) {
+          this.setData({ submitting: false });
+          return this.warn(j.msg || '加入班级失败');
+        }
+        // 本地缓存一份资料，用于界面展示
         const profile = app.getProfile(role);
         profile.name = name.trim();
         if (className.trim()) profile.className = className.trim();
+        if (j && j.className) profile.className = j.className;
         if (role === 'teacher' && subject.trim()) profile.subject = subject.trim();
         if (role === 'student' && studentNo.trim()) profile.studentNo = studentNo.trim();
         app.saveProfile(role, profile);
-        app.globalData.userInfo = res;
 
         app.setRole(role);
         wx.showToast({ title: '注册成功', icon: 'success' });

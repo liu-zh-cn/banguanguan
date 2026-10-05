@@ -1,0 +1,9 @@
+{
+  "name": "sendBroadcast",
+  "version": "1.0.0",
+  "description": "老师发送广播消息到大屏",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

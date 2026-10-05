@@ -1,0 +1,9 @@
+{
+  "name": "createClass",
+  "version": "1.0.0",
+  "description": "老师创建班级",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

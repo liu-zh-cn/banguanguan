@@ -4,11 +4,7 @@ Page({
   data: {},
   enter(e) {
     const role = e.currentTarget.dataset.role;
-    app.setRole(role);
-    const url = role === 'teacher'
-      ? '/pages/teacher/stats/stats'
-      : '/pages/student/homework/homework';
-    wx.reLaunch({ url });
+    wx.navigateTo({ url: '/pages/register/register?role=' + role });
   },
 
   goRegister() {
@@ -17,5 +13,9 @@ Page({
 
   goLogin() {
     wx.navigateTo({ url: '/pages/login/login' });
+  },
+
+  goScreen() {
+    wx.navigateTo({ url: '/pages/screen/screen' });
   }
 });

@@ -26,10 +26,16 @@
       <input class="field-input" placeholder="任教学科，如：数学" value="{{subject}}" data-field="subject" bindinput="onInput" />
     </view>
 
-    <view class="field" wx:else>
-      <text class="field-ico">🔢</text>
-      <input class="field-input" placeholder="学号，如：05" value="{{studentNo}}" data-field="studentNo" bindinput="onInput" />
-    </view>
+    <block wx:else>
+      <view class="field">
+        <text class="field-ico">🔢</text>
+        <input class="field-input" placeholder="学号，如：05" value="{{studentNo}}" data-field="studentNo" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <text class="field-ico">🎟️</text>
+        <input class="field-input" placeholder="班级邀请码（向老师索取，选填）" value="{{inviteCode}}" data-field="inviteCode" bindinput="onInput" />
+      </view>
+    </block>
 
     <view class="wx-note muted">
       <text>🔒</text>

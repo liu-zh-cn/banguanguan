@@ -1,7 +1,7 @@
 <view class="page">
   <view class="hero">
     <view class="hero-title">我的作业</view>
-    <view class="hero-sub">高三(2)班 · 刘同学</view>
+    <view class="hero-sub">{{className}} · {{name}}</view>
   </view>
 
   <view class="tab-row">

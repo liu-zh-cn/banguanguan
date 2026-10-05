@@ -3,7 +3,7 @@
     <view class="row-between">
       <view>
         <view class="hero-title">班级管理</view>
-        <view class="hero-sub">共 {{all.length}} 名学生 · 高三(2)班</view>
+        <view class="hero-sub">共 {{all.length}} 名学生 · {{className}}</view>
       </view>
       <view class="hero-create" bindtap="goCreate">＋ 创建班级</view>
     </view>
