@@ -1,31 +1,59 @@
-const mock = require('../../../utils/mock.js');
+const app = getApp();
 
 Page({
   data: {
     scores: [],
     total: 0,
     avg: 0,
+    rank: 0,
     barData: {},
-    examName: '2026 第一次月考'
+    exams: [],
+    examId: '',
+    examName: '',
+    hasExam: false
   },
 
-  onLoad() {
-    const scores = mock.studentScores.map((s) => ({
-      ...s,
-      diff: s.score - s.classAvg,
-      barPct: Math.round((s.score / 100) * 100)
-    }));
-    const total = scores.reduce((sum, s) => sum + s.score, 0);
-    const avg = (total / scores.length).toFixed(1);
-    this.setData({
-      scores,
-      total,
-      avg,
-      barData: {
-        labels: scores.map((s) => s.subject),
-        values: scores.map((s) => s.score),
-        max: 100
-      }
-    });
+  onShow() {
+    this.load('');
+  },
+
+  // 拉取成绩：默认最近一次已发布的考试，也可指定 examId 切换
+  load(examId) {
+    app
+      .cloudMyScores(examId)
+      .then((r) => {
+        if (!r || !r.ok) return;
+        if (!r.hasExam) {
+          this.setData({ hasExam: false, exams: [], scores: [], examName: '' });
+          return;
+        }
+        const rows = (r.rows || []).map((s) => ({
+          ...s,
+          diff: Number((s.score - s.classAvg).toFixed(1)),
+          barPct: Math.round((s.score / 100) * 100)
+        }));
+        this.setData({
+          hasExam: true,
+          exams: r.exams || [],
+          examId: r.examId,
+          examName: r.examName + (r.date ? ' · ' + r.date : ''),
+          scores: rows,
+          total: r.total || 0,
+          avg: r.avg || 0,
+          rank: r.rank || 0,
+          barData: {
+            labels: rows.map((s) => s.subject),
+            values: rows.map((s) => s.score),
+            max: 100
+          }
+        });
+      })
+      .catch(() => {});
+  },
+
+  pickExam(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id || id === this.data.examId) return;
+    this.load(id);
   }
 });

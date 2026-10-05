@@ -31,3 +31,5 @@
   border: 2rpx solid var(--primary);
   border-radius: 999rpx;
 }
+
+.empty { text-align: center; color: #A6ABC0; padding: 80rpx 0; }

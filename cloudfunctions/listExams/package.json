@@ -1,0 +1,9 @@
+{
+  "name": "listExams",
+  "version": "1.0.0",
+  "description": "列出本班考试",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

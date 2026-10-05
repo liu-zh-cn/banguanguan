@@ -124,6 +124,80 @@ App({
       .then((res) => (res && res.result) || {});
   },
 
+  // ---------- 考试 / 成绩 ----------
+  // 老师新建考试
+  cloudCreateExam(payload) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'createExam', data: payload })
+      .then((res) => (res && res.result) || {});
+  },
+
+  // 列出本班考试（老师含平均分）
+  cloudListExams() {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'listExams' })
+      .then((res) => (res && res.result) || {});
+  },
+
+  // 老师发布/撤回考试成绩
+  cloudSetExamPublished(examId, published) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'setExamPublished', data: { examId, published } })
+      .then((res) => (res && res.result) || {});
+  },
+
+  // 录入成绩页：考试信息 + 学生名单 + 已录成绩
+  cloudGetExamScores(examId) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'getExamScores', data: { examId } })
+      .then((res) => (res && res.result) || {});
+  },
+
+  // 老师保存某一科的成绩
+  cloudInputScores(payload) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'inputScores', data: payload })
+      .then((res) => (res && res.result) || {});
+  },
+
+  // 学生：我的成绩（可按考试切换）
+  cloudMyScores(examId) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'myScores', data: { examId: examId || '' } })
+      .then((res) => (res && res.result) || {});
+  },
+
+  // 老师数据看板：总览 + 图表 + 每位学生最新均分
+  cloudClassStats() {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'classStats' })
+      .then((res) => (res && res.result) || {});
+  },
+
+  // ---------- 点评 ----------
+  // 老师给学生写点评
+  cloudAddReview(payload) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'addReview', data: payload })
+      .then((res) => (res && res.result) || {});
+  },
+
+  // 点评列表（学生：我收到的；老师：我写的）
+  cloudListReviews() {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'listReviews' })
+      .then((res) => (res && res.result) || {});
+  },
+
   // ---------- 用户资料：默认值（本地缓存，用于个性化展示） ----------
   defaultProfile(role) {
     if (role === 'student') {

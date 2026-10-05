@@ -1,42 +1,66 @@
-const mock = require('../../../utils/mock.js');
 const app = getApp();
 
-const CHARTS = {
-  bar: { title: '各科目平均分', desc: '本班 vs 年级', data: mock.subjectAvg },
-  line: { title: '月考平均分趋势', desc: '近 6 次大考', data: mock.scoreTrend },
-  pie: { title: '成绩分布', desc: '按分数段统计', data: mock.scoreDist },
-  radar: { title: '综合能力画像', desc: '班级平均能力维度', data: mock.ability }
-};
+const SEGMENTS = [
+  { key: 'bar', label: '柱状图' },
+  { key: 'line', label: '折线图' },
+  { key: 'pie', label: '饼图' },
+  { key: 'radar', label: '雷达图' }
+];
 
 Page({
   data: {
-    overview: mock.overview,
+    overview: { studentCount: '—', avgScore: '—', excellentRate: '—', passRate: '—' },
     className: '未设置班级',
-    segments: [
-      { key: 'bar', label: '柱状图' },
-      { key: 'line', label: '折线图' },
-      { key: 'pie', label: '饼图' },
-      { key: 'radar', label: '雷达图' }
-    ],
+    segments: SEGMENTS,
     current: 'bar',
-    chartTitle: CHARTS.bar.title,
-    chartDesc: CHARTS.bar.desc,
-    chartData: CHARTS.bar.data
+    chartTitle: '',
+    chartDesc: '',
+    chartData: {},
+    hasData: false,
+    tip: '暂无成绩数据，请先到「发布成绩」新建考试并录入成绩'
   },
 
   onShow() {
     const p = app.getProfile('teacher');
     this.setData({ className: p.className || '未设置班级' });
-    app.cloudMyClass()
+    app
+      .cloudMyClass()
       .then((r) => {
         if (r.class && r.class.name) this.setData({ className: r.class.name });
+      })
+      .catch(() => {});
+    this.loadStats();
+  },
+
+  // 全部数据来自 classStats 云函数（真实成绩计算）
+  loadStats() {
+    app
+      .cloudClassStats()
+      .then((r) => {
+        if (!r || !r.ok) return;
+        const charts = {
+          bar: { title: '各科平均分', desc: '最近一次考试', data: r.subjectAvg || {} },
+          line: { title: '考试平均分趋势', desc: '历次考试', data: r.trend || {} },
+          pie: { title: '成绩分布', desc: '按学生均分统计', data: r.dist || {} },
+          radar: { title: '各科均分雷达', desc: '最近一次考试', data: r.radar || {} }
+        };
+        this._charts = charts;
+        const c = charts[this.data.current];
+        this.setData({
+          overview: r.overview || this.data.overview,
+          hasData: !!r.hasData,
+          chartTitle: c.title,
+          chartDesc: c.desc,
+          chartData: c.data
+        });
       })
       .catch(() => {});
   },
 
   switchChart(e) {
     const key = e.currentTarget.dataset.key;
-    const c = CHARTS[key];
+    if (!this._charts) return;
+    const c = this._charts[key];
     if (!c || key === this.data.current) return;
     this.setData({
       current: key,

@@ -1,0 +1,54 @@
+.si-page { padding-bottom: calc(240rpx + env(safe-area-inset-bottom)); }
+
+.si-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18rpx;
+  padding: 28rpx 28rpx 0;
+}
+.si-chip {
+  padding: 14rpx 30rpx;
+  background: #fff;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: #6B7180;
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+.si-chip--on { background: var(--primary); color: #fff; font-weight: 700; }
+
+.si-row {
+  display: flex;
+  align-items: center;
+  padding: 22rpx 0;
+  border-bottom: 2rpx solid #F2F3F7;
+}
+.si-row:last-child { border-bottom: none; }
+.si-no { width: 70rpx; color: #A6ABC0; font-size: 26rpx; }
+.si-name { flex: 1; font-size: 30rpx; font-weight: 600; }
+.si-input {
+  width: 170rpx;
+  height: 68rpx;
+  background: #F5F6FA;
+  border-radius: 16rpx;
+  text-align: center;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.si-empty {
+  text-align: center;
+  color: #A6ABC0;
+  padding: 60rpx 0;
+  font-size: 26rpx;
+}
+
+.si-savebar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 28rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 -8rpx 30rpx rgba(31, 36, 48, 0.06);
+}
+.si-save { width: 100%; }

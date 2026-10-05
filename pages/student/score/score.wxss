@@ -4,6 +4,23 @@
 .sb-accent { color: var(--primary-deep); }
 .sb-lb { font-size: 24rpx; color: #8A90A2; margin-top: 6rpx; }
 
+/* 考试切换 chips */
+.exam-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18rpx;
+  padding: 28rpx 28rpx 0;
+}
+.ec-chip {
+  padding: 14rpx 30rpx;
+  background: #fff;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: #6B7180;
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+.ec-chip--on { background: var(--primary); color: #fff; font-weight: 700; }
+
 .sc-item {
   display: flex;
   align-items: center;
@@ -29,3 +46,5 @@
 .sc-diff.down { color: var(--danger); }
 .sc-rank { display: block; margin-top: 4rpx; }
 .sc-tip { margin-top: 20rpx; text-align: center; }
+
+.empty { text-align: center; color: #A6ABC0; padding: 80rpx 0; }

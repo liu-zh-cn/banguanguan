@@ -1,0 +1,9 @@
+{
+  "name": "setExamPublished",
+  "version": "1.0.0",
+  "description": "发布或撤回考试成绩",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

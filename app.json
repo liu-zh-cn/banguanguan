@@ -10,6 +10,7 @@
     "pages/teacher/class/class",
     "pages/teacher/homework-assign/homework-assign",
     "pages/teacher/score-publish/score-publish",
+    "pages/teacher/score-input/score-input",
     "pages/teacher/broadcast/broadcast",
     "pages/teacher/mine/mine",
     "pages/screen/screen",

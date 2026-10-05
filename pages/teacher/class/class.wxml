@@ -17,13 +17,14 @@
   <!-- 筛选 -->
   <view class="filter-row">
     <view class="chip {{filter === 'all' ? 'chip--on' : ''}}" data-filter="all" bindtap="setFilter">全部</view>
-    <view class="chip {{filter === 'cadre' ? 'chip--on' : ''}}" data-filter="cadre" bindtap="setFilter">班委</view>
+    <view class="chip {{filter === 'excellent' ? 'chip--on' : ''}}" data-filter="excellent" bindtap="setFilter">优秀</view>
     <view class="chip {{filter === 'warn' ? 'chip--on' : ''}}" data-filter="warn" bindtap="setFilter">需关注</view>
   </view>
 
-  <!-- 学生列表 -->
+  <!-- 学生列表（点一下给 TA 写点评） -->
   <view class="stu-list">
-    <view class="stu-item card" wx:for="{{list}}" wx:key="id" data-name="{{item.name}}" bindtap="onView">
+    <view class="stu-item card" wx:for="{{list}}" wx:key="id"
+          data-openid="{{item.openid}}" data-name="{{item.name}}" bindtap="onTapStudent">
       <view class="avatar" style="background: {{item.avatarColor}}">{{item.name[0]}}</view>
       <view class="stu-main">
         <view class="row">
@@ -33,7 +34,7 @@
         <view class="muted">学号 {{item.no}} · {{item.gender}}</view>
       </view>
       <view class="stu-score">
-        <view class="score-num {{item.score < 60 ? 'score-warn' : ''}}">{{item.score}}</view>
+        <view class="score-num {{item.warn ? 'score-warn' : ''}}">{{item.scoreText}}</view>
         <view class="muted">最新分</view>
       </view>
     </view>
@@ -41,7 +42,7 @@
     <view class="empty" wx:if="{{!list.length}}">暂无符合条件的学生</view>
   </view>
 
-  <view class="fab" bindtap="addStudent">＋</view>
+  <view class="fab" style="font-size:48rpx;" bindtap="invite">🔗</view>
 
   <bottom-nav role="teacher" active="{{1}}" />
 </view>

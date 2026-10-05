@@ -1,8 +1,8 @@
 <view class="page">
   <view class="hero">
     <view class="hero-title">我的成绩</view>
-    <view class="hero-sub">{{examName}}</view>
-    <view class="score-banner card card-raised">
+    <view class="hero-sub">{{examName || '暂无已发布的考试'}}</view>
+    <view class="score-banner card card-raised" wx:if="{{hasExam}}">
       <view class="sb-cell">
         <view class="sb-num">{{total}}</view>
         <view class="sb-lb">总分</view>
@@ -12,18 +12,29 @@
         <view class="sb-lb">平均分</view>
       </view>
       <view class="sb-cell">
-        <view class="sb-num sb-accent">5</view>
+        <view class="sb-num sb-accent">{{rank || '—'}}</view>
         <view class="sb-lb">班级排名</view>
       </view>
     </view>
   </view>
 
-  <view class="card">
+  <!-- 考试切换（多于一场才显示） -->
+  <view class="exam-chips" wx:if="{{exams.length > 1}}">
+    <view
+      class="ec-chip {{examId === item._id ? 'ec-chip--on' : ''}}"
+      wx:for="{{exams}}"
+      wx:key="_id"
+      data-id="{{item._id}}"
+      bindtap="pickExam"
+    >{{item.name}}</view>
+  </view>
+
+  <view class="card" wx:if="{{hasExam && scores.length}}">
     <view class="section-title">各科成绩</view>
     <chart type="bar" data="{{barData}}" />
   </view>
 
-  <view class="card">
+  <view class="card" wx:if="{{hasExam && scores.length}}">
     <view class="section-title">成绩明细</view>
     <view class="sc-item" wx:for="{{scores}}" wx:key="subject">
       <view class="sc-left">
@@ -41,6 +52,14 @@
       </view>
     </view>
     <view class="sc-tip muted">↑↓ 表示该科与班级平均分的差值</view>
+  </view>
+
+  <view class="card" wx:if="{{hasExam && !scores.length}}">
+    <view class="empty">这次考试还没有你的成绩记录</view>
+  </view>
+
+  <view class="card" wx:if="{{!hasExam}}">
+    <view class="empty">老师还没有发布成绩，过段时间再来看看吧</view>
   </view>
 
   <bottom-nav role="student" active="{{1}}" />

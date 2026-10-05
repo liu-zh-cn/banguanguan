@@ -1,0 +1,40 @@
+<view class="page si-page">
+  <view class="hero">
+    <view class="hero-title">录入成绩</view>
+    <view class="hero-sub">{{examName || '…'}}</view>
+  </view>
+
+  <!-- 科目切换 -->
+  <view class="si-chips">
+    <view
+      class="si-chip {{subjectIndex === index ? 'si-chip--on' : ''}}"
+      wx:for="{{subjects}}"
+      wx:key="*this"
+      wx:for-index="index"
+      data-index="{{index}}"
+      bindtap="pickSubject"
+    >{{item}}</view>
+  </view>
+
+  <!-- 学生成绩列表 -->
+  <view class="card">
+    <view class="section-title">{{subject}} · 共 {{rows.length}} 人</view>
+    <view class="si-row" wx:for="{{rows}}" wx:key="openid">
+      <view class="si-no">{{item.no}}</view>
+      <view class="si-name">{{item.name}}</view>
+      <input
+        class="si-input"
+        type="number"
+        placeholder="—"
+        value="{{item.val}}"
+        data-index="{{index}}"
+        bindinput="onInput"
+      />
+    </view>
+    <view class="si-empty" wx:if="{{!rows.length}}">班里还没有学生，让学生用邀请码加入后就能录成绩了</view>
+  </view>
+
+  <view class="si-savebar">
+    <button class="btn-primary si-save" bindtap="save">{{saving ? '保存中…' : '保存「' + subject + '」成绩'}}</button>
+  </view>
+</view>

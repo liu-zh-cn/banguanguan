@@ -1,0 +1,9 @@
+{
+  "name": "myScores",
+  "version": "1.0.0",
+  "description": "学生查询自己的成绩",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

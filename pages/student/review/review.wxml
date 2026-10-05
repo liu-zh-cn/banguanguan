@@ -23,5 +23,7 @@
     </view>
   </view>
 
+  <view class="empty" wx:if="{{!list.length}}">老师还没有给你写点评，继续加油吧！</view>
+
   <bottom-nav role="student" active="{{2}}" />
 </view>

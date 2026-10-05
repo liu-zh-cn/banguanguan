@@ -49,7 +49,8 @@
       <text class="chart-title">{{chartTitle}}</text>
       <text class="chart-desc">{{chartDesc}}</text>
     </view>
-    <chart type="{{current}}" data="{{chartData}}" />
+    <chart wx:if="{{hasData}}" type="{{current}}" data="{{chartData}}" />
+    <view class="muted" style="text-align:center;padding:70rpx 0;" wx:else>{{tip}}</view>
   </view>
 
   <!-- 快捷入口 -->
