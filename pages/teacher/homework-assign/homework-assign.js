@@ -1,4 +1,4 @@
-const mock = require('../../../utils/mock.js');
+const app = getApp();
 
 Page({
   data: {
@@ -7,48 +7,73 @@ Page({
     title: '',
     content: '',
     deadline: '',
-    list: mock.homeworkList
+    list: [],
+    loading: false
   },
 
-  onSubject(e) { this.setData({ subjectIndex: Number(e.detail.value) }); },
-  onTitle(e) { this.setData({ title: e.detail.value }); },
-  onContent(e) { this.setData({ content: e.detail.value }); },
-  onDate(e) { this.setData({ deadline: e.detail.value }); },
+  onShow() {
+    this.loadList();
+  },
+
+  loadList() {
+    this.setData({ loading: true });
+    app
+      .cloudListHomework()
+      .then((r) => {
+        const list = ((r && r.list) || []).map((h) => ({
+          ...h,
+          id: h._id,
+          pct: h.total ? Math.round((h.done / h.total) * 100) : 0
+        }));
+        this.setData({ loading: false, list });
+      })
+      .catch(() => this.setData({ loading: false }));
+  },
+
+  onSubject(e) {
+    this.setData({ subjectIndex: Number(e.detail.value) });
+  },
+  onTitle(e) {
+    this.setData({ title: e.detail.value });
+  },
+  onContent(e) {
+    this.setData({ content: e.detail.value });
+  },
+  onDate(e) {
+    this.setData({ deadline: e.detail.value });
+  },
 
   submit() {
-    const { subjects, subjectIndex, title, deadline, list } = this.data;
+    const { subjects, subjectIndex, title, content, deadline } = this.data;
     if (!title.trim()) {
       wx.showToast({ title: '请填写作业标题', icon: 'none' });
       return;
     }
-    const item = {
-      id: Date.now(),
-      subject: subjects[subjectIndex],
-      title: title.trim(),
-      deadline: deadline || '未设置',
-      done: 0,
-      total: 46,
-      status: '进行中'
-    };
-    this.setData({
-      list: [item].concat(list),
-      title: '',
-      content: '',
-      deadline: ''
-    });
-    wx.showToast({ title: '布置成功', icon: 'success' });
+    wx.showLoading({ title: '发布中' });
+    app
+      .cloudAssignHomework({
+        subject: subjects[subjectIndex],
+        title,
+        content,
+        deadline
+      })
+      .then((res) => {
+        wx.hideLoading();
+        if (!res.ok) {
+          wx.showToast({ title: res.msg || '发布失败', icon: 'none' });
+          return;
+        }
+        this.setData({ title: '', content: '', deadline: '' });
+        wx.showToast({ title: '布置成功', icon: 'success' });
+        this.loadList();
+      })
+      .catch(() => {
+        wx.hideLoading();
+        wx.showToast({ title: '请检查云函数/网络', icon: 'none' });
+      });
   },
 
-  remove(e) {
-    const id = e.currentTarget.dataset.id;
-    wx.showModal({
-      title: '提示',
-      content: '确定撤回该作业？',
-      success: (res) => {
-        if (res.confirm) {
-          this.setData({ list: this.data.list.filter((h) => h.id !== id) });
-        }
-      }
-    });
+  remove() {
+    wx.showToast({ title: '撤回功能开发中', icon: 'none' });
   }
 });

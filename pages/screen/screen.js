@@ -1,25 +1,108 @@
 Page({
   data: {
+    bound: false,
+    classId: '',
+    className: '',
+    code: '',
     text: '',
-    status: '正在连接大屏…',
+    status: '',
     connected: false,
     speaking: false
   },
 
   onLoad() {
+    const classId = wx.getStorageSync('screen_classId') || '';
+    const className = wx.getStorageSync('screen_className') || '';
+    if (classId) {
+      this.setData({ bound: true, classId, className });
+      this.startWatch();
+    } else {
+      this.setData({ status: '请绑定班级' });
+    }
+  },
+
+  onUnload() {
+    this.closeWatch();
+    if (this._audio) this._audio.destroy();
+  },
+
+  onCode(e) {
+    this.setData({ code: e.detail.value });
+  },
+
+  bind() {
+    const code = this.data.code.trim();
+    if (!code) {
+      wx.showToast({ title: '请输入邀请码', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '绑定中' });
+    getApp()
+      .cloudGetClassByCode(code)
+      .then((r) => {
+        wx.hideLoading();
+        if (!r.ok) {
+          wx.showToast({ title: r.msg || '绑定失败', icon: 'none' });
+          return;
+        }
+        wx.setStorageSync('screen_classId', r.classId);
+        wx.setStorageSync('screen_className', r.className);
+        this.closeWatch();
+        this.setData({
+          bound: true,
+          classId: r.classId,
+          className: r.className,
+          text: '',
+          code: ''
+        });
+        this.startWatch();
+      })
+      .catch(() => {
+        wx.hideLoading();
+        wx.showToast({ title: '网络/云函数错误', icon: 'none' });
+      });
+  },
+
+  unbind() {
+    wx.showModal({
+      title: '切换班级',
+      content: '解除当前班级绑定？',
+      success: (res) => {
+        if (!res.confirm) return;
+        this.closeWatch();
+        wx.removeStorageSync('screen_classId');
+        wx.removeStorageSync('screen_className');
+        this.setData({
+          bound: false,
+          classId: '',
+          className: '',
+          text: '',
+          connected: false,
+          status: '请绑定班级'
+        });
+      }
+    });
+  },
+
+  startWatch() {
     if (!wx.cloud) {
-      this.setData({ status: '当前环境不支持云开发' });
+      this.setData({ status: '环境不支持云开发' });
       return;
     }
     const db = wx.cloud.database();
     this._lastText = '';
+    this.setData({ status: '正在连接…' });
     this._watcher = db
       .collection('broadcasts')
+      .where({ classId: this.data.classId })
       .orderBy('ts', 'desc')
       .limit(1)
       .watch({
         onChange: (snapshot) => {
-          this.setData({ connected: true, status: '大屏已连接 · 实时监听中' });
+          this.setData({
+            connected: true,
+            status: '已连接 · ' + (this.data.className || '')
+          });
           const doc = snapshot.docs && snapshot.docs[0];
           if (doc && doc.text && doc.text !== this._lastText) {
             this._lastText = doc.text;
@@ -31,15 +114,17 @@ Page({
           console.error(e);
           this.setData({
             connected: false,
-            status: '监听中断：请检查 broadcasts 集合权限（需所有人可读）'
+            status: '监听中断：检查 broadcasts 集合权限（需所有人可读）'
           });
         }
       });
   },
 
-  onUnload() {
-    if (this._watcher) this._watcher.close();
-    if (this._audio) this._audio.destroy();
+  closeWatch() {
+    if (this._watcher) {
+      this._watcher.close();
+      this._watcher = null;
+    }
   },
 
   // 调 tts 云函数拿到音频并播放

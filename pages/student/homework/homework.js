@@ -1,22 +1,16 @@
-const mock = require('../../../utils/mock.js');
 const app = getApp();
-
-function withPct(list) {
-  return list.map((h) => ({ ...h, pct: Math.round(h.progress * 100) }));
-}
 
 Page({
   data: {
-    all: withPct(mock.studentHomework),
-    list: withPct(mock.studentHomework),
+    all: [],
+    list: [],
     tab: 'all',
     className: '未设置班级',
     name: '',
     tabs: [
       { key: 'all', label: '全部' },
       { key: '待完成', label: '待完成' },
-      { key: '已完成', label: '已完成' },
-      { key: '已逾期', label: '已逾期' }
+      { key: '已提交', label: '已提交' }
     ]
   },
 
@@ -26,23 +20,71 @@ Page({
       className: p.className || '未设置班级',
       name: p.name || ''
     });
-    app.cloudMyClass()
+    this.load();
+  },
+
+  load() {
+    app
+      .cloudListHomework()
       .then((r) => {
-        if (r.class && r.class.name) this.setData({ className: r.class.name });
-        if (r.user && r.user.name) this.setData({ name: r.user.name });
+        const list = (r.list || []).map((h) => ({
+          id: h._id,
+          subject: h.subject,
+          title: h.title,
+          deadline: h.deadline || '未设置',
+          status: h.myStatus || '待完成'
+        }));
+        this.setData({ all: list });
+        this.applyTab();
+      })
+      .catch(() => {});
+
+    app
+      .cloudMyClass()
+      .then((rr) => {
+        if (rr.class && rr.class.name) this.setData({ className: rr.class.name });
+        if (rr.user && rr.user.name) this.setData({ name: rr.user.name });
       })
       .catch(() => {});
   },
 
   setTab(e) {
-    const key = e.currentTarget.dataset.key;
-    const all = this.data.all;
-    const list = key === 'all' ? all : all.filter((h) => h.status === key);
-    this.setData({ tab: key, list });
+    this.setData({ tab: e.currentTarget.dataset.key });
+    this.applyTab();
+  },
+
+  applyTab() {
+    const { all, tab } = this.data;
+    this.setData({
+      list: tab === 'all' ? all : all.filter((h) => h.status === tab)
+    });
   },
 
   onSubmit(e) {
     const id = e.currentTarget.dataset.id;
-    wx.showToast({ title: '已提交作业', icon: 'success' });
+    wx.showModal({
+      title: '提交作业',
+      editable: true,
+      placeholderText: '可填写答案要点 / 说明（选填）',
+      success: (res) => {
+        if (!res.confirm) return;
+        wx.showLoading({ title: '提交中' });
+        app
+          .cloudSubmitHomework(id, res.content || '')
+          .then((r) => {
+            wx.hideLoading();
+            if (r.ok) {
+              wx.showToast({ title: '已提交', icon: 'success' });
+              this.load();
+            } else {
+              wx.showToast({ title: r.msg || '提交失败', icon: 'none' });
+            }
+          })
+          .catch(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '网络/云函数错误', icon: 'none' });
+          });
+      }
+    });
   }
 });

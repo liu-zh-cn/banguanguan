@@ -6,7 +6,22 @@ Page({
     location: '办公室',
     custom: '',
     sending: false,
+    classId: '',
+    className: '',
     history: []
+  },
+
+  onShow() {
+    app.cloudMyClass()
+      .then((r) => {
+        if (r.user) {
+          this.setData({
+            classId: r.user.classId || '',
+            className: r.user.className || ''
+          });
+        }
+      })
+      .catch(() => {});
   },
 
   onInput(e) {
@@ -28,6 +43,14 @@ Page({
     const text = this.buildText();
     if (!text) {
       wx.showToast({ title: '请填写姓名或广播内容', icon: 'none' });
+      return;
+    }
+    if (!this.data.classId) {
+      wx.showModal({
+        title: '还没有班级',
+        content: '广播按班级隔离，请先创建班级（我的 → 我的班级）。',
+        showCancel: false
+      });
       return;
     }
     this.setData({ sending: true });

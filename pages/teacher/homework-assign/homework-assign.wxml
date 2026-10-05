@@ -46,12 +46,12 @@
         </view>
         <text class="del" data-id="{{item.id}}" catchtap="remove">撤回</text>
       </view>
-      <view class="hw-meta muted">截止 {{item.deadline}} · {{item.status}}</view>
+      <view class="hw-meta muted">截止 {{item.deadline || '未设置'}} · 已交 {{item.done}}/{{item.total}}</view>
       <view class="progress-row">
         <view class="progress-track">
-          <view class="progress-bar" style="width: {{item.done / item.total * 100}}%"></view>
+          <view class="progress-bar" style="width: {{item.pct}}%"></view>
         </view>
-        <text class="progress-text">{{item.done}}/{{item.total}}</text>
+        <text class="progress-text">{{item.pct}}%</text>
       </view>
     </view>
   </view>

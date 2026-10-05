@@ -94,6 +94,36 @@ App({
       .then((res) => (res && res.result) || {});
   },
 
+  // 大屏凭邀请码解析班级（只读）
+  cloudGetClassByCode(inviteCode) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'getClassByCode', data: { inviteCode } })
+      .then((res) => (res && res.result) || {});
+  },
+
+  // ---------- 作业 ----------
+  cloudAssignHomework(payload) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'assignHomework', data: payload })
+      .then((res) => (res && res.result) || {});
+  },
+
+  cloudListHomework() {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'listHomework' })
+      .then((res) => (res && res.result) || {});
+  },
+
+  cloudSubmitHomework(homeworkId, content) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'submitHomework', data: { homeworkId, content } })
+      .then((res) => (res && res.result) || {});
+  },
+
   // ---------- 用户资料：默认值（本地缓存，用于个性化展示） ----------
   defaultProfile(role) {
     if (role === 'student') {

@@ -44,3 +44,4 @@
 }
 
 .empty { text-align: center; color: #A6ABC0; padding: 100rpx 0; }
+.done-tip { margin-top: 12rpx; text-align: right; }

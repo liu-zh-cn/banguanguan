@@ -3,19 +3,32 @@ const app = getApp();
 Page({
   data: {
     profile: {},
+    stats: { student: '—', homework: '—', exam: '—' },
     menus: [
-      { icon: '🏫', label: '我的班级', extra: '管理 / 创建', action: 'class' },
+      { icon: '🏫', label: '我的班级', extra: '查看学生', action: 'class' },
       { icon: '🎟️', label: '班级邀请码', extra: '分享给学生', action: 'code' },
-      { icon: '🔔', label: '消息通知', extra: '3 条未读' },
-      { icon: '👨‍👩‍👧', label: '家长联系' },
-      { icon: '📅', label: '课程表' },
-      { icon: '⚙️', label: '设置' },
-      { icon: '❓', label: '帮助与反馈' }
+      { icon: '📝', label: '我的作业', action: 'homework' },
+      { icon: '📢', label: '大屏广播', action: 'broadcast' },
+      { icon: '📈', label: '发布成绩', action: 'score' },
+      { icon: '⚙️', label: '设置', action: 'setting' }
     ]
   },
 
   onShow() {
     this.setData({ profile: app.getProfile('teacher') });
+    app
+      .cloudMyClass()
+      .then((r) => {
+        const student = r.students ? r.students.length : (r.class && r.class.studentCount) || 0;
+        this.setData({ 'stats.student': student });
+      })
+      .catch(() => {});
+    app
+      .cloudListHomework()
+      .then((r) => {
+        this.setData({ 'stats.homework': (r.list || []).length });
+      })
+      .catch(() => {});
   },
 
   goEdit() {
@@ -23,16 +36,27 @@ Page({
   },
 
   onMenu(e) {
-    const { label, action } = e.currentTarget.dataset;
-    if (action === 'class') {
-      wx.navigateTo({ url: '/pages/create-class/create-class' });
-      return;
-    }
+    const { action } = e.currentTarget.dataset;
     if (action === 'code') {
       this.showInviteCode();
       return;
     }
-    wx.showToast({ title: label, icon: 'none' });
+    const tabMap = {
+      class: '/pages/teacher/class/class',
+      homework: '/pages/teacher/homework-assign/homework-assign',
+      score: '/pages/teacher/score-publish/score-publish'
+    };
+    if (tabMap[action]) {
+      wx.reLaunch({ url: tabMap[action] });
+      return;
+    }
+    if (action === 'broadcast') {
+      wx.navigateTo({ url: '/pages/teacher/broadcast/broadcast' });
+      return;
+    }
+    if (action === 'setting') {
+      wx.navigateTo({ url: '/pages/setting/setting' });
+    }
   },
 
   showInviteCode() {

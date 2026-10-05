@@ -3,19 +3,26 @@ const app = getApp();
 Page({
   data: {
     profile: {},
+    stats: { rank: '—', todo: '—', review: '—' },
     menus: [
       { icon: '➕', label: '加入班级', extra: '输入邀请码', action: 'join' },
-      { icon: '📇', label: '个人档案', extra: '查看 / 编辑', action: 'edit' },
-      { icon: '📅', label: '我的课表' },
-      { icon: '✅', label: '作业记录', extra: '12 次' },
-      { icon: '🏅', label: '我的荣誉', extra: '3 项' },
-      { icon: '🔔', label: '消息通知', extra: '2 条未读' },
-      { icon: '⚙️', label: '设置' }
+      { icon: '📇', label: '我的资料', extra: '查看 / 编辑', action: 'edit' },
+      { icon: '✅', label: '我的作业', action: 'homework' },
+      { icon: '🏆', label: '我的成绩', action: 'score' },
+      { icon: '💬', label: '老师点评', action: 'review' },
+      { icon: '⚙️', label: '设置', action: 'setting' }
     ]
   },
 
   onShow() {
     this.setData({ profile: app.getProfile('student') });
+    app
+      .cloudListHomework()
+      .then((r) => {
+        const todo = (r.list || []).filter((h) => (h.myStatus || '待完成') === '待完成').length;
+        this.setData({ 'stats.todo': todo });
+      })
+      .catch(() => {});
   },
 
   goEdit() {
@@ -23,7 +30,7 @@ Page({
   },
 
   onMenu(e) {
-    const { label, action } = e.currentTarget.dataset;
+    const { action } = e.currentTarget.dataset;
     if (action === 'edit') {
       this.goEdit();
       return;
@@ -32,7 +39,18 @@ Page({
       this.joinClass();
       return;
     }
-    wx.showToast({ title: label, icon: 'none' });
+    const tabMap = {
+      homework: '/pages/student/homework/homework',
+      score: '/pages/student/score/score',
+      review: '/pages/student/review/review'
+    };
+    if (tabMap[action]) {
+      wx.reLaunch({ url: tabMap[action] });
+      return;
+    }
+    if (action === 'setting') {
+      wx.navigateTo({ url: '/pages/setting/setting' });
+    }
   },
 
   joinClass() {

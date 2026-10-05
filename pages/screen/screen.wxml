@@ -1,21 +1,36 @@
 <view class="screen">
-  <view class="scr-top">
-    <view class="scr-brand">📢 班管管 · 校园广播</view>
-    <view class="scr-status {{connected ? 'on' : ''}}">
-      <view class="dot"></view>{{status}}
-    </view>
+  <!-- 未绑定：输入班级邀请码 -->
+  <view wx:if="{{!bound}}" class="bind-box">
+    <view class="bind-logo">📢</view>
+    <view class="bind-title">班管管 · 校园大屏</view>
+    <view class="bind-tip">输入班级邀请码，本大屏只播报该班级的消息</view>
+    <input class="bind-input" placeholder="请输入班级邀请码" value="{{code}}" bindinput="onCode" />
+    <button class="bind-btn" bindtap="bind">绑定班级</button>
   </view>
 
-  <view class="scr-body">
-    <view class="scr-text {{text ? '' : 'placeholder'}}">
-      {{text || '等待老师发送广播…'}}
+  <!-- 已绑定：大屏显示 -->
+  <block wx:else>
+    <view class="scr-top">
+      <view class="scr-brand">📢 {{className || '校园广播'}}</view>
+      <view class="scr-right">
+        <view class="scr-status {{connected ? 'on' : ''}}">
+          <view class="dot"></view>{{status}}
+        </view>
+        <text class="scr-switch" bindtap="unbind">切换班级</text>
+      </view>
     </view>
-    <view class="scr-wave {{speaking ? 'playing' : ''}}" wx:if="{{text}}">
-      <view class="bar" wx:for="{{[1,2,3,4,5]}}" wx:key="*this"></view>
-    </view>
-  </view>
 
-  <view class="scr-bottom">
-    <view class="replay" wx:if="{{text}}" bindtap="replay">🔊 重播语音</view>
-  </view>
+    <view class="scr-body">
+      <view class="scr-text {{text ? '' : 'placeholder'}}">
+        {{text || '等待老师发送广播…'}}
+      </view>
+      <view class="scr-wave {{speaking ? 'playing' : ''}}" wx:if="{{text}}">
+        <view class="bar" wx:for="{{[1,2,3,4,5]}}" wx:key="*this"></view>
+      </view>
+    </view>
+
+    <view class="scr-bottom">
+      <view class="replay" wx:if="{{text}}" bindtap="replay">🔊 重播语音</view>
+    </view>
+  </block>
 </view>

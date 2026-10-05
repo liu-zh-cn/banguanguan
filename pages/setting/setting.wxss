@@ -1,0 +1,21 @@
+.set-page { min-height: 100vh; padding-top: 20rpx; }
+
+.acc-card { padding: 12rpx 32rpx; }
+.acc-card .row-between { padding: 26rpx 0; border-bottom: 2rpx solid #F2F3F7; }
+.acc-card .row-between:last-child { border-bottom: none; }
+.acc-label { font-size: 28rpx; color: #6B7180; }
+.acc-val { font-size: 28rpx; font-weight: 600; color: #1F2430; }
+
+.menu-card { padding: 8rpx 32rpx; }
+.s-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 0;
+  border-bottom: 2rpx solid #F2F3F7;
+}
+.s-item:last-child { border-bottom: none; }
+.s-ico { font-size: 40rpx; margin-right: 24rpx; }
+.s-label { flex: 1; font-size: 30rpx; }
+.s-arrow { color: #C7CBDA; font-size: 40rpx; }
+
+.logout { text-align: center; color: var(--danger); font-size: 30rpx; font-weight: 600; padding: 6rpx 0; }

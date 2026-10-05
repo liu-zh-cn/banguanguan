@@ -9,6 +9,8 @@
 }
 
 .scr-top { display: flex; align-items: center; justify-content: space-between; }
+.scr-right { display: flex; align-items: center; gap: 24rpx; }
+.scr-switch { font-size: 24rpx; color: #9aa4d6; text-decoration: underline; }
 .scr-brand { font-size: 34rpx; font-weight: 700; opacity: 0.9; }
 .scr-status { display: flex; align-items: center; font-size: 24rpx; color: #9aa4d6; }
 .scr-status .dot {
@@ -65,3 +67,39 @@
   padding: 18rpx 48rpx;
   border-radius: 999rpx;
 }
+
+/* 绑定班级界面 */
+.bind-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.bind-logo { font-size: 120rpx; margin-bottom: 20rpx; }
+.bind-title { font-size: 52rpx; font-weight: 800; margin-bottom: 16rpx; }
+.bind-tip { font-size: 26rpx; color: #8f9ac9; margin-bottom: 48rpx; }
+.bind-input {
+  width: 560rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2rpx solid rgba(205, 213, 255, 0.35);
+  border-radius: 999rpx;
+  padding: 26rpx 40rpx;
+  font-size: 34rpx;
+  color: #fff;
+  letter-spacing: 4rpx;
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+.bind-btn {
+  width: 560rpx;
+  background: linear-gradient(135deg, #5B7CFF, #24C8A0);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  border-radius: 999rpx;
+  padding: 24rpx 0;
+  border: none;
+}
+.bind-btn::after { border: none; }

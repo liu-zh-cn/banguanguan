@@ -9,9 +9,9 @@
   </view>
 
   <view class="card stat-card">
-    <view class="p-stat"><text class="p-num">46</text><text class="p-lb">学生</text></view>
-    <view class="p-stat"><text class="p-num">12</text><text class="p-lb">待批作业</text></view>
-    <view class="p-stat"><text class="p-num">3</text><text class="p-lb">未发布成绩</text></view>
+    <view class="p-stat"><text class="p-num">{{stats.student}}</text><text class="p-lb">学生</text></view>
+    <view class="p-stat"><text class="p-num">{{stats.homework}}</text><text class="p-lb">已布置作业</text></view>
+    <view class="p-stat"><text class="p-num">{{stats.exam}}</text><text class="p-lb">未发布成绩</text></view>
   </view>
 
   <view class="card menu-card">
