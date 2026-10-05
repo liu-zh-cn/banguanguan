@@ -6,7 +6,7 @@ Page({
     stats: { student: '—', homework: '—', exam: '—' },
     menus: [
       { icon: '🏫', label: '我的班级', extra: '查看学生', action: 'class' },
-      { icon: '🎟️', label: '班级邀请码', extra: '分享给学生', action: 'code' },
+      { icon: '🎟️', label: '班级邀请码', extra: '发给学生', action: 'code' },
       { icon: '📝', label: '我的作业', action: 'homework' },
       { icon: '📢', label: '大屏广播', action: 'broadcast' },
       { icon: '📈', label: '发布成绩', action: 'score' },
