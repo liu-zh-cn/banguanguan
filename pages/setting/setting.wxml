@@ -13,6 +13,10 @@
       <text class="acc-val">{{profile.className || '未设置'}}</text>
     </view>
     <view class="row-between">
+      <text class="acc-label">版本</text>
+      <text class="acc-val">{{version}} · {{envText}}</text>
+    </view>
+    <view class="row-between">
       <text class="acc-label">登录账号 openid</text>
       <text class="acc-val muted">{{openidShort}}</text>
     </view>

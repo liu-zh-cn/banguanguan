@@ -73,7 +73,39 @@ Page({
       });
   },
 
-  remove() {
-    wx.showToast({ title: '撤回功能开发中', icon: 'none' });
+  // 撤回作业：连带学生提交记录一起删，删前必须确认
+  remove(e) {
+    const id = e.currentTarget.dataset.id;
+    const item = this.data.list.find((h) => h.id === id);
+    if (!item) return;
+    if (this._removing) return;
+    wx.showModal({
+      title: '撤回作业',
+      content: '确定撤回「' + item.title + '」？\n已交的 ' + (item.done || 0) + ' 份提交记录会一并删除，且无法恢复。',
+      confirmText: '撤回',
+      confirmColor: '#E23B41',
+      success: (res) => {
+        if (!res.confirm) return;
+        this._removing = true;
+        wx.showLoading({ title: '撤回中' });
+        app
+          .cloudDeleteHomework(id)
+          .then((r) => {
+            wx.hideLoading();
+            this._removing = false;
+            if (!r.ok) {
+              wx.showToast({ title: r.msg || '撤回失败', icon: 'none' });
+              return;
+            }
+            wx.showToast({ title: '已撤回', icon: 'success' });
+            this.loadList();
+          })
+          .catch(() => {
+            wx.hideLoading();
+            this._removing = false;
+            wx.showToast({ title: '网络/云函数错误', icon: 'none' });
+          });
+      }
+    });
   }
 });

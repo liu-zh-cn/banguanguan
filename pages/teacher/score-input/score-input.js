@@ -4,6 +4,7 @@ Page({
   data: {
     examId: '',
     examName: '',
+    fullScore: 100,
     subjects: [],
     subjectIndex: 0,
     subject: '',
@@ -38,6 +39,7 @@ Page({
         this.setData({
           loading: false,
           examName: (r.exam && r.exam.name) || '',
+          fullScore: (r.exam && r.exam.fullScore) || 100,
           subjects,
           subjectIndex: 0,
           subject: subjects[0] || ''
@@ -83,17 +85,32 @@ Page({
   save() {
     if (this.data.saving) return;
     const { examId, subject, rows } = this.data;
-    const items = rows
-      .filter((r) => String(r.val).trim() !== '')
-      .map((r) => ({ openid: r.openid, name: r.name, score: Number(r.val) }));
-    if (!items.length) {
+    const fullScore = this.data.fullScore || 100;
+
+    // 先在前端拦一道，把「哪个学生超了多少分」说清楚；云函数里还会再校验一次
+    const valid = [];
+    for (let i = 0; i < rows.length; i++) {
+      const raw = String(rows[i].val).trim();
+      if (raw === '') continue;
+      const n = Number(raw);
+      if (isNaN(n) || n < 0 || n > fullScore) {
+        wx.showToast({
+          title: (rows[i].name || '某位同学') + ' 的分数需在 0–' + fullScore + ' 之间',
+          icon: 'none'
+        });
+        return;
+      }
+      valid.push({ openid: rows[i].openid, name: rows[i].name, score: n });
+    }
+
+    if (!valid.length) {
       wx.showToast({ title: '请至少录入一个成绩', icon: 'none' });
       return;
     }
     this.setData({ saving: true });
     wx.showLoading({ title: '保存中' });
     app
-      .cloudInputScores({ examId, subject, items })
+      .cloudInputScores({ examId, subject, items: valid })
       .then((r) => {
         wx.hideLoading();
         this.setData({ saving: false });
@@ -102,7 +119,7 @@ Page({
           return;
         }
         // 同步到本地缓存，切科目再回来不丢
-        items.forEach((it) => {
+        valid.forEach((it) => {
           this._scores[it.openid] = this._scores[it.openid] || {};
           this._scores[it.openid][subject] = it.score;
         });

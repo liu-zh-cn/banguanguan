@@ -11,6 +11,22 @@
     </view>
   </view>
 
+  <!-- 试卷满分：新建考试时生效 -->
+  <view class="card">
+    <view class="section-title">试卷满分</view>
+    <view class="fs-bar">
+      <view
+        class="fs-item {{fullScoreIndex === index ? 'fs-item--on' : ''}}"
+        wx:for="{{fullScores}}"
+        wx:key="*this"
+        wx:for-index="index"
+        data-index="{{index}}"
+        bindtap="pickFullScore"
+      >{{item}} 分</view>
+    </view>
+    <view class="muted fs-tip">录入、图表和进度条都按这个满分换算；新建考试后不可修改</view>
+  </view>
+
   <view class="card">
     <view class="exam-item" wx:for="{{exams}}" wx:key="id">
       <view class="row-between">
@@ -19,7 +35,7 @@
           {{item.published ? '已发布' : '未发布'}}
         </text>
       </view>
-      <view class="exam-meta muted">考试日期：{{item.date}} · 平均分：{{item.count ? item.avg : '—'}}</view>
+      <view class="exam-meta muted">考试日期：{{item.date}} · 满分：{{item.fullScore}} · 平均分：{{item.count ? item.avg : '—'}}</view>
       <view class="exam-actions">
         <view class="mini-btn" data-id="{{item.id}}" data-name="{{item.name}}" bindtap="inputScore">📥 录入成绩</view>
         <view class="mini-btn {{item.published ? 'mini-btn--warn' : 'mini-btn--primary'}}"

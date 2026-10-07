@@ -16,6 +16,11 @@ Page({
 
   onShow() {
     this.setData({ profile: app.getProfile('teacher') });
+    this.loadStats();
+    this.syncProfile();
+  },
+
+  loadStats() {
     app
       .cloudMyClass()
       .then((r) => {
@@ -29,6 +34,34 @@ Page({
         this.setData({ 'stats.homework': (r.list || []).length });
       })
       .catch(() => {});
+    // 未发布成绩的考试数：之前这个格子永远是「—」
+    app
+      .cloudListExams()
+      .then((r) => {
+        if (!r || !r.ok) return;
+        const pending = (r.list || []).filter((e) => !e.published).length;
+        this.setData({ 'stats.exam': pending });
+      })
+      .catch(() => {});
+  },
+
+  // 本地缓存只用于展示，姓名 / 班级以云端 users 表为准（每个页面生命周期同步一次）
+  syncProfile() {
+    if (this._synced) return;
+    this._synced = true;
+    app
+      .cloudMyClass()
+      .then((r) => {
+        if (!r || !r.user) return;
+        const p = app.getProfile('teacher');
+        if (r.user.name) p.name = r.user.name;
+        if (r.user.className) p.className = r.user.className;
+        app.saveProfile('teacher', p);
+        this.setData({ profile: p });
+      })
+      .catch(() => {
+        this._synced = false; // 同步失败，下次进来再试
+      });
   },
 
   goEdit() {

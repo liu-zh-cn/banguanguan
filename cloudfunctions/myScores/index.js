@@ -27,6 +27,7 @@ exports.main = async (event) => {
     _id: e._id,
     name: e.name,
     date: e.date || '',
+    fullScore: Number(e.fullScore) > 0 ? Number(e.fullScore) : 100,
     subjects: e.subjects || []
   }));
   if (!exams.length) return { ok: true, hasExam: false, exams: [] };
@@ -68,6 +69,7 @@ exports.main = async (event) => {
     examId: exam._id,
     examName: exam.name,
     date: exam.date,
+    fullScore: exam.fullScore,
     rows,
     total: myTotal,
     avg: mean(rows.map((r) => r.score)),

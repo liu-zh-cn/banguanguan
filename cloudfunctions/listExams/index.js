@@ -17,6 +17,12 @@ exports.main = async () => {
   const res = await db.collection('exams').where(where).orderBy('ts', 'desc').limit(50).get();
   const exams = res.data || [];
 
+  // 老考试记录没有 fullScore，统一按 100 分兜底，前端不用再判空
+  exams.forEach((e) => {
+    const f = Number(e.fullScore);
+    e.fullScore = f > 0 ? f : 100;
+  });
+
   // 老师的列表附带平均分（所有学生、所有科目的均分）
   if (isTeacher && exams.length) {
     const ids = exams.map((e) => e._id);

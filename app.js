@@ -132,6 +132,14 @@ App({
       .then((res) => (res && res.result) || {});
   },
 
+  // 老师撤回作业（连带删除学生的提交记录）
+  cloudDeleteHomework(homeworkId) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'deleteHomework', data: { homeworkId } })
+      .then((res) => (res && res.result) || {});
+  },
+
   // ---------- 考试 / 成绩 ----------
   // 老师新建考试
   cloudCreateExam(payload) {

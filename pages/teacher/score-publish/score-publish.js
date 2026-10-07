@@ -2,11 +2,18 @@ const app = getApp();
 
 Page({
   data: {
-    exams: []
+    exams: [],
+    // 试卷满分：录入 / 图表 / 进度条都按它换算，避免把 150 分卷当成 100 分
+    fullScores: [100, 120, 150, 200],
+    fullScoreIndex: 2
   },
 
   onShow() {
     this.load();
+  },
+
+  pickFullScore(e) {
+    this.setData({ fullScoreIndex: Number(e.currentTarget.dataset.index) });
   },
 
   load() {
@@ -19,10 +26,19 @@ Page({
           date: x.date || '—',
           published: !!x.published,
           avg: x.avg || 0,
+          fullScore: x.fullScore || 100,
           // 有没有录成绩看分数条数，不能看平均分（0 分的考试会被误判成没录）
           count: x.scoreCount || 0
         }));
         this.setData({ exams });
+        // 满分选择器默认跟随最近一次考试，避免：上次建的是 100 分卷，这次进来静默变回 150
+        const last = exams[0];
+        if (last) {
+          const idx = this.data.fullScores.indexOf(Number(last.fullScore));
+          if (idx > -1 && idx !== this.data.fullScoreIndex) {
+            this.setData({ fullScoreIndex: idx });
+          }
+        }
       })
       .catch(() => {
         wx.showToast({ title: '网络/云函数错误', icon: 'none' });
@@ -70,8 +86,10 @@ Page({
     });
   },
 
-  // 新建考试：先写名称，再写科目（可留空，默认六科）
+  // 新建考试：先写名称，再写科目（可留空，默认六科）；满分取上方选择器
   addExam() {
+    const { fullScores, fullScoreIndex } = this.data;
+    const fullScore = fullScores[fullScoreIndex];
     wx.showModal({
       title: '新建考试',
       editable: true,
@@ -90,7 +108,7 @@ Page({
               .filter(Boolean);
             wx.showLoading({ title: '创建中' });
             app
-              .cloudCreateExam({ name, subjects })
+              .cloudCreateExam({ name, subjects, fullScore })
               .then((r3) => {
                 wx.hideLoading();
                 if (!r3.ok) {

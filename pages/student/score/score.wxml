@@ -30,7 +30,7 @@
   </view>
 
   <view class="card" wx:if="{{hasExam && scores.length}}">
-    <view class="section-title">各科成绩</view>
+    <view class="section-title">各科成绩（满分 {{fullScore}}）</view>
     <chart type="bar" data="{{barData}}" />
   </view>
 

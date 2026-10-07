@@ -18,6 +18,9 @@ exports.main = async (event) => {
   if (!e || !e.data) return { ok: false, msg: '考试不存在' };
   if (e.data.classId !== user.classId) return { ok: false, msg: '无权操作' };
 
+  // 超过试卷满分就拒收，避免录入时手滑把 150 填进 100 分的卷子
+  const fullScore = Number(e.data.fullScore) > 0 ? Number(e.data.fullScore) : 100;
+
   // 取出该考试已存在的成绩记录，按 openid 建索引
   const exist = await db.collection('scores').where({ examId }).limit(1000).get();
   const byOpenid = {};
@@ -29,7 +32,7 @@ exports.main = async (event) => {
   for (const it of items) {
     const openid = it && it.openid;
     const score = Number(it && it.score);
-    if (!openid || isNaN(score) || score < 0 || score > 150) continue;
+    if (!openid || isNaN(score) || score < 0 || score > fullScore) continue;
     const doc = byOpenid[openid];
     if (doc) {
       await db.collection('scores').doc(doc._id).update({

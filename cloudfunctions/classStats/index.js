@@ -32,6 +32,7 @@ exports.main = async () => {
     trend: { labels: [], values: [] },
     dist: { items: [] },
     radar: { labels: [], values: [], max: 100 },
+    fullScore: 100,
     studentLatest: {}
   };
   if (!classId) return empty;
@@ -53,6 +54,10 @@ exports.main = async () => {
 
   const latest = exams[exams.length - 1]; // ts 升序，最后一条就是最新
   const latestDocs = byExam[latest._id] || [];
+  // 优秀 / 及格线按试卷满分等比换算：100 分卷为 90 / 60，150 分卷为 135 / 90
+  const fullScore = Number(latest.fullScore) > 0 ? Number(latest.fullScore) : 100;
+  const excellentLine = fullScore === 100 ? 90 : Math.round(fullScore * 0.9);
+  const passLine = fullScore === 100 ? 60 : Math.round(fullScore * 0.6);
 
   // 最近一次考试：每位学生的均分 → 总览 + 分布 + class 页的「最新分」
   const studentLatest = {};
@@ -71,12 +76,12 @@ exports.main = async () => {
   const overview = {
     studentCount,
     avgScore: allVals.length ? mean(allVals) : '—',
-    excellentRate: stuAvgs.length ? Math.round((stuAvgs.filter((v) => v >= 90).length / stuAvgs.length) * 100) : '—',
-    passRate: stuAvgs.length ? Math.round((stuAvgs.filter((v) => v >= 60).length / stuAvgs.length) * 100) : '—'
+    excellentRate: stuAvgs.length ? Math.round((stuAvgs.filter((v) => v >= excellentLine).length / stuAvgs.length) * 100) : '—',
+    passRate: stuAvgs.length ? Math.round((stuAvgs.filter((v) => v >= passLine).length / stuAvgs.length) * 100) : '—'
   };
 
-  // 柱状图：最近一次考试各科均分
-  const subjectAvg = { labels: [], values: [], max: 100 };
+  // 柱状图：最近一次考试各科均分（纵轴按满分）
+  const subjectAvg = { labels: [], values: [], max: fullScore };
   (latest.subjects || []).forEach((sub) => {
     const vals = latestDocs.map((d) => d.scores && d.scores[sub]).filter((v) => typeof v === 'number');
     if (vals.length) {
@@ -100,13 +105,14 @@ exports.main = async () => {
     }
   });
 
-  // 饼图：按学生均分段的成绩分布
+  // 饼图：按学生均分段的成绩分布（分段线同样按满分换算）
+  const goodLine = Math.round(fullScore * 0.8);
   const dist = {
     items: [
-      { name: '优秀(≥90)', value: stuAvgs.filter((v) => v >= 90).length, color: '#5B7CFF' },
-      { name: '良好(80-89)', value: stuAvgs.filter((v) => v >= 80 && v < 90).length, color: '#24C8A0' },
-      { name: '及格(60-79)', value: stuAvgs.filter((v) => v >= 60 && v < 80).length, color: '#FFB020' },
-      { name: '不及格(<60)', value: stuAvgs.filter((v) => v < 60).length, color: '#FF5A5F' }
+      { name: '优秀(≥' + excellentLine + ')', value: stuAvgs.filter((v) => v >= excellentLine).length, color: '#5B7CFF' },
+      { name: '良好(' + goodLine + '-' + (excellentLine - 1) + ')', value: stuAvgs.filter((v) => v >= goodLine && v < excellentLine).length, color: '#24C8A0' },
+      { name: '及格(' + passLine + '-' + (goodLine - 1) + ')', value: stuAvgs.filter((v) => v >= passLine && v < goodLine).length, color: '#FFB020' },
+      { name: '不及格(<' + passLine + ')', value: stuAvgs.filter((v) => v < passLine).length, color: '#FF5A5F' }
     ]
   };
 
@@ -118,6 +124,7 @@ exports.main = async () => {
     trend,
     dist,
     radar: subjectAvg, // 各科均分雷达（与柱状图同源）
+    fullScore,
     studentLatest
   };
 };

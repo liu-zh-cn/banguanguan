@@ -17,6 +17,10 @@ exports.main = async (event) => {
   const name = (event.name || '').trim();
   if (!name) return { ok: false, msg: '考试名称不能为空' };
 
+  // 试卷满分：录入 / 图表 / 进度条都按它换算，落库后不再改
+  const rawFull = Number(event.fullScore);
+  const fullScore = rawFull > 0 && rawFull <= 1000 ? Math.round(rawFull) : 100;
+
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
   if (!u.data.length) return { ok: false, msg: '未注册' };
   const user = u.data[0];
@@ -38,6 +42,7 @@ exports.main = async (event) => {
       name,
       date: todayStr(),
       subjects,
+      fullScore,
       published: false,
       teacherOpenid: OPENID,
       ts: Date.now(),

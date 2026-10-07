@@ -1,19 +1,38 @@
 const app = getApp();
 
+// 当前小程序版本 / 环境：正式版有 version，开发版和体验版取不到，用环境标识兜底
+function getVersionInfo() {
+  try {
+    const mp = (wx.getAccountInfoSync() || {}).miniProgram || {};
+    const envText = { develop: '开发版', trial: '体验版', release: '正式版' };
+    return {
+      version: mp.version || '开发预览',
+      envText: envText[mp.envVersion] || '未知环境'
+    };
+  } catch (e) {
+    return { version: '未知', envText: '未知环境' };
+  }
+}
+
 Page({
   data: {
     role: 'teacher',
     profile: {},
-    openidShort: ''
+    openidShort: '',
+    version: '未知',
+    envText: ''
   },
 
   onShow() {
     const role = wx.getStorageSync('role') || 'teacher';
     const openid = app.globalData.openid || wx.getStorageSync('openid') || '';
+    const ver = getVersionInfo();
     this.setData({
       role,
       profile: app.getProfile(role),
-      openidShort: openid ? openid.slice(0, 12) + '…' : '未登录'
+      openidShort: openid ? openid.slice(0, 12) + '…' : '未登录',
+      version: ver.version,
+      envText: ver.envText
     });
   },
 
@@ -38,7 +57,7 @@ Page({
   about() {
     wx.showModal({
       title: '关于 班管管',
-      content: 'v1.0.0\n帮助老师管理班级：统计 · 作业 · 成绩 · 点评 · 大屏广播',
+      content: this.data.version + '（' + this.data.envText + '）\n帮助老师管理班级：统计 · 作业 · 成绩 · 点评 · 大屏广播',
       showCancel: false
     });
   },

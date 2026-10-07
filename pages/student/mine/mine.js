@@ -16,6 +16,12 @@ Page({
 
   onShow() {
     this.setData({ profile: app.getProfile('student') });
+    this.loadStats();
+    this.syncProfile();
+  },
+
+  // 三个统计项都接真实数据：待交作业 / 班级排名 / 收到点评
+  loadStats() {
     app
       .cloudListHomework()
       .then((r) => {
@@ -23,6 +29,41 @@ Page({
         this.setData({ 'stats.todo': todo });
       })
       .catch(() => {});
+
+    app
+      .cloudMyScores('')
+      .then((r) => {
+        if (!r || !r.ok || !r.hasExam) return;
+        // rank 为 0 表示还没有已发布的成绩，保持「—」
+        if (r.rank) this.setData({ 'stats.rank': '第 ' + r.rank + ' 名' });
+      })
+      .catch(() => {});
+
+    app
+      .cloudListReviews()
+      .then((r) => {
+        if (r && r.ok) this.setData({ 'stats.review': (r.list || []).length });
+      })
+      .catch(() => {});
+  },
+
+  // 本地缓存只用于展示，姓名 / 班级以云端 users 表为准（每个页面生命周期同步一次）
+  syncProfile() {
+    if (this._synced) return;
+    this._synced = true;
+    app
+      .cloudMyClass()
+      .then((r) => {
+        if (!r || !r.user) return;
+        const p = app.getProfile('student');
+        if (r.user.name) p.name = r.user.name;
+        if (r.user.className) p.className = r.user.className;
+        app.saveProfile('student', p);
+        this.setData({ profile: p });
+      })
+      .catch(() => {
+        this._synced = false; // 同步失败，下次进来再试
+      });
   },
 
   goEdit() {

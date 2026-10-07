@@ -10,6 +10,7 @@ Page({
     exams: [],
     examId: '',
     examName: '',
+    fullScore: 100,
     hasExam: false
   },
 
@@ -30,13 +31,14 @@ Page({
         const rows = (r.rows || []).map((s) => ({
           ...s,
           diff: Number((s.score - s.classAvg).toFixed(1)),
-          barPct: Math.round((s.score / 100) * 100)
+          barPct: Math.round((s.score / (r.fullScore || 100)) * 100)
         }));
         this.setData({
           hasExam: true,
           exams: r.exams || [],
           examId: r.examId,
           examName: r.examName + (r.date ? ' · ' + r.date : ''),
+          fullScore: r.fullScore || 100,
           scores: rows,
           total: r.total || 0,
           avg: r.avg || 0,
@@ -44,7 +46,7 @@ Page({
           barData: {
             labels: rows.map((s) => s.subject),
             values: rows.map((s) => s.score),
-            max: 100
+            max: r.fullScore || 100
           }
         });
       })

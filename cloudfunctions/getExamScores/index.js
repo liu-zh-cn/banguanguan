@@ -40,6 +40,7 @@ exports.main = async (event) => {
     exam: {
       name: e.data.name,
       date: e.data.date || '',
+      fullScore: Number(e.data.fullScore) > 0 ? Number(e.data.fullScore) : 100,
       subjects: e.data.subjects || []
     },
     students,
