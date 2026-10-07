@@ -12,6 +12,8 @@ exports.main = async (event) => {
   let className = '';
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
   if (u.data.length) {
+    // 角色以服务端 users 表为准，学生不可布置作业
+    if (u.data[0].role !== 'teacher') return { ok: false, msg: '仅老师可布置作业' };
     classId = u.data[0].classId || '';
     className = u.data[0].className || '';
   }

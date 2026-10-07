@@ -34,6 +34,9 @@ Page({
     this.setData({ submitting: true });
     wx.showLoading({ title: '注册中...' });
 
+    // 服务端最终身份：老用户不会被 register 改角色，跳转以它为准
+    let finalRole = role;
+
     // 1. 确保已拿到 openid
     const ensureOpenid = app.globalData.openid
       ? Promise.resolve({ openid: app.globalData.openid })
@@ -58,9 +61,10 @@ Page({
           this.warn(res.msg || '注册失败');
           return false;
         }
+        finalRole = res.role || role;
         // 学生填了邀请码 → 加入班级
         const inviteCode = this.data.inviteCode.trim();
-        if (role === 'student' && inviteCode) {
+        if (finalRole === 'student' && inviteCode) {
           return app.cloudJoinClass(inviteCode);
         }
         return { ok: true };
@@ -73,18 +77,18 @@ Page({
           return this.warn(j.msg || '加入班级失败');
         }
         // 本地缓存一份资料，用于界面展示
-        const profile = app.getProfile(role);
+        const profile = app.getProfile(finalRole);
         profile.name = name.trim();
         if (className.trim()) profile.className = className.trim();
         if (j && j.className) profile.className = j.className;
-        if (role === 'teacher' && subject.trim()) profile.subject = subject.trim();
-        if (role === 'student' && studentNo.trim()) profile.studentNo = studentNo.trim();
-        app.saveProfile(role, profile);
+        if (finalRole === 'teacher' && subject.trim()) profile.subject = subject.trim();
+        if (finalRole === 'student' && studentNo.trim()) profile.studentNo = studentNo.trim();
+        app.saveProfile(finalRole, profile);
 
-        app.setRole(role);
+        app.setRole(finalRole);
         wx.showToast({ title: '注册成功', icon: 'success' });
         setTimeout(() => {
-          const url = role === 'teacher'
+          const url = finalRole === 'teacher'
             ? '/pages/teacher/stats/stats'
             : '/pages/student/homework/homework';
           wx.reLaunch({ url });

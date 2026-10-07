@@ -11,6 +11,8 @@ exports.main = async (event) => {
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
   if (!u.data.length) return { ok: false, msg: '未注册' };
   const user = u.data[0];
+  // 角色以服务端 users 表为准，学生不可自行发布 / 撤回成绩
+  if (user.role !== 'teacher') return { ok: false, msg: '仅老师可发布成绩' };
 
   const e = await db.collection('exams').doc(examId).get().catch(() => null);
   if (!e || !e.data) return { ok: false, msg: '考试不存在' };

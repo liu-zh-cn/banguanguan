@@ -15,6 +15,8 @@ exports.main = async (event) => {
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
   if (!u.data.length) return { ok: false, msg: '未注册' };
   const user = u.data[0];
+  // 角色以服务端 users 表为准，学生不可伪造老师点评
+  if (user.role !== 'teacher') return { ok: false, msg: '仅老师可写点评' };
   if (!user.classId) return { ok: false, msg: '请先创建班级' };
 
   const s = await db

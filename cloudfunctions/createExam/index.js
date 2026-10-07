@@ -20,6 +20,8 @@ exports.main = async (event) => {
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
   if (!u.data.length) return { ok: false, msg: '未注册' };
   const user = u.data[0];
+  // 角色以服务端 users 表为准，学生不可新建考试
+  if (user.role !== 'teacher') return { ok: false, msg: '仅老师可新建考试' };
   if (!user.classId) return { ok: false, msg: '请先创建班级' };
 
   // 科目：去空、去重（云数据库字段名里不能带 . 和 $，一并过滤）；留空则用默认六科

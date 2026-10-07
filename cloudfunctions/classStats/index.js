@@ -13,6 +13,8 @@ exports.main = async () => {
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
   if (!u.data.length) return { ok: false, msg: '未注册' };
   const user = u.data[0];
+  // 数据看板是老师端功能：总览与全班分布不对学生开放
+  if (user.role !== 'teacher') return { ok: false, msg: '仅老师可查看班级数据' };
   const classId = user.classId || '';
 
   let studentCount = 0;
