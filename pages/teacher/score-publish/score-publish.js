@@ -18,7 +18,9 @@ Page({
           name: x.name,
           date: x.date || '—',
           published: !!x.published,
-          avg: x.avg || 0
+          avg: x.avg || 0,
+          // 有没有录成绩看分数条数，不能看平均分（0 分的考试会被误判成没录）
+          count: x.scoreCount || 0
         }));
         this.setData({ exams });
       })
@@ -31,7 +33,7 @@ Page({
     const id = e.currentTarget.dataset.id;
     const exam = this.data.exams.find((x) => x.id === id);
     if (!exam) return;
-    if (!exam.published && !exam.avg) {
+    if (!exam.published && !exam.count) {
       wx.showToast({ title: '请先录入成绩', icon: 'none' });
       return;
     }

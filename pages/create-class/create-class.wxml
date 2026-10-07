@@ -35,18 +35,6 @@
     </view>
   </view>
 
-  <view class="card">
-    <view class="section-title">班级邀请码</view>
-    <view class="code-card">
-      <text class="code-text">{{inviteCode}}</text>
-      <view class="code-actions">
-        <text class="code-link" bindtap="refreshCode">🔄 换一换</text>
-        <text class="code-link" data-code="{{inviteCode}}" bindtap="copyCode">📋 复制</text>
-      </view>
-    </view>
-    <view class="muted code-tip">学生注册时填写该邀请码即可加入你的班级</view>
-  </view>
-
   <view class="submit-wrap">
     <button class="btn-primary" bindtap="submit">创建班级</button>
   </view>
@@ -57,9 +45,9 @@
     <view class="my-item" wx:for="{{myClasses}}" wx:key="id">
       <view class="flex-1">
         <view class="my-name">{{item.name}}</view>
-        <view class="muted">班主任 {{item.teacher}} · 邀请码 {{item.inviteCode}}</view>
+        <view class="muted">班主任 {{item.teacher}} · 邀请码 {{item.inviteCode || '—'}}</view>
       </view>
-      <text class="tag tag-green">已创建</text>
+      <text class="code-link" wx:if="{{item.inviteCode}}" data-code="{{item.inviteCode}}" catchtap="copyCode">复制</text>
     </view>
   </view>
 </view>

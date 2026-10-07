@@ -127,29 +127,34 @@ Component({
       }
 
       const n = values.length || 1;
+      // n <= 1 时没有"间隔"可分，单点居中显示；其余情况按等间隔铺开
       const step = n > 1 ? cw / (n - 1) : 0;
+      const xAt = (i) => (n > 1 ? padL + step * i : padL + cw / 2);
       const pts = values.map((v, i) => ({
-        x: padL + step * i,
+        x: xAt(i),
+        // 所有点分数相同时 range 会退化成 0，靠 || 1 兜底，避免 NaN
         y: padT + ch - ((v - min) / range) * ch
       }));
 
-      const areaGrad = ctx.createLinearGradient(0, padT, 0, padT + ch);
-      areaGrad.addColorStop(0, 'rgba(91,124,255,0.28)');
-      areaGrad.addColorStop(1, 'rgba(91,124,255,0)');
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, padT + ch);
-      pts.forEach((p) => ctx.lineTo(p.x, p.y));
-      ctx.lineTo(pts[pts.length - 1].x, padT + ch);
-      ctx.closePath();
-      ctx.fillStyle = areaGrad;
-      ctx.fill();
+      if (n > 1) {
+        const areaGrad = ctx.createLinearGradient(0, padT, 0, padT + ch);
+        areaGrad.addColorStop(0, 'rgba(91,124,255,0.28)');
+        areaGrad.addColorStop(1, 'rgba(91,124,255,0)');
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, padT + ch);
+        pts.forEach((p) => ctx.lineTo(p.x, p.y));
+        ctx.lineTo(pts[pts.length - 1].x, padT + ch);
+        ctx.closePath();
+        ctx.fillStyle = areaGrad;
+        ctx.fill();
 
-      ctx.beginPath();
-      pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
-      ctx.strokeStyle = theme;
-      ctx.lineWidth = 2.5;
-      ctx.lineJoin = 'round';
-      ctx.stroke();
+        ctx.beginPath();
+        pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+        ctx.strokeStyle = theme;
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      }
 
       pts.forEach((p, i) => {
         ctx.beginPath();
@@ -273,10 +278,11 @@ Component({
       const ctx = this._ctx;
       const r = Math.min(radius, width / 2, height / 2);
       ctx.beginPath();
+      // 四个角都要带圆角半径，漏传会让右边两角变成直角
       ctx.moveTo(x + r, y);
       ctx.arcTo(x + width, y, x + width, y + height, r);
-      ctx.arcTo(x + width, y + height, x, y + height, 0);
-      ctx.arcTo(x, y + height, x, y, 0);
+      ctx.arcTo(x + width, y + height, x, y + height, r);
+      ctx.arcTo(x, y + height, x, y, r);
       ctx.arcTo(x, y, x + width, y, r);
       ctx.closePath();
     }

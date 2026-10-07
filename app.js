@@ -53,6 +53,14 @@ App({
     );
   },
 
+  // 更新资料到 users 表（服务端只接受白名单字段，不会改 role / classId）
+  cloudUpdateProfile(payload) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud.callFunction({ name: 'updateProfile', data: payload }).then(
+      (res) => (res && res.result) || {}
+    );
+  },
+
   // 老师创建班级
   cloudCreateClass(payload) {
     if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
@@ -198,7 +206,8 @@ App({
       .then((res) => (res && res.result) || {});
   },
 
-  // ---------- 用户资料：默认值（本地缓存，用于个性化展示） ----------
+  // ---------- 用户资料：本地缓存只负责展示，真实资料以云端 users 表为准 ----------
+  // 注意：className 对学生只用于本地展示，学生真实班级由 joinClass 决定
   defaultProfile(role) {
     if (role === 'student') {
       return {

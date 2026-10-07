@@ -91,6 +91,8 @@ Page({
     }
     const db = wx.cloud.database();
     this._lastText = '';
+    // 首次快照只是"当前状态"（含进入页面前就存在的旧广播），不能当成新消息朗读；再点「重播」即可
+    this._speakReady = false;
     this.setData({ status: '正在连接…' });
     this._watcher = db
       .collection('broadcasts')
@@ -104,6 +106,14 @@ Page({
             status: '已连接 · ' + (this.data.className || '')
           });
           const doc = snapshot.docs && snapshot.docs[0];
+          if (!this._speakReady) {
+            this._speakReady = true;
+            if (doc && doc.text) {
+              this._lastText = doc.text;
+              this.setData({ text: doc.text });
+            }
+            return;
+          }
           if (doc && doc.text && doc.text !== this._lastText) {
             this._lastText = doc.text;
             this.setData({ text: doc.text });

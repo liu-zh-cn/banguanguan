@@ -1,12 +1,5 @@
 const app = getApp();
 
-function genCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let s = '';
-  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
-  return s;
-}
-
 Page({
   data: {
     grades: [
@@ -19,15 +12,11 @@ Page({
     teacher: '',
     count: '',
     motto: '',
-    inviteCode: '',
     myClasses: []
   },
 
   onLoad() {
-    this.setData({
-      teacher: app.getProfile('teacher').name,
-      inviteCode: genCode()
-    });
+    this.setData({ teacher: app.getProfile('teacher').name });
   },
 
   onShow() {
@@ -40,10 +29,6 @@ Page({
 
   onGrade(e) {
     this.setData({ gradeIndex: Number(e.detail.value) });
-  },
-
-  refreshCode() {
-    this.setData({ inviteCode: genCode() });
   },
 
   submit() {
@@ -75,14 +60,9 @@ Page({
         wx.setStorageSync('myClasses', list);
         app.globalData.classId = res.classId;
         app.globalData.className = fullName;
-        this.setData({
-          myClasses: list,
-          name: '',
-          count: '',
-          motto: '',
-          inviteCode: res.inviteCode
-        });
-        wx.showToast({ title: '班级创建成功', icon: 'success' });
+        this.setData({ myClasses: list, name: '', count: '', motto: '' });
+        // 邀请码由服务端生成，创建成功后才存在，这里直接告诉老师真实的那个
+        this.showInviteCode(fullName, res.inviteCode);
       })
       .catch((err) => {
         wx.hideLoading();
@@ -91,8 +71,26 @@ Page({
       });
   },
 
+  // 创建成功后弹出真正的邀请码，可直接复制
+  showInviteCode(className, code) {
+    if (!code) {
+      wx.showToast({ title: '班级创建成功', icon: 'success' });
+      return;
+    }
+    wx.showModal({
+      title: className + ' 创建成功',
+      content: '班级邀请码：' + code + '\n让学生注册或「加入班级」时填写',
+      confirmText: '复制邀请码',
+      cancelText: '知道了',
+      success: (res) => {
+        if (res.confirm) wx.setClipboardData({ data: code });
+      }
+    });
+  },
+
   copyCode(e) {
     const code = e.currentTarget.dataset.code;
+    if (!code) return;
     wx.setClipboardData({ data: code });
   },
 

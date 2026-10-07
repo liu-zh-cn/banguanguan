@@ -3,7 +3,19 @@ const app = getApp();
 Page({
   data: {
     role: 'teacher',
-    logging: false
+    logging: false,
+    // 体验登录（不校验身份）只在开发版/体验版展示，正式版不给入口
+    isDemoEnv: true
+  },
+
+  onLoad() {
+    let env = 'develop';
+    try {
+      env = (wx.getAccountInfoSync() || {}).miniProgram.envVersion || 'develop';
+    } catch (e) {
+      // 取不到就按开发环境处理，避免影响本地调试
+    }
+    this.setData({ isDemoEnv: env !== 'release' });
   },
 
   setRole(e) {
@@ -57,8 +69,12 @@ Page({
       });
   },
 
-  // 本地体验登录（不依赖云，使用演示资料）
+  // 本地体验登录（不依赖云，使用演示资料）；正式版已隐藏入口，这里再兜一道
   quickDemo() {
+    if (!this.data.isDemoEnv) {
+      wx.showToast({ title: '请使用微信一键登录', icon: 'none' });
+      return;
+    }
     this.enter(this.data.role);
   },
 

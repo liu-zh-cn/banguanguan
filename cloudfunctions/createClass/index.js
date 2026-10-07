@@ -1,13 +1,25 @@
-// 云函数：createClass —— 老师创建班级，生成邀请码，并把班级绑定到该老师
+// 云函数：createClass —— 老师创建班级，生成唯一邀请码，并把班级绑定到该老师
 const cloud = require('wx-server-sdk');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 去掉易混的 I O 0 1
+const MAX_RETRY = 4;
+
 function genCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let s = '';
-  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 6; i++) s += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
   return s;
+}
+
+// 生成一个库里没被占用的邀请码；撞码会导致两个班共用一个码，这里必须查重
+async function genUniqueCode() {
+  for (let attempt = 0; attempt < MAX_RETRY; attempt++) {
+    const code = genCode();
+    const dup = await db.collection('classes').where({ inviteCode: code }).limit(1).get();
+    if (!dup.data.length) return code;
+  }
+  throw new Error('invite-code-collision');
 }
 
 exports.main = async (event) => {
@@ -17,7 +29,13 @@ exports.main = async (event) => {
   const { name, grade, motto, studentCount } = event;
   if (!name) return { ok: false, msg: '班级名称不能为空' };
 
-  const inviteCode = genCode();
+  let inviteCode = '';
+  try {
+    inviteCode = await genUniqueCode();
+  } catch (e) {
+    return { ok: false, msg: '邀请码生成失败，请重试' };
+  }
+
   const add = await db.collection('classes').add({
     data: {
       name,

@@ -38,6 +38,8 @@ exports.main = async () => {
         });
       });
       e.avg = cnt ? Number((sum / cnt).toFixed(1)) : 0;
+      // 录了几条分数。前端不能靠 avg 判断"有没有录成绩"：平均分就是 0 分时会被误判
+      e.scoreCount = cnt;
     });
   }
 
