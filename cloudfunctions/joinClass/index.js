@@ -29,7 +29,8 @@ exports.main = async (event) => {
   const user = u.data[0];
 
   // 已在该班，直接返回，不重复计数
-  if (user.classId === cls._id) {
+  const oldClassId = user.classId || '';
+  if (oldClassId === cls._id) {
     return { ok: true, classId: cls._id, className: cls.name };
   }
 
@@ -39,6 +40,14 @@ exports.main = async (event) => {
   await db.collection('classes').doc(cls._id).update({
     data: { studentCount: _.inc(1) }
   });
+  // 换班时旧班人数要减回去，否则 studentCount 只增不减、越用越虚
+  if (oldClassId) {
+    await db
+      .collection('classes')
+      .doc(oldClassId)
+      .update({ data: { studentCount: _.inc(-1) } })
+      .catch(() => null); // 旧班可能已被删除，不阻断加入流程
+  }
 
   return { ok: true, classId: cls._id, className: cls.name };
 };

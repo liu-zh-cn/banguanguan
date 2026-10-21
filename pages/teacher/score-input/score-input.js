@@ -88,29 +88,39 @@ Page({
     const fullScore = this.data.fullScore || 100;
 
     // 先在前端拦一道，把「哪个学生超了多少分」说清楚；云函数里还会再校验一次
-    const valid = [];
+    // 空值不是"跳过"，而是"清空该科目分数"——录错了要能删掉
+    const items = [];
     for (let i = 0; i < rows.length; i++) {
-      const raw = String(rows[i].val).trim();
-      if (raw === '') continue;
+      const row = rows[i];
+      const raw = String(row.val).trim();
+      const prev = this._scores[row.openid] || {};
+      const had = typeof prev[subject] === 'number';
+
+      if (raw === '') {
+        if (had) items.push({ openid: row.openid, name: row.name, score: null });
+        continue;
+      }
+
       const n = Number(raw);
       if (isNaN(n) || n < 0 || n > fullScore) {
         wx.showToast({
-          title: (rows[i].name || '某位同学') + ' 的分数需在 0–' + fullScore + ' 之间',
+          title: (row.name || '某位同学') + ' 的分数需在 0–' + fullScore + ' 之间',
           icon: 'none'
         });
         return;
       }
-      valid.push({ openid: rows[i].openid, name: rows[i].name, score: n });
+      items.push({ openid: row.openid, name: row.name, score: n });
     }
 
-    if (!valid.length) {
-      wx.showToast({ title: '请至少录入一个成绩', icon: 'none' });
+    if (!items.length) {
+      wx.showToast({ title: '没有需要保存的改动', icon: 'none' });
       return;
     }
+
     this.setData({ saving: true });
     wx.showLoading({ title: '保存中' });
     app
-      .cloudInputScores({ examId, subject, items: valid })
+      .cloudInputScores({ examId, subject, items })
       .then((r) => {
         wx.hideLoading();
         this.setData({ saving: false });
@@ -118,12 +128,21 @@ Page({
           wx.showToast({ title: r.msg || '保存失败', icon: 'none' });
           return;
         }
-        // 同步到本地缓存，切科目再回来不丢
-        valid.forEach((it) => {
+        // 同步到本地缓存，切科目再回来不丢；被清空的科目要从缓存里删掉
+        items.forEach((it) => {
           this._scores[it.openid] = this._scores[it.openid] || {};
-          this._scores[it.openid][subject] = it.score;
+          if (it.score === null) {
+            delete this._scores[it.openid][subject];
+          } else {
+            this._scores[it.openid][subject] = it.score;
+          }
         });
-        wx.showToast({ title: '已保存 ' + r.saved + ' 条', icon: 'success' });
+        const saved = r.saved || 0;
+        const cleared = r.cleared || 0;
+        let msg = '已保存 ' + saved + ' 条';
+        if (cleared) msg += '，清除 ' + cleared + ' 条';
+        wx.showToast({ title: msg, icon: 'success' });
+        this.buildRows();
       })
       .catch(() => {
         wx.hideLoading();

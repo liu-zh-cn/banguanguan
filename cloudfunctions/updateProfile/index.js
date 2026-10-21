@@ -26,20 +26,25 @@ exports.main = async (event) => {
   // 与 register 保持一致：缺 role 的老记录按老师处理
   const role = user.role || 'teacher';
 
-  // 手机号选填，填了就要合法
+  // 手机号选填。传了非空值就要合法；传空字符串表示"删除该信息"，允许
   const phone = clean(event.phone);
   if (phone && !/^1\d{10}$/.test(phone)) return { ok: false, msg: '手机号格式不正确' };
 
   const name = clean(event.name);
   if (!name) return { ok: false, msg: '姓名不能为空' };
 
+  // 关键：区分「没传这个字段」和「传了空字符串」
+  //   没传     → 保持原值，不动（兼容老版本前端、避免误删）
+  //   传空字符串 → 明确要求删除该信息（隐私政策承诺的"用户可自行修改或删除"）
+  const has = (k) => Object.prototype.hasOwnProperty.call(event, k);
+
   const allow = ROLE_FIELDS[role] || ROLE_FIELDS.student;
   const data = { updatedAt: db.serverDate() };
   allow.forEach((k) => {
-    const v = k === 'name' ? name : clean(event[k]);
-    if (v) data[k] = v;
+    if (!has(k)) return;
+    // 姓名已在上面校验过非空，其余字段允许写空字符串以清空
+    data[k] = k === 'name' ? name : clean(event[k]);
   });
-  if (phone) data.phone = phone;
 
   await db.collection('users').doc(user._id).update({ data });
 

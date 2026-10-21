@@ -22,6 +22,8 @@ Page({
   },
 
   onUnload() {
+    // 标记已卸载：tts 是异步的，回来时页面可能已经销毁，不能再 setData
+    this._unloaded = true;
     this.closeWatch();
     if (this._audio) this._audio.destroy();
   },
@@ -139,10 +141,12 @@ Page({
 
   // 调 tts 云函数拿到音频并播放
   speak(text) {
+    if (this._unloaded) return;
     this.setData({ speaking: true });
     wx.cloud
       .callFunction({ name: 'tts', data: { text } })
       .then((res) => {
+        if (this._unloaded) return; // 页面已退出，丢弃结果
         const r = (res && res.result) || {};
         if (!r.ok || !r.fileID) {
           this.setData({ speaking: false });
@@ -157,7 +161,9 @@ Page({
         audio.play();
         this._audio = audio;
       })
-      .catch(() => this.setData({ speaking: false }));
+      .catch(() => {
+        if (!this._unloaded) this.setData({ speaking: false });
+      });
   },
 
   replay() {

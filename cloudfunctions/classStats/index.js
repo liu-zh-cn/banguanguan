@@ -33,12 +33,17 @@ exports.main = async () => {
     dist: { items: [] },
     radar: { labels: [], values: [], max: 100 },
     fullScore: 100,
+    excellentLine: 90,
+    passLine: 60,
+    goodLine: 80,
     studentLatest: {}
   };
   if (!classId) return empty;
 
-  const ex = await db.collection('exams').where({ classId }).orderBy('ts', 'asc').limit(50).get();
-  const exams = ex.data || [];
+  // 取最近的 50 场考试：必须 desc 取再反转。
+  // 直接 asc + limit(50) 会拿到最早的 50 场，考试超过 50 场后「最近一次」永远是第 50 场
+  const ex = await db.collection('exams').where({ classId }).orderBy('ts', 'desc').limit(50).get();
+  const exams = (ex.data || []).reverse(); // 反转回升序，供趋势图按下标画
   if (!exams.length) return empty;
 
   const sc = await db.collection('scores').where({ classId }).limit(5000).get();
@@ -125,6 +130,9 @@ exports.main = async () => {
     dist,
     radar: subjectAvg, // 各科均分雷达（与柱状图同源）
     fullScore,
+    excellentLine,
+    passLine,
+    goodLine,
     studentLatest
   };
 };

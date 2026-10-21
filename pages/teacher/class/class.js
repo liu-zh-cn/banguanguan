@@ -39,10 +39,16 @@ Page({
       })
       .then((r) => {
         const map = (r && r.studentLatest) || {};
+        // 分数线跟着试卷满分走：150 分卷的及格线是 90、优秀线是 135，
+        // 不能写死 60/90，否则 150 分卷会把 90 分标成优秀、把 90 分标成不及格
+        const passLine = Number(r && r.passLine) > 0 ? Number(r.passLine) : 60;
+        const excellentLine = Number(r && r.excellentLine) > 0 ? Number(r.excellentLine) : 90;
+        this._passLine = passLine;
+        this._excellentLine = excellentLine;
         const all = this.data.all.map((s) => {
           const v = map[s.openid];
           if (typeof v !== 'number') return s;
-          return { ...s, score: v, scoreText: v, warn: v < 60 };
+          return { ...s, score: v, scoreText: v, warn: v < passLine };
         });
         this.setData({ all });
         this.applyFilter();
@@ -62,9 +68,12 @@ Page({
 
   applyFilter() {
     const { all, keyword, filter } = this.data;
+    const excellentLine = this._excellentLine || 90;
     let list = all;
     if (filter === 'warn') list = list.filter((s) => s.warn);
-    if (filter === 'excellent') list = list.filter((s) => typeof s.score === 'number' && s.score >= 90);
+    if (filter === 'excellent') {
+      list = list.filter((s) => typeof s.score === 'number' && s.score >= excellentLine);
+    }
     if (keyword) list = list.filter((s) => s.name.indexOf(keyword) > -1);
     this.setData({ list });
   },

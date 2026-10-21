@@ -1,7 +1,8 @@
-// 云函数：inputScores —— 老师录入某一科目的成绩（按 学生openid 逐条 upsert）
+// 云函数：inputScores —— 老师录入某一科目的成绩（按 学生openid 逐条 upsert / 清空）
 const cloud = require('wx-server-sdk');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
+const _ = db.command;
 
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
@@ -29,11 +30,30 @@ exports.main = async (event) => {
   });
 
   let saved = 0;
+  let cleared = 0;
   for (const it of items) {
     const openid = it && it.openid;
-    const score = Number(it && it.score);
-    if (!openid || isNaN(score) || score < 0 || score > fullScore) continue;
+    if (!openid) continue;
     const doc = byOpenid[openid];
+    const raw = it.score;
+
+    // 空值 = 老师主动清空这位同学该科目的分数（录错了要能删）
+    const isEmpty = raw === null || raw === undefined || raw === '';
+    if (isEmpty) {
+      if (!doc) continue; // 本来就没录，无需处理
+      await db.collection('scores').doc(doc._id).update({
+        data: {
+          ['scores.' + subject]: _.remove(),
+          updatedAt: db.serverDate(),
+          ts: Date.now()
+        }
+      });
+      cleared++;
+      continue;
+    }
+
+    const score = Number(raw);
+    if (isNaN(score) || score < 0 || score > fullScore) continue;
     if (doc) {
       await db.collection('scores').doc(doc._id).update({
         data: {
@@ -58,5 +78,5 @@ exports.main = async (event) => {
     }
     saved++;
   }
-  return { ok: true, saved };
+  return { ok: true, saved, cleared };
 };
