@@ -59,9 +59,14 @@
       </view>
     </block>
 
-    <view class="f-row">
+    <!-- 老师可改班级名（会同步 classes 集合）；学生的班级由邀请码决定，只读 -->
+    <view class="f-row" wx:if="{{role === 'teacher'}}">
       <text class="f-label">所在班级</text>
       <input class="f-input" data-field="className" value="{{profile.className}}" bindinput="onInput" placeholder="如：高三(2)班" />
+    </view>
+    <view class="f-row" wx:else>
+      <text class="f-label">所在班级</text>
+      <view class="f-input f-picker">{{profile.className || '未加入班级'}}</view>
     </view>
 
     <view class="f-row column">

@@ -14,13 +14,27 @@ exports.main = async () => {
   let students = [];
   if (user && user.classId) {
     const c = await db.collection('classes').doc(user.classId).get().catch(() => null);
-    cls = c && c.data ? c.data : null;
-    const s = await db
-      .collection('users')
-      .where({ classId: user.classId, role: 'student' })
-      .limit(200)
-      .get();
-    students = s.data || [];
+    const raw = (c && c.data) || null;
+    if (raw) {
+      cls = { ...raw };
+      // 邀请码 / 创建者 openid 只对老师下发。
+      // 学生拿到邀请码等于能无限拉人进班，拿到 ownerOpenid 也没有任何用处。
+      if (user.role !== 'teacher') {
+        delete cls.inviteCode;
+        delete cls.ownerOpenid;
+      }
+    }
+
+    // 学生名单含全班同学的 openid / 姓名 / 学号 / 电话，只下发给老师。
+    // 学生端只需要 class.name 和 user，拿到名单属于越权读取他人信息。
+    if (user.role === 'teacher') {
+      const s = await db
+        .collection('users')
+        .where({ classId: user.classId, role: 'student' })
+        .limit(200)
+        .get();
+      students = s.data || [];
+    }
   }
 
   return { ok: true, user, class: cls, students };

@@ -46,9 +46,14 @@ function fetchAudio(url, depth, info) {
   });
 }
 
+const MAX_TEXT_LEN = 200; // 大屏广播一句话通常不到 50 字，200 字足够，防止被刷成超长合成
+
 exports.main = async (event) => {
   const text = (event.text || '').trim();
   if (!text) return { ok: false, msg: '空文本' };
+  if (text.length > MAX_TEXT_LEN) {
+    return { ok: false, msg: '文本过长（最多 ' + MAX_TEXT_LEN + ' 字）' };
+  }
 
   try {
     const url =
