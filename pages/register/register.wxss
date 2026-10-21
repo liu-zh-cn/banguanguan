@@ -80,5 +80,14 @@
 .submit { margin-top: 10rpx; }
 .to-login { text-align: center; font-size: 26rpx; color: #8A90A2; margin-top: 30rpx; }
 
-.wx-note { display: flex; align-items: center; gap: 8rpx; font-size: 22rpx; margin: 8rpx 0 30rpx; }
+.wx-note { display: flex; align-items: center; gap: 8rpx; font-size: 22rpx; margin: 8rpx 0 24rpx; }
 .wx-note-text { flex: 1; line-height: 1.5; }
+
+/* 隐私政策 / 用户服务协议入口（审核要求） */
+.pp-agree {
+  font-size: 22rpx;
+  color: #8A90A2;
+  line-height: 1.7;
+  margin-bottom: 28rpx;
+}
+.pp-link { color: #5B7CFF; font-weight: 600; }

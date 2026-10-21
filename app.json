@@ -5,6 +5,7 @@
     "pages/register/register",
     "pages/edit-profile/edit-profile",
     "pages/setting/setting",
+    "pages/privacy/privacy",
     "pages/create-class/create-class",
     "pages/teacher/stats/stats",
     "pages/teacher/class/class",

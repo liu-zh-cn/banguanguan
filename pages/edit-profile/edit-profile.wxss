@@ -34,6 +34,38 @@
 .f-picker { text-align: right; color: #8A90A2; }
 .f-textarea { width: 100%; height: 120rpx; font-size: 28rpx; }
 
+/* 手机号授权同意区（审核要求：收集个人信息前须取得同意） */
+.f-consent {
+  padding: 24rpx 0 28rpx;
+  border-bottom: 2rpx solid #F2F3F7;
+}
+.f-consent-main {
+  display: flex;
+  align-items: flex-start;
+}
+.f-switch {
+  transform: scale(0.85);
+  transform-origin: left center;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+.f-consent-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #1F2430;
+  line-height: 1.6;
+  padding-top: 4rpx;
+}
+.f-consent-links { margin-top: 6rpx; }
+.pp-link { color: #5B7CFF; font-weight: 600; }
+.pp-sep { color: #C6CAD6; margin: 0 6rpx; }
+.f-consent-tip {
+  font-size: 22rpx;
+  line-height: 1.6;
+  margin-top: 12rpx;
+  padding-left: 4rpx;
+}
+
 .save-bar {
   position: fixed;
   left: 0;

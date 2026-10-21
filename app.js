@@ -31,6 +31,33 @@ App({
     wx.setStorageSync('role', role);
   },
 
+  // ---------- 隐私授权：手机号等个人信息需用户主动同意 ----------
+  // 说明：本小程序不调用任何微信用户信息接口，手机号为用户在页面手动输入。
+  // 按《个人信息保护法》与微信审核要求，收集前须明确告知并取得同意。
+  hasPhoneConsent() {
+    try {
+      return wx.getStorageSync('phoneConsent') === true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  setPhoneConsent(ok) {
+    try {
+      wx.setStorageSync('phoneConsent', !!ok);
+    } catch (e) {
+      // 存储失败不影响主流程，仅退化为每次都要重新同意
+    }
+    this.globalData.phoneConsent = !!ok;
+  },
+
+  // 打开《隐私政策》或《用户服务协议》
+  openPrivacy(tab) {
+    wx.navigateTo({
+      url: '/pages/privacy/privacy' + (tab === 'agreement' ? '?tab=agreement' : '')
+    });
+  },
+
   // ---------- 云开发：登录 / 注册 ----------
   // 调 login 云函数拿 openid，并查询该微信是否已注册
   cloudLogin() {

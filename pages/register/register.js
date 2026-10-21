@@ -112,5 +112,11 @@ Page({
 
   goLogin() {
     wx.redirectTo({ url: '/pages/login/login' });
+  },
+
+  // 查看隐私政策 / 用户服务协议
+  openPrivacy(e) {
+    const tab = e.currentTarget.dataset.tab;
+    app.openPrivacy(tab);
   }
 });

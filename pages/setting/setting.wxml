@@ -32,6 +32,12 @@
     <view class="s-item" bindtap="about">
       <text class="s-ico">ℹ️</text><text class="s-label">关于班管管</text><text class="s-arrow">›</text>
     </view>
+    <view class="s-item" bindtap="goPrivacy">
+      <text class="s-ico">🔒</text><text class="s-label">隐私政策</text><text class="s-arrow">›</text>
+    </view>
+    <view class="s-item" bindtap="goAgreement">
+      <text class="s-ico">📄</text><text class="s-label">用户服务协议</text><text class="s-arrow">›</text>
+    </view>
   </view>
 
   <view class="card">

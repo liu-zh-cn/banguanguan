@@ -5,16 +5,20 @@ Page({
     role: 'teacher',
     genders: ['男', '女'],
     genderIndex: 0,
-    profile: {}
+    profile: {},
+    // 手机号为个人信息，收集前须用户主动同意（审核要求）
+    phoneAgree: false
   },
 
   onLoad(options) {
     const role = options.role || wx.getStorageSync('role') || 'teacher';
     const profile = app.getProfile(role);
+    const agree = app.hasPhoneConsent();
     this.setData({
       role,
       profile,
-      genderIndex: profile.gender === '女' ? 1 : 0
+      genderIndex: profile.gender === '女' ? 1 : 0,
+      phoneAgree: agree
     });
     wx.setNavigationBarTitle({ title: '编辑资料' });
   },
@@ -29,6 +33,19 @@ Page({
     this.setData({ genderIndex: idx, 'profile.gender': this.data.genders[idx] });
   },
 
+  // 同意 / 撤回同意保存手机号
+  onPhoneAgree(e) {
+    this.setData({ phoneAgree: !!e.detail.value });
+    if (!e.detail.value) {
+      wx.showToast({ title: '已撤回手机号授权', icon: 'none' });
+    }
+  },
+
+  openPrivacy(e) {
+    const tab = e.currentTarget.dataset.tab;
+    app.openPrivacy(tab);
+  },
+
   save() {
     const p = this.data.profile;
     const name = (p.name || '').trim();
@@ -36,14 +53,46 @@ Page({
       wx.showToast({ title: '请填写姓名', icon: 'none' });
       return;
     }
+
     const phone = (p.phone || '').trim();
+    const agree = !!this.data.phoneAgree;
+
+    // 手机号：格式校验
     if (phone && !/^1\d{10}$/.test(phone)) {
       wx.showToast({ title: '手机号格式不正确', icon: 'none' });
       return;
     }
+
+    // 手机号：未同意不收集。填了但没勾选 → 引导去勾选，不静默丢弃
+    if (phone && !agree) {
+      wx.showModal({
+        title: '需要你的同意',
+        content: '手机号为个人信息。保存前请先阅读《隐私政策》并打开「我同意」开关，否则本次不会保存手机号。',
+        confirmText: '去勾选',
+        cancelText: '不保存手机号',
+        success: (res) => {
+          if (res.confirm) return;
+          // 用户选择不保存手机号 → 丢弃号段，仅存其他资料
+          this.doSave(name, '', agree);
+        }
+      });
+      return;
+    }
+
+    this.doSave(name, phone, agree);
+  },
+
+  // 实际提交。phone 传空字符串 = 用户不同意/选择不保存，此时云端手机号会被清空（撤回同意的结果）
+  doSave(name, phone, agree) {
+    const p = this.data.profile;
+
     // 本地立刻更新，界面不掉帧
     const next = Object.assign({}, p, { name, phone });
     this.setData({ profile: next });
+
+    // 记录本次同意状态：不勾选则下次进入也不自动回填为"已同意"
+    app.setPhoneConsent(agree);
+
     app.saveProfile(this.data.role, next);
 
     // 同步到云端 users 表，失败要明确告诉用户，不能假装成功
