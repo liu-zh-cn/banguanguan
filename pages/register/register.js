@@ -8,7 +8,9 @@ Page({
     subject: '',
     studentNo: '',
     inviteCode: '',
-    submitting: false
+    submitting: false,
+    // 个人信息处理同意（必选）：未成年人还需监护人同意
+    guardianOk: false
   },
 
   onLoad(options) {
@@ -25,9 +27,14 @@ Page({
     this.setData({ [e.currentTarget.dataset.field]: e.detail.value });
   },
 
+  toggleGuardian() {
+    this.setData({ guardianOk: !this.data.guardianOk });
+  },
+
   submit() {
-    const { role, name, className, subject, studentNo, submitting } = this.data;
+    const { role, name, className, subject, studentNo, submitting, guardianOk } = this.data;
     if (submitting) return;
+    if (!guardianOk) return this.warn('请先阅读并勾选同意《用户服务协议》与《隐私政策》');
     if (!name.trim()) return this.warn('请填写姓名');
     if (!className.trim()) return this.warn('请填写所在班级');
 

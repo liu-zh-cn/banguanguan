@@ -137,6 +137,14 @@ App({
       .then((res) => (res && res.result) || {});
   },
 
+  // 大屏凭邀请码取本班最新广播（不再直连 broadcasts 集合，避免全量可读）
+  cloudGetBroadcast(inviteCode) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'getBroadcast', data: { inviteCode } })
+      .then((res) => (res && res.result) || {});
+  },
+
   // ---------- 作业 ----------
   cloudAssignHomework(payload) {
     if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));

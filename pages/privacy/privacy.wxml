@@ -55,15 +55,16 @@
       </view>
       <view class="pp-tr">
         <view class="pp-td c1">手机号</view>
-        <view class="pp-td c2">编辑资料（需单独勾选同意）</view>
-        <view class="pp-td c3">老师与家长之间的班级事务联系</view>
+        <view class="pp-td c2">仅教师端 · 编辑资料（需单独勾选同意）</view>
+        <view class="pp-td c3">教师与家长之间的班级事务联系</view>
         <view class="pp-td c4">非必需</view>
       </view>
     </view>
 
     <view class="pp-h">三、手机号的收集与授权</view>
-    <view class="pp-p">手机号属于个人信息，我们仅在<b>你主动填写并明确勾选同意</b>后方会保存。若你不填写或不勾选，<b>不影响本小程序任何功能的使用</b>。你可以随时在「编辑资料」页修改或删除手机号。</view>
-    <view class="pp-p">我们不会调用微信的手机号快速验证（getPhoneNumber）能力，也不会从微信侧读取你的手机号，只保存你手动输入的内容。</view>
+    <view class="pp-p"><b>手机号仅面向教师收集。</b>学生端不提供手机号填写入口，也不会保存学生的手机号。</view>
+    <view class="pp-p">手机号属于个人信息，我们仅在教师<b>主动填写并明确勾选同意</b>后方会保存。若不填写或不勾选，<b>不影响本小程序任何功能的使用</b>。教师可随时在「编辑资料」页修改或删除手机号，关闭同意开关即撤回授权。</view>
+    <view class="pp-p">我们不会调用微信的手机号快速验证（getPhoneNumber）能力，也不会从微信侧读取任何手机号，只保存用户手动输入的内容。</view>
 
     <view class="pp-h">四、我们不收集的信息</view>
     <view class="pp-p">本小程序不收集你的身份证号、人脸、指纹、精确位置、通讯录、相册、银行卡、支付信息，也不读取你的微信昵称、头像。本小程序未使用 open-data 组件，未使用位置、相机、麦克风、相册相关接口。</view>

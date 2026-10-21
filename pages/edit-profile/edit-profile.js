@@ -54,8 +54,10 @@ Page({
       return;
     }
 
-    const phone = (p.phone || '').trim();
-    const agree = !!this.data.phoneAgree;
+    // 手机号只对老师收集；学生端不显示该字段，这里固定传空（云端白名单也会忽略）
+    const isTeacher = this.data.role === 'teacher';
+    const phone = isTeacher ? (p.phone || '').trim() : '';
+    const agree = isTeacher ? !!this.data.phoneAgree : false;
 
     // 手机号：格式校验
     if (phone && !/^1\d{10}$/.test(phone)) {
@@ -91,7 +93,7 @@ Page({
     this.setData({ profile: next });
 
     // 记录本次同意状态：不勾选则下次进入也不自动回填为"已同意"
-    app.setPhoneConsent(agree);
+    if (this.data.role === 'teacher') app.setPhoneConsent(agree);
 
     app.saveProfile(this.data.role, next);
 

@@ -4,9 +4,10 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 
 // 允许修改的字段：按角色区分，其余字段一律过滤，防止前端提权或改归属班级
+// 手机号只对老师开放：家长联系老师的场景才需要，学生手机号在本小程序里没有任何消费方
 const ROLE_FIELDS = {
   teacher: ['name', 'gender', 'phone', 'title', 'subject', 'signature', 'className'],
-  student: ['name', 'gender', 'phone', 'studentNo', 'signature']
+  student: ['name', 'gender', 'studentNo', 'signature']
 };
 
 const MAX_LEN = 200;
@@ -45,6 +46,9 @@ exports.main = async (event) => {
     // 姓名已在上面校验过非空，其余字段允许写空字符串以清空
     data[k] = k === 'name' ? name : clean(event[k]);
   });
+
+  // 学生不收集手机号（白名单里已移除）。老数据里若存过，借这次保存一并清掉
+  if (role === 'student') data.phone = '';
 
   await db.collection('users').doc(user._id).update({ data });
 

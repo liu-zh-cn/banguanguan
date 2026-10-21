@@ -1,3 +1,8 @@
+// 大屏页：凭邀请码轮询本班最新广播。
+// 为什么不用 db.watch：broadcasts 集合需要「所有用户可读」才能前端监听，
+// 那等于任何人都能读全部班级的广播。改走云函数后集合可收紧为「仅创建者可读写」。
+const POLL_MS = 5000; // 5 秒一轮；太密会吃云函数调用配额，5 秒对"请学生到办公室"够用
+
 Page({
   data: {
     bound: false,
@@ -13,18 +18,31 @@ Page({
   onLoad() {
     const classId = wx.getStorageSync('screen_classId') || '';
     const className = wx.getStorageSync('screen_className') || '';
-    if (classId) {
+    const inviteCode = wx.getStorageSync('screen_code') || '';
+    this._inviteCode = inviteCode;
+    if (classId && inviteCode) {
       this.setData({ bound: true, classId, className });
-      this.startWatch();
+    } else if (classId) {
+      // 老版本只存了 classId，没有邀请码就没法通过云函数校验，需要重新绑一次
+      this.setData({ status: '请重新输入邀请码完成绑定' });
     } else {
       this.setData({ status: '请绑定班级' });
     }
   },
 
+  onShow() {
+    if (this.data.bound) this.startPolling();
+  },
+
+  onHide() {
+    // 页面不可见时停掉，避免白烧调用次数
+    this.stopPolling();
+  },
+
   onUnload() {
     // 标记已卸载：tts 是异步的，回来时页面可能已经销毁，不能再 setData
     this._unloaded = true;
-    this.closeWatch();
+    this.stopPolling();
     if (this._audio) this._audio.destroy();
   },
 
@@ -47,9 +65,11 @@ Page({
           wx.showToast({ title: r.msg || '绑定失败', icon: 'none' });
           return;
         }
+        this._inviteCode = code.toUpperCase();
         wx.setStorageSync('screen_classId', r.classId);
         wx.setStorageSync('screen_className', r.className);
-        this.closeWatch();
+        wx.setStorageSync('screen_code', this._inviteCode);
+        this.stopPolling();
         this.setData({
           bound: true,
           classId: r.classId,
@@ -57,7 +77,7 @@ Page({
           text: '',
           code: ''
         });
-        this.startWatch();
+        this.startPolling();
       })
       .catch(() => {
         wx.hideLoading();
@@ -71,9 +91,11 @@ Page({
       content: '解除当前班级绑定？',
       success: (res) => {
         if (!res.confirm) return;
-        this.closeWatch();
+        this.stopPolling();
+        this._inviteCode = '';
         wx.removeStorageSync('screen_classId');
         wx.removeStorageSync('screen_className');
+        wx.removeStorageSync('screen_code');
         this.setData({
           bound: false,
           classId: '',
@@ -86,62 +108,71 @@ Page({
     });
   },
 
-  startWatch() {
-    if (!wx.cloud) {
-      this.setData({ status: '环境不支持云开发' });
-      return;
-    }
-    const db = wx.cloud.database();
-    this._lastText = '';
-    // 首次快照只是"当前状态"（含进入页面前就存在的旧广播），不能当成新消息朗读；再点「重播」即可
+  startPolling() {
+    if (this._timer) return;
+    if (!this._inviteCode) return;
+    this._polling = false;
+    // 首次拿到的是"当前状态"（可能含进页面之前就存在的旧广播），只显示不朗读；想听点「重播」
     this._speakReady = false;
+    this._lastTs = 0;
     this.setData({ status: '正在连接…' });
-    this._watcher = db
-      .collection('broadcasts')
-      .where({ classId: this.data.classId })
-      .orderBy('ts', 'desc')
-      .limit(1)
-      .watch({
-        onChange: (snapshot) => {
-          this.setData({
-            connected: true,
-            status: '已连接 · ' + (this.data.className || '')
-          });
-          const doc = snapshot.docs && snapshot.docs[0];
-          if (!this._speakReady) {
-            this._speakReady = true;
-            if (doc && doc.text) {
-              this._lastText = doc.text;
-              this.setData({ text: doc.text });
-            }
-            return;
-          }
-          if (doc && doc.text && doc.text !== this._lastText) {
-            this._lastText = doc.text;
-            this.setData({ text: doc.text });
-            this.speak(doc.text);
-          }
-        },
-        onError: (e) => {
-          console.error(e);
-          this.setData({
-            connected: false,
-            status: '监听中断：检查 broadcasts 集合权限（需所有人可读）'
-          });
-        }
-      });
+    this.poll();
+    this._timer = setInterval(() => this.poll(), POLL_MS);
   },
 
-  closeWatch() {
-    if (this._watcher) {
-      this._watcher.close();
-      this._watcher = null;
+  stopPolling() {
+    if (this._timer) {
+      clearInterval(this._timer);
+      this._timer = null;
     }
+  },
+
+  poll() {
+    if (this._unloaded || this._polling) return;
+    this._polling = true;
+    getApp()
+      .cloudGetBroadcast(this._inviteCode)
+      .then((r) => {
+        this._polling = false;
+        if (this._unloaded) return;
+        if (!r || !r.ok) {
+          this.setData({ connected: false, status: (r && r.msg) || '获取广播失败' });
+          return;
+        }
+        if (r.className && r.className !== this.data.className) {
+          wx.setStorageSync('screen_className', r.className);
+          this.setData({ className: r.className });
+        }
+        this.setData({
+          connected: true,
+          status: '已连接 · ' + (r.className || this.data.className || '')
+        });
+
+        const b = r.broadcast;
+        // 第一次轮询只记录当前状态：即使此时还没有广播，也算"已就绪"，
+        // 否则第一条广播会被当成首屏旧消息、只显示不朗读
+        if (!this._speakReady) {
+          this._speakReady = true;
+          this._lastTs = b ? b.ts || 0 : 0;
+          if (b) this.setData({ text: b.text || '' });
+          return;
+        }
+        if (b && b.ts && b.ts !== this._lastTs) {
+          this._lastTs = b.ts;
+          this.setData({ text: b.text || '' });
+          this.speak(b.text);
+        }
+      })
+      .catch(() => {
+        this._polling = false;
+        if (this._unloaded) return;
+        this.setData({ connected: false, status: '网络异常，重试中…' });
+      });
   },
 
   // 调 tts 云函数拿到音频并播放
   speak(text) {
-    if (this._unloaded) return;
+    if (this._unloaded || !text) return;
     this.setData({ speaking: true });
     wx.cloud
       .callFunction({ name: 'tts', data: { text } })
