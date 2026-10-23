@@ -17,8 +17,8 @@
   <!-- 筛选 -->
   <view class="filter-row">
     <view class="chip {{filter === 'all' ? 'chip--on' : ''}}" data-filter="all" bindtap="setFilter">全部</view>
-    <view class="chip {{filter === 'excellent' ? 'chip--on' : ''}}" data-filter="excellent" bindtap="setFilter">优秀</view>
-    <view class="chip {{filter === 'warn' ? 'chip--on' : ''}}" data-filter="warn" bindtap="setFilter">需关注</view>
+    <view class="chip {{filter === 'excellent' ? 'chip--on' : ''}}" data-filter="excellent" bindtap="setFilter">优秀 ≥{{excellentLine}}</view>
+    <view class="chip {{filter === 'warn' ? 'chip--on' : ''}}" data-filter="warn" bindtap="setFilter">低于 {{passLine}}</view>
   </view>
 
   <!-- 学生列表（点一下给 TA 写点评） -->

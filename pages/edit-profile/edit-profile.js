@@ -69,12 +69,13 @@ Page({
     if (phone && !agree) {
       wx.showModal({
         title: '需要你的同意',
-        content: '手机号为个人信息。保存前请先阅读《隐私政策》并打开「我同意」开关，否则本次不会保存手机号。',
+        content:
+          '手机号为个人信息。请先阅读《隐私政策》并打开「我同意」开关；选择「清除手机号」会删除已保存的手机号。',
         confirmText: '去勾选',
-        cancelText: '不保存手机号',
+        cancelText: '清除手机号',
         success: (res) => {
           if (res.confirm) return;
-          // 用户选择不保存手机号 → 丢弃号段，仅存其他资料
+          // 用户选择清除 → 手机号置空提交（撤回同意的结果）
           this.doSave(name, '', agree);
         }
       });

@@ -7,7 +7,7 @@
   <!-- ============ 隐私政策 ============ -->
   <view class="pp-card card" wx:if="{{tab === 'privacy'}}">
     <view class="pp-title">班管管隐私政策</view>
-    <view class="pp-meta muted">更新日期：2026 年 1 月 1 日　生效日期：2026 年 1 月 1 日</view>
+    <view class="pp-meta muted">更新日期：2026 年 10 月 23 日　生效日期：2026 年 10 月 23 日</view>
 
     <view class="pp-h">一、引言</view>
     <view class="pp-p">班管管（以下简称"本小程序"）是一款面向中小学班主任的班级内部管理工具，用于作业发布、成绩登记、班级统计与班级事务通知。我们深知个人信息对你的重要性，并会尽力保护你的个人信息安全可靠。本政策说明我们收集哪些信息、为何收集、如何保存，以及你享有的权利。</view>
@@ -104,7 +104,7 @@
   <!-- ============ 用户服务协议 ============ -->
   <view class="pp-card card" wx:else>
     <view class="pp-title">班管管用户服务协议</view>
-    <view class="pp-meta muted">更新日期：2026 年 1 月 1 日　生效日期：2026 年 1 月 1 日</view>
+    <view class="pp-meta muted">更新日期：2026 年 10 月 23 日　生效日期：2026 年 10 月 23 日</view>
 
     <view class="pp-h">一、协议范围</view>
     <view class="pp-p">本协议是你与班管管小程序开发者之间关于使用本小程序所订立的协议。本小程序是一款面向中小学班主任的班级内部管理工具，提供作业管理、成绩登记、班级统计与班级事务通知等功能。</view>

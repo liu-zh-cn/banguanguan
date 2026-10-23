@@ -48,7 +48,7 @@ exports.main = async (event) => {
   });
 
   // 学生不收集手机号（白名单里已移除）。老数据里若存过，借这次保存一并清掉
-  if (role === 'student') data.phone = '';
+  if (role === 'student' && user.phone) data.phone = '';
 
   await db.collection('users').doc(user._id).update({ data });
 

@@ -26,6 +26,14 @@ exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   if (!OPENID) return { ok: false, msg: '未登录' };
 
+  // 角色以服务端 users 表为准。
+  // 注意：原实现在建班后把当前用户写成 role:'teacher'，等于给了学生一条提权路径
+  //（前端无入口，但云函数可以被任意调用），这里必须先校验再建班。
+  const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
+  if (!u.data.length) return { ok: false, msg: '请先注册' };
+  const user = u.data[0];
+  if (user.role !== 'teacher') return { ok: false, msg: '仅老师可创建班级' };
+
   const { name, grade, motto, studentCount } = event;
   if (!name) return { ok: false, msg: '班级名称不能为空' };
 
@@ -43,18 +51,18 @@ exports.main = async (event) => {
       motto: motto || '',
       inviteCode,
       ownerOpenid: OPENID,
-      studentCount: Number(studentCount) || 0,
+      // studentCount 由 joinClass 递减/递增维护，是"实际加入人数"；
+      // 老师建班时填的是"预计人数"，另存 expectedCount，两者不能混用
+      studentCount: 0,
+      expectedCount: Number(studentCount) || 0,
       createdAt: db.serverDate()
     }
   });
 
-  // 把班级绑定到当前老师
-  const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
-  if (u.data.length) {
-    await db.collection('users').doc(u.data[0]._id).update({
-      data: { classId: add._id, className: name, role: 'teacher' }
-    });
-  }
+  // 把班级绑定到当前老师；role 上面已校验为 teacher，这里不再改写
+  await db.collection('users').doc(user._id).update({
+    data: { classId: add._id, className: name }
+  });
 
   return { ok: true, classId: add._id, inviteCode, name };
 };

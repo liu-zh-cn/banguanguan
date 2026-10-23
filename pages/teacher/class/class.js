@@ -8,7 +8,10 @@ Page({
     list: [],
     keyword: '',
     filter: 'all',
-    className: '未设置班级'
+    className: '未设置班级',
+    // 分数线跟着试卷满分走，拿到 classStats 后再刷新
+    passLine: 60,
+    excellentLine: 90
   },
 
   onShow() {
@@ -45,6 +48,7 @@ Page({
         const excellentLine = Number(r && r.excellentLine) > 0 ? Number(r.excellentLine) : 90;
         this._passLine = passLine;
         this._excellentLine = excellentLine;
+        this.setData({ passLine, excellentLine });
         const all = this.data.all.map((s) => {
           const v = map[s.openid];
           if (typeof v !== 'number') return s;

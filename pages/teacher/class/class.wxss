@@ -22,6 +22,7 @@
 
 .filter-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 20rpx;
   padding: 28rpx 28rpx 4rpx;
 }

@@ -33,8 +33,15 @@ exports.main = async (event) => {
   };
 
   if (hasUser) {
-    await users.doc(exist.data[0]._id).update({ data });
-    return { ok: true, userId: exist.data[0]._id, role: finalRole, ...data };
+    // 已注册用户重复调 register 时，只覆盖本次确实填了值的字段。
+    // 否则表单里留空的 className / subject / studentNo 会把云端已存的值清掉
+    // （例如学生误入注册页再提交一次，班级名就被清空了）
+    const patch = { role: finalRole, name, updatedAt: db.serverDate() };
+    if (className) patch.className = className;
+    if (subject) patch.subject = subject;
+    if (studentNo) patch.studentNo = studentNo;
+    await users.doc(exist.data[0]._id).update({ data: patch });
+    return { ok: true, userId: exist.data[0]._id, role: finalRole, ...patch };
   }
 
   // 首次注册才写 openid 与创建时间

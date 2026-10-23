@@ -28,6 +28,11 @@ exports.main = async (event) => {
   if (!u.data.length) return { ok: false, msg: '请先注册' };
   const user = u.data[0];
 
+  // 老师误调「加入班级」不应被降级成学生，也不该覆盖他已管理的班级
+  if (user.role === 'teacher') {
+    return { ok: false, msg: '当前身份为老师，无需加入班级' };
+  }
+
   // 已在该班，直接返回，不重复计数
   const oldClassId = user.classId || '';
   if (oldClassId === cls._id) {
