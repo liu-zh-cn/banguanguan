@@ -15,14 +15,13 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 
 ## Screenshots
 
-<!-- How to add: WeChat DevTools → Simulator → camera icon (top-right) to export,
-     save into docs/screenshots/, then replace the placeholders below with real paths -->
+<!-- How to add: WeChat DevTools → Simulator → camera icon (top-right) to export, save into docs/screenshots/ -->
 
 | Teacher · Dashboard | Teacher · Class | Teacher · My Reviews |
 | :---: | :---: | :---: |
-| TODO | TODO | TODO |
+| ![Dashboard](docs/screenshots/teacher-stats.png) | ![Class](docs/screenshots/teacher-class.png) | ![My Reviews](docs/screenshots/teacher-reviews.png) |
 | **Student · Scores** | **Student · Reviews** | **Screen · Broadcast** |
-| TODO | TODO | TODO |
+| ![Scores](docs/screenshots/student-score.png) | ![Reviews](docs/screenshots/student-review.png) | ![Broadcast](docs/screenshots/screen-broadcast.png) |
 
 ## Features
 

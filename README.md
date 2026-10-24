@@ -13,14 +13,13 @@
 
 ## 截图预览
 
-<!-- 补充截图方法：微信开发者工具 → 模拟器 → 右上角相机图标导出图片，
-     保存到 docs/screenshots/ 目录，然后把下面的占位链接替换成真实路径即可 -->
+<!-- 截图方法：微信开发者工具 → 模拟器 → 右上角相机图标导出图片，放入 docs/screenshots/ -->
 
 | 老师端 · 数据看板 | 老师端 · 班级管理 | 老师端 · 我的点评 |
 | :---: | :---: | :---: |
-| 待补充 | 待补充 | 待补充 |
+| ![数据看板](docs/screenshots/teacher-stats.png) | ![班级管理](docs/screenshots/teacher-class.png) | ![我的点评](docs/screenshots/teacher-reviews.png) |
 | **学生端 · 我的成绩** | **学生端 · 老师点评** | **大屏 · 广播** |
-| 待补充 | 待补充 | 待补充 |
+| ![我的成绩](docs/screenshots/student-score.png) | ![老师点评](docs/screenshots/student-review.png) | ![大屏广播](docs/screenshots/screen-broadcast.png) |
 
 ## 功能一览
 
