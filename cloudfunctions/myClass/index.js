@@ -23,6 +23,16 @@ exports.main = async () => {
         delete cls.inviteCode;
         delete cls.ownerOpenid;
       }
+    } else {
+      // 班级已不存在（比如被直接在数据库里删除）：清理悬空的 classId / className，
+      // 否则各页面会一直显示这个已删除的"幽灵班级"
+      await db
+        .collection('users')
+        .doc(user._id)
+        .update({ data: { classId: '', className: '' } })
+        .catch(() => {});
+      user.classId = '';
+      user.className = '';
     }
 
     // 学生名单含全班同学的 openid / 姓名 / 学号 / 电话，只下发给老师。

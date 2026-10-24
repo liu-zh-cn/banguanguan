@@ -39,15 +39,15 @@
     <button class="btn-primary" bindtap="submit">创建班级</button>
   </view>
 
-  <!-- 我创建的班级 -->
-  <view class="card" wx:if="{{myClasses.length}}">
-    <view class="section-title">我创建的班级（{{myClasses.length}}）</view>
-    <view class="my-item" wx:for="{{myClasses}}" wx:key="id">
+  <!-- 我创建的班级：云端实时数据，班级删除 / 换账号后自动消失 -->
+  <view class="card" wx:if="{{myClass}}">
+    <view class="section-title">我创建的班级</view>
+    <view class="my-item">
       <view class="flex-1">
-        <view class="my-name">{{item.name}}</view>
-        <view class="muted">班主任 {{item.teacher}} · 邀请码 {{item.inviteCode || '—'}}</view>
+        <view class="my-name">{{myClass.name}}</view>
+        <view class="muted">班主任 {{myClass.teacher}} · 邀请码 {{myClass.inviteCode || '—'}}</view>
       </view>
-      <text class="code-link" wx:if="{{item.inviteCode}}" data-code="{{item.inviteCode}}" catchtap="copyCode">复制</text>
+      <text class="code-link" wx:if="{{myClass.inviteCode}}" data-code="{{myClass.inviteCode}}" catchtap="copyCode">复制</text>
     </view>
   </view>
 </view>

@@ -133,6 +133,8 @@ Page({
         if (res.confirm) {
           wx.removeStorageSync('role');
           wx.removeStorageSync('openid');
+          // 本机遗留的班级缓存是设备级的，不清会串到下一个登录的账号
+          wx.removeStorageSync('myClasses');
           app.globalData.openid = '';
           app.globalData.userInfo = null;
           wx.reLaunch({ url: '/pages/index/index' });

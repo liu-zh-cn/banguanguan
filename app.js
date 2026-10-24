@@ -292,17 +292,5 @@ App({
       this.globalData.teacherName = profile.name;
       this.globalData.className = profile.className;
     }
-  },
-
-  // ---------- 我创建的班级 ----------
-  getClasses() {
-    return wx.getStorageSync('myClasses') || [];
-  },
-
-  addClass(item) {
-    const list = this.getClasses();
-    list.unshift(item);
-    wx.setStorageSync('myClasses', list);
-    return list;
   }
 });

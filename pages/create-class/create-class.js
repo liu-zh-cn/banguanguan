@@ -12,7 +12,8 @@ Page({
     teacher: '',
     count: '',
     motto: '',
-    myClasses: []
+    // 当前绑定的班级（以云端为准；本机缓存会残留已删除的班级、也区分不了切换的账号）
+    myClass: null
   },
 
   onLoad() {
@@ -20,7 +21,27 @@ Page({
   },
 
   onShow() {
-    this.setData({ myClasses: app.getClasses() });
+    this.syncMyClass();
+  },
+
+  // 拉取当前账号真实绑定的班级：班级被删 / 换账号后，这里自然就空了
+  syncMyClass() {
+    app
+      .cloudMyClass()
+      .then((r) => {
+        if (!r || !r.ok || !r.class) {
+          this.setData({ myClass: null });
+          return;
+        }
+        this.setData({
+          myClass: {
+            name: r.class.name || '未命名班级',
+            inviteCode: r.class.inviteCode || '',
+            teacher: (r.user && r.user.name) || ''
+          }
+        });
+      })
+      .catch(() => {});
   },
 
   onInput(e) {
@@ -69,20 +90,19 @@ Page({
           return;
         }
         if (!res.ok) return this.warn(res.msg || '创建失败');
-        // 本地留一份用于列表展示（真实数据在云端 classes 集合）
-        const list = app.getClasses().concat([{
-          id: Date.now(),
-          name: fullName,
-          grade: grades[gradeIndex],
-          teacher: teacher.trim(),
-          count: count || 0,
-          motto: motto.trim(),
-          inviteCode: res.inviteCode
-        }]);
-        wx.setStorageSync('myClasses', list);
+        // 直接用服务端返回的结果展示，不再写本机缓存
+        this.setData({
+          myClass: {
+            name: fullName,
+            inviteCode: res.inviteCode || '',
+            teacher: teacher.trim()
+          },
+          name: '',
+          count: '',
+          motto: ''
+        });
         app.globalData.classId = res.classId;
         app.globalData.className = fullName;
-        this.setData({ myClasses: list, name: '', count: '', motto: '' });
         // 邀请码由服务端生成，创建成功后才存在，这里直接告诉老师真实的那个
         this.showInviteCode(fullName, res.inviteCode);
       })
