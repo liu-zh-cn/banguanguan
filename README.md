@@ -215,3 +215,6 @@ E-MAIL：liu20250115@outlook.com
 ## License
 
 [MIT](LICENSE) © 2026 Timmy Liu
+
+本项目由未成年作者独立开发，经其法定监护人同意后以 MIT 许可证发布。
+Released with the consent of the author's legal guardian.
