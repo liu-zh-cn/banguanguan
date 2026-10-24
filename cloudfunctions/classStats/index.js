@@ -2,6 +2,7 @@
 const cloud = require('wx-server-sdk');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
+const _ = db.command;
 
 function mean(arr) {
   if (!arr.length) return 0;
@@ -46,8 +47,19 @@ exports.main = async () => {
   const exams = (ex.data || []).reverse(); // 反转回升序，供趋势图按下标画
   if (!exams.length) return empty;
 
-  const sc = await db.collection('scores').where({ classId }).limit(5000).get();
-  const docs = sc.data || [];
+  // 拉这 50 场考试的成绩。注意：云函数单次 get 平台硬上限 1000 条，
+  // 之前的 limit(5000) 实际只拿到无排序的前 1000 条（老考试整段消失且无报错），
+  // 改为按考试 id 分批拉全：每批 4 场 × 每场 ≤200 名学生 ≈ 800 条，留出余量
+  const examIds = exams.map((e) => e._id);
+  const docs = [];
+  for (let i = 0; i < examIds.length; i += 4) {
+    const part = await db
+      .collection('scores')
+      .where({ examId: _.in(examIds.slice(i, i + 4)) })
+      .limit(1000)
+      .get();
+    (part.data || []).forEach((d) => docs.push(d));
+  }
   if (!docs.length) return empty;
 
   // 按考试分组

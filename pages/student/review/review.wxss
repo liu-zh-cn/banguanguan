@@ -32,4 +32,29 @@
   border-radius: 999rpx;
 }
 
+/* 学生回复老师的内容：右对齐气泡，与点评正文区分开 */
+.rv-reply {
+  margin-top: 20rpx;
+  background: #EEF2FF;
+  border-radius: 18rpx;
+  padding: 20rpx 24rpx;
+}
+.rv-reply-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.rv-reply-label {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: var(--primary-deep, #3D5AF1);
+}
+.rv-reply-time { font-size: 22rpx; color: #A6ABC0; }
+.rv-reply-text {
+  margin-top: 10rpx;
+  font-size: 27rpx;
+  line-height: 1.6;
+  color: #3A4152;
+}
+
 .empty { text-align: center; color: #A6ABC0; padding: 80rpx 0; }

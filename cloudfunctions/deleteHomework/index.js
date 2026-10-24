@@ -20,7 +20,8 @@ exports.main = async (event) => {
 
   const hw = await db.collection('homeworks').doc(homeworkId).get().catch(() => null);
   if (!hw || !hw.data) return { ok: false, msg: '作业不存在' };
-  if (hw.data.classId !== user.classId) return { ok: false, msg: '无权操作' };
+  // 先判 classId 非空再比对，避免「双方都 undefined」误判为同班
+  if (!user.classId || hw.data.classId !== user.classId) return { ok: false, msg: '无权操作' };
 
   // 先删提交记录，再删作业本身（顺序反了会留下孤儿提交记录）
   let removed = 0;
@@ -41,6 +42,17 @@ exports.main = async (event) => {
     const n = results.filter((r) => r && r.stats && r.stats.removed).length;
     removed += n;
     if (n === 0) break; // 一条都没删掉，别再空转
+  }
+
+  // 兜底校验：如果因为超轮次上限或批量删除持续失败导致提交没删完，
+  // 就不要删作业本体——否则留下永远无人可见的孤儿提交记录
+  const left = await db
+    .collection('submissions')
+    .where({ homeworkId })
+    .count()
+    .catch(() => null);
+  if (left && left.total > 0) {
+    return { ok: false, msg: '提交记录未清理完（剩 ' + left.total + ' 条），作业已保留，请重试撤回' };
   }
 
   const del = await db.collection('homeworks').doc(homeworkId).remove();

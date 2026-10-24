@@ -6,7 +6,11 @@ const db = cloud.database();
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const { subject, title, content, deadline } = event;
-  if (!title || !title.trim()) return { ok: false, msg: '请填写作业标题' };
+  // String() 兜底：title 若被传成对象，!title.trim() 这步就抛未捕获异常了
+  const clean = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
+  const cleanTitle = clean(title, 100);
+  const cleanContent = clean(content, 2000);
+  if (!cleanTitle) return { ok: false, msg: '请填写作业标题' };
 
   let classId = '';
   let className = '';
@@ -23,10 +27,10 @@ exports.main = async (event) => {
     data: {
       classId,
       className,
-      subject: subject || '',
-      title: title.trim(),
-      content: content || '',
-      deadline: deadline || '',
+      subject: clean(subject, 50),
+      title: cleanTitle,
+      content: cleanContent,
+      deadline: clean(deadline, 30),
       teacherOpenid: OPENID,
       ts: Date.now(),
       createdAt: db.serverDate()

@@ -5,7 +5,8 @@ const db = cloud.database();
 
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
-  const text = (event.text || '').trim();
+  // String() 兜底 + 限长：text 被传成对象会抛异常，超长文本会直接怼上大屏
+  const text = String(event.text || '').trim().slice(0, 200);
   if (!text) return { ok: false, msg: '内容不能为空' };
 
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();

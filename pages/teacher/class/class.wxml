@@ -35,7 +35,7 @@
       </view>
       <view class="stu-score">
         <view class="score-num {{item.warn ? 'score-warn' : ''}}">{{item.scoreText}}</view>
-        <view class="muted">最新分</view>
+        <view class="muted">最新均分</view>
       </view>
     </view>
 

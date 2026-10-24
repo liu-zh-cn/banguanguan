@@ -55,7 +55,7 @@ Page({
       content: '将清除本机保存的资料、班级绑定等（云端数据不受影响）',
       success: (r) => {
         if (!r.confirm) return;
-        ['profile_teacher', 'profile_student', 'myClasses', 'screen_classId', 'screen_className', 'phoneConsent']
+        ['profile_teacher', 'profile_student', 'myClasses', 'screen_classId', 'screen_className', 'screen_code', 'phoneConsent']
           .forEach((k) => wx.removeStorageSync(k));
         wx.showToast({ title: '已清除', icon: 'success' });
         this.onShow();

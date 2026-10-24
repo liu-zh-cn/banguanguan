@@ -11,5 +11,18 @@ exports.main = async () => {
 
   const where = user.role === 'teacher' ? { teacherOpenid: OPENID } : { studentOpenid: OPENID };
   const res = await db.collection('reviews').where(where).orderBy('ts', 'desc').limit(100).get();
-  return { ok: true, role: user.role, list: res.data || [] };
+  // 白名单字段下发：原始文档里的 teacherOpenid / studentOpenid / classId 不下发，
+  // 与 myClass 对学生隐藏 openid 的约定保持一致
+  const list = (res.data || []).map((d) => ({
+    _id: d._id,
+    type: d.type,
+    content: d.content,
+    subject: d.subject,
+    teacherName: d.teacherName,
+    studentName: d.studentName,
+    reply: d.reply || '',
+    replyTs: d.replyTs || 0,
+    ts: d.ts
+  }));
+  return { ok: true, role: user.role, list };
 };

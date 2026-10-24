@@ -48,8 +48,33 @@ function fetchAudio(url, depth, info) {
 
 const MAX_TEXT_LEN = 200; // 大屏广播一句话通常不到 50 字，200 字足够，防止被刷成超长合成
 
+// 简易内存限流（云函数实例复用期间有效）：同一 openid 每分钟最多 6 次合成。
+// 大屏 5 秒轮询一次但只在有新广播时才合成，正常使用远低于此限；
+// 本函数无登录态可校验（大屏设备可能未注册），至少挡住单实例内的脚本刷量，
+// 保护百度接口配额与云存储不被刷爆
+const RATE_LIMIT = 6;
+const RATE_WINDOW = 60 * 1000;
+const rateMap = new Map();
+
+function rateLimited(openid) {
+  const now = Date.now();
+  const arr = (rateMap.get(openid) || []).filter((t) => now - t < RATE_WINDOW);
+  if (arr.length >= RATE_LIMIT) {
+    rateMap.set(openid, arr);
+    return true;
+  }
+  arr.push(now);
+  rateMap.set(openid, arr);
+  return false;
+}
+
 exports.main = async (event) => {
-  const text = (event.text || '').trim();
+  const { OPENID } = cloud.getWXContext();
+  if (rateLimited(OPENID || 'anonymous')) {
+    return { ok: false, msg: '合成太频繁，请稍后再试' };
+  }
+  // String() 兜底：text 被传成对象时 trim 会直接抛未捕获异常
+  const text = String(event.text || '').trim();
   if (!text) return { ok: false, msg: '空文本' };
   if (text.length > MAX_TEXT_LEN) {
     return { ok: false, msg: '文本过长（最多 ' + MAX_TEXT_LEN + ' 字）' };

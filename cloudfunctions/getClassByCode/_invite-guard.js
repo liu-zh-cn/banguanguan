@@ -1,4 +1,4 @@
-// 邀请码校验的失败次数限制（getClassByCode / joinClass 共用）
+// 邀请码校验的失败次数限制（getClassByCode / joinClass / getBroadcast 共用）
 // 说明：云函数各自独立打包、无法跨目录 require，所以这个文件在两个函数目录里各放一份
 //
 // 规则：同一 openid 在 10 分钟内失败 5 次，锁定 15 分钟；验证成功即清零。

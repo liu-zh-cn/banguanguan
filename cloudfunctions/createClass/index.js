@@ -35,7 +35,23 @@ exports.main = async (event) => {
   if (user.role !== 'teacher') return { ok: false, msg: '仅老师可创建班级' };
 
   const { name, grade, motto, studentCount } = event;
-  if (!name) return { ok: false, msg: '班级名称不能为空' };
+  const cleanName = String(name || '').trim().slice(0, 50);
+  if (!cleanName) return { ok: false, msg: '班级名称不能为空' };
+  const cleanStr = (v) => String(v == null ? '' : v).trim().slice(0, 100);
+
+  // 重复建班保护：老师已绑定班级时，直接再建会把 classId 指向新班，
+  // 旧班的学生/作业/成绩从此无人管理（成为孤儿班）。
+  // 默认拒绝并返回 needForce，前端二次确认「旧班不再由我管理」后才带 force 重建
+  if (user.classId && !event.force) {
+    const old = await db.collection('classes').doc(user.classId).get().catch(() => null);
+    if (old && old.data) {
+      return {
+        ok: false,
+        needForce: true,
+        msg: '你已是「' + (old.data.name || '未命名班级') + '」的老师。再建新班级后，原班级将不再由你管理，学生需凭新邀请码重新加入。确定继续吗？'
+      };
+    }
+  }
 
   let inviteCode = '';
   try {
@@ -46,22 +62,23 @@ exports.main = async (event) => {
 
   const add = await db.collection('classes').add({
     data: {
-      name,
-      grade: grade || '',
-      motto: motto || '',
+      name: cleanName,
+      grade: cleanStr(grade),
+      motto: cleanStr(motto),
       inviteCode,
       ownerOpenid: OPENID,
       // studentCount 由 joinClass 递减/递增维护，是"实际加入人数"；
       // 老师建班时填的是"预计人数"，另存 expectedCount，两者不能混用
       studentCount: 0,
-      expectedCount: Number(studentCount) || 0,
+      // 预计人数取非负整数，防止 -5 / 3.5 之类原样入库
+      expectedCount: Math.max(0, Math.floor(Number(studentCount) || 0)),
       createdAt: db.serverDate()
     }
   });
 
   // 把班级绑定到当前老师；role 上面已校验为 teacher，这里不再改写
   await db.collection('users').doc(user._id).update({
-    data: { classId: add._id, className: name }
+    data: { classId: add._id, className: cleanName }
   });
 
   return { ok: true, classId: add._id, inviteCode, name };

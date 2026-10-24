@@ -66,6 +66,9 @@ Page({
           return;
         }
         this._inviteCode = code.toUpperCase();
+        // 换绑新班级：重置静默基线，新班的当前广播只显示不朗读，避免拿旧 _lastTs 误判
+        this._speakReady = undefined;
+        this._lastTs = 0;
         wx.setStorageSync('screen_classId', r.classId);
         wx.setStorageSync('screen_className', r.className);
         wx.setStorageSync('screen_code', this._inviteCode);
@@ -112,10 +115,14 @@ Page({
     if (this._timer) return;
     if (!this._inviteCode) return;
     this._polling = false;
-    // 首次拿到的是"当前状态"（可能含进页面之前就存在的旧广播），只显示不朗读；想听点「重播」
-    this._speakReady = false;
-    this._lastTs = 0;
-    this.setData({ status: '正在连接…' });
+    // 首次拿到的是"当前状态"（可能含进页面之前就存在的旧广播），只显示不朗读；想听点「重播」。
+    // 注意：只有"从未就绪"才建立静默基线。息屏/切后台（onHide 停轮询）回来恢复时要保留
+    // _lastTs，否则隐藏期间收到的新广播回来后只显示不播报——语音播报就白做了
+    if (this._speakReady === undefined) {
+      this._speakReady = false;
+      this._lastTs = 0;
+    }
+    this.setData({ status: '正在连接…', connected: false });
     this.poll();
     this._timer = setInterval(() => this.poll(), POLL_MS);
   },
@@ -136,7 +143,23 @@ Page({
         this._polling = false;
         if (this._unloaded) return;
         if (!r || !r.ok) {
-          this.setData({ connected: false, status: (r && r.msg) || '获取广播失败' });
+          const msg = (r && r.msg) || '获取广播失败';
+          // 邀请码失效（班级被删/码被改）属于不可恢复错误：
+          // 继续每 5 秒轮询只会整夜白烧云函数调用配额，停轮询让用户重新绑定
+          if (r && (msg === '邀请码无效' || msg === '缺少邀请码')) {
+            this.stopPolling();
+            wx.removeStorageSync('screen_classId');
+            wx.removeStorageSync('screen_code');
+            this.setData({
+              bound: false,
+              classId: '',
+              connected: false,
+              text: '',
+              status: '邀请码已失效，请重新绑定班级'
+            });
+            return;
+          }
+          this.setData({ connected: false, status: msg });
           return;
         }
         if (r.className && r.className !== this.data.className) {

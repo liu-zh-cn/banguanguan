@@ -8,7 +8,8 @@ const TYPES = ['表扬', '进步', '建议'];
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const { studentOpenid } = event;
-  const content = (event.content || '').trim();
+  // String() 兜底：content 被传成对象时 trim 会直接抛未捕获异常
+  const content = String(event.content || '').trim();
   if (!studentOpenid) return { ok: false, msg: '参数错误' };
   if (!content) return { ok: false, msg: '点评内容不能为空' };
 

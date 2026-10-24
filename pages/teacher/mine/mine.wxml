@@ -3,7 +3,7 @@
     <view class="p-avatar">{{profile.name[0] || '李'}}</view>
     <view class="p-info">
       <view class="p-name">{{profile.name}}</view>
-      <view class="p-role">{{profile.title}} · {{profile.className}}</view>
+      <view class="p-role">{{profile.className ? profile.title + " · " + profile.className : profile.title}}</view>
     </view>
     <view class="p-edit" bindtap="goEdit">编辑 ›</view>
   </view>

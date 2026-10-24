@@ -27,7 +27,11 @@ Page({
         }));
         this.setData({ loading: false, list });
       })
-      .catch(() => this.setData({ loading: false }));
+      .catch(() => {
+        this.setData({ loading: false });
+        // 失败不能静默：否则页面看起来像「没有作业」
+        wx.showToast({ title: '网络/云函数错误', icon: 'none' });
+      });
   },
 
   onSubject(e) {
@@ -44,12 +48,15 @@ Page({
   },
 
   submit() {
+    // 防重复提交：布置作业不幂等，网络慢时连点会建出多条同名作业
+    if (this._submitting) return;
     const { subjects, subjectIndex, title, content, deadline } = this.data;
     if (!title.trim()) {
       wx.showToast({ title: '请填写作业标题', icon: 'none' });
       return;
     }
-    wx.showLoading({ title: '发布中' });
+    this._submitting = true;
+    wx.showLoading({ title: '发布中', mask: true });
     app
       .cloudAssignHomework({
         subject: subjects[subjectIndex],
@@ -59,6 +66,7 @@ Page({
       })
       .then((res) => {
         wx.hideLoading();
+        this._submitting = false;
         if (!res.ok) {
           wx.showToast({ title: res.msg || '发布失败', icon: 'none' });
           return;
@@ -69,6 +77,7 @@ Page({
       })
       .catch(() => {
         wx.hideLoading();
+        this._submitting = false;
         wx.showToast({ title: '请检查云函数/网络', icon: 'none' });
       });
   },

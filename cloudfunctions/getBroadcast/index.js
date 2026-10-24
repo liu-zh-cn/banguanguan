@@ -1,17 +1,28 @@
 // 云函数：getBroadcast —— 大屏凭邀请码取本班最新一条广播
 // 为什么要走云函数：broadcasts 集合若设为「所有用户可读」，任何人都能读全部班级的广播；
 // 改为「仅创建者可读写」后前端不再直连数据库，只有本云函数（管理权限）能读。
+// 同样接入邀请码限流：否则绕过 getClassByCode/joinClass 直接刷本函数就能无限枚举邀请码
 const cloud = require('wx-server-sdk');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
+const guard = require('./_invite-guard');
 
 exports.main = async (event) => {
-  const code = (event.inviteCode || '').trim().toUpperCase();
+  const { OPENID } = cloud.getWXContext();
+  const code = String(event.inviteCode || '').trim().toUpperCase();
   if (!code) return { ok: false, msg: '缺少邀请码' };
 
+  const gate = await guard.allowed(cloud, OPENID);
+  if (!gate.ok) return gate;
+
   const c = await db.collection('classes').where({ inviteCode: code }).limit(1).get();
-  if (!c.data.length) return { ok: false, msg: '邀请码无效' };
+  if (!c.data.length) {
+    await guard.failed(cloud, OPENID);
+    return { ok: false, msg: '邀请码无效' };
+  }
   const cls = c.data[0];
+
+  await guard.passed(cloud, OPENID);
 
   const b = await db
     .collection('broadcasts')

@@ -1,0 +1,9 @@
+{
+  "name": "replyReview",
+  "version": "1.0.0",
+  "description": "学生回复老师点评",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,52 @@
+.timeline { padding-top: 8rpx; padding-bottom: 40rpx; }
+.rv-card { margin: 22rpx 28rpx; }
+.rv-head { display: flex; align-items: center; }
+.rv-avatar {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 22rpx;
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 22rpx;
+}
+.rv-name { font-size: 30rpx; font-weight: 700; }
+.rv-content {
+  margin-top: 24rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: #3A4152;
+  background: #F7F8FC;
+  padding: 24rpx;
+  border-radius: 18rpx;
+}
+
+/* 学生的回复：高亮显示，方便老师扫一眼看到新回复 */
+.rv-reply {
+  margin-top: 20rpx;
+  background: #EAF9F3;
+  border-radius: 18rpx;
+  padding: 20rpx 24rpx;
+}
+.rv-reply-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.rv-reply-label {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #1FA98A;
+}
+.rv-reply-time { font-size: 22rpx; color: #A6ABC0; }
+.rv-reply-text {
+  margin-top: 10rpx;
+  font-size: 27rpx;
+  line-height: 1.6;
+  color: #3A4152;
+}
+
+.empty { text-align: center; color: #A6ABC0; padding: 80rpx 0; }

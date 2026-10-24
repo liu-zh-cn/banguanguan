@@ -14,12 +14,20 @@ function todayStr() {
 
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
-  const name = (event.name || '').trim();
+  const name = String(event.name || '').trim().slice(0, 50);
   if (!name) return { ok: false, msg: '考试名称不能为空' };
 
-  // 试卷满分：录入 / 图表 / 进度条都按它换算，落库后不再改
-  const rawFull = Number(event.fullScore);
-  const fullScore = rawFull > 0 && rawFull <= 1000 ? Math.round(rawFull) : 100;
+  // 试卷满分：录入 / 图表 / 进度条都按它换算，落库后不再改。
+  // 未传时按老数据约定兜底 100；传了非法值直接报错而不是静默变 100，
+  // 否则老师以为建的是 150 分卷、实际按 100 校验
+  let fullScore = 100;
+  if (event.fullScore !== undefined && event.fullScore !== null && event.fullScore !== '') {
+    const rawFull = Math.round(Number(event.fullScore));
+    if (!(rawFull > 0 && rawFull <= 1000)) {
+      return { ok: false, msg: '试卷满分必须是 1~1000 的数字' };
+    }
+    fullScore = rawFull;
+  }
 
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
   if (!u.data.length) return { ok: false, msg: '未注册' };

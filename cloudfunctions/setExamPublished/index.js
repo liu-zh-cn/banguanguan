@@ -16,7 +16,8 @@ exports.main = async (event) => {
 
   const e = await db.collection('exams').doc(examId).get().catch(() => null);
   if (!e || !e.data) return { ok: false, msg: '考试不存在' };
-  if (e.data.classId !== user.classId) return { ok: false, msg: '无权操作' };
+  // 先判 classId 非空再比对，避免「双方都 undefined」误判为同班
+  if (!user.classId || e.data.classId !== user.classId) return { ok: false, msg: '无权操作' };
 
   await db.collection('exams').doc(examId).update({
     data: { published: !!event.published, updatedAt: db.serverDate() }

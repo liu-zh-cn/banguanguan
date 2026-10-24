@@ -32,7 +32,7 @@
   <!-- 发送记录 -->
   <view class="card" wx:if="{{history.length}}">
     <view class="section-title">最近发送</view>
-    <view class="his-item" wx:for="{{history}}" wx:key="index">
+    <view class="his-item" wx:for="{{history}}" wx:key="id">
       <text class="his-time muted">{{item.time}}</text>
       <text class="his-text">{{item.text}}</text>
     </view>

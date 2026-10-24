@@ -95,7 +95,7 @@ Component({
         ctx.fillStyle = '#5A6072';
         ctx.textAlign = 'center';
         ctx.font = '10px sans-serif';
-        ctx.fillText(labels[i] || '', x + barW / 2, h - padB / 2);
+        ctx.fillText(this.fitLabel(labels[i] || '', Math.min(slot * 0.95, 84)), x + barW / 2, h - padB / 2);
         ctx.fillStyle = theme;
         ctx.fillText(v, x + barW / 2, y - 8);
       });
@@ -156,6 +156,9 @@ Component({
         ctx.stroke();
       }
 
+      // 标签可用宽度不超过相邻点的水平间距（首尾标签各有一半会压到边界，上限再压到 64），
+      // 超长截断成「xx…」，避免考试名较长时相邻标签互相重叠
+      const labelMaxW = n > 1 ? Math.max(24, Math.min(step * 0.92, 64)) : 64;
       pts.forEach((p, i) => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
@@ -167,7 +170,7 @@ Component({
         ctx.fillStyle = '#5A6072';
         ctx.textAlign = 'center';
         ctx.font = '10px sans-serif';
-        ctx.fillText(labels[i] || '', p.x, h - padB / 2);
+        ctx.fillText(this.fitLabel(labels[i] || '', labelMaxW), p.x, h - padB / 2);
       });
     },
 
@@ -175,7 +178,9 @@ Component({
     drawPie() {
       const ctx = this._ctx, w = this._w, h = this._h;
       const items = (this.data.data && this.data.data.items) || [];
-      const total = items.reduce((s, it) => s + it.value, 0) || 1;
+      const rawTotal = items.reduce((s, it) => s + (Number(it.value) || 0), 0);
+      // 全 0 时也用 1 作除数避免 NaN，但中心文字要显示真实的 0 而不是借位的 1
+      const total = rawTotal > 0 ? rawTotal : 1;
       const cx = w / 2;
       const cy = h / 2;
       const r = Math.min(w, h) / 2 - 12;
@@ -201,7 +206,7 @@ Component({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = 'bold 20px sans-serif';
-      ctx.fillText(total, cx, cy - 8);
+      ctx.fillText(rawTotal > 0 ? rawTotal : 0, cx, cy - 8);
       ctx.fillStyle = '#A6ABC0';
       ctx.font = '10px sans-serif';
       ctx.fillText('总人数', cx, cy + 12);
@@ -246,7 +251,7 @@ Component({
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(labels[i], lx, ly);
+        ctx.fillText(this.fitLabel(labels[i], 60), lx, ly);
       }
 
       ctx.beginPath();
@@ -272,6 +277,18 @@ Component({
         ctx.fillStyle = theme;
         ctx.fill();
       });
+    },
+
+    // 标签超宽时截断加省略号（须在设置好 font 之后调用，measureText 依赖当前字体）
+    fitLabel(text, maxWidth) {
+      const ctx = this._ctx;
+      const s = String(text || '');
+      if (!s || ctx.measureText(s).width <= maxWidth) return s;
+      let cut = s;
+      while (cut.length > 1 && ctx.measureText(cut + '…').width > maxWidth) {
+        cut = cut.slice(0, -1);
+      }
+      return cut + '…';
     },
 
     roundRect(x, y, width, height, radius) {

@@ -21,11 +21,11 @@
       <view class="stat-label">班级均分</view>
     </view>
     <view class="stat-cell">
-      <view class="stat-num text-green">{{overview.excellentRate}}%</view>
+      <view class="stat-num text-green">{{overview.excellentRate === "—" ? "—" : overview.excellentRate + "%"}}</view>
       <view class="stat-label">优秀率</view>
     </view>
     <view class="stat-cell">
-      <view class="stat-num text-blue">{{overview.passRate}}%</view>
+      <view class="stat-num text-blue">{{overview.passRate === "—" ? "—" : overview.passRate + "%"}}</view>
       <view class="stat-label">及格率</view>
     </view>
   </view>

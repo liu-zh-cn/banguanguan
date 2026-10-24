@@ -1,0 +1,31 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">我的点评</view>
+    <view class="hero-sub">共发出 {{list.length}} 条 · 收到 {{repliedCount}} 条学生回复</view>
+  </view>
+
+  <view class="timeline">
+    <view class="rv-card card" wx:for="{{list}}" wx:key="id">
+      <view class="rv-head">
+        <view class="rv-avatar" style="background: {{item.avatarColor}}">{{item.student[0]}}</view>
+        <view class="flex-1">
+          <view class="row">
+            <text class="rv-name">{{item.student}}</text>
+            <text class="tag {{item.tagCls}}" style="margin-left:14rpx;">{{item.type}}</text>
+          </view>
+          <view class="muted">{{item.subject}} · {{item.time}}</view>
+        </view>
+      </view>
+      <view class="rv-content">{{item.content}}</view>
+      <view class="rv-reply" wx:if="{{item.reply}}">
+        <view class="rv-reply-head">
+          <text class="rv-reply-label">学生回复</text>
+          <text class="rv-reply-time">{{item.replyTime}}</text>
+        </view>
+        <view class="rv-reply-text">{{item.reply}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{!list.length}}">你还没有写过点评，去「班级管理」点学生头像写一条吧</view>
+</view>

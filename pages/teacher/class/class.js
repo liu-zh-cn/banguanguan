@@ -16,11 +16,16 @@ Page({
 
   onShow() {
     this._inviteCode = '';
+    // 请求序号：快速切页时 bottom-nav 走 reLaunch、onShow 重入，
+    // 若旧的 myClass 响应晚于新的 stats 合并落地，会把已显示的分数刷回「—」
+    this._seq = (this._seq || 0) + 1;
+    const seq = this._seq;
     const p = app.getProfile('teacher');
     this.setData({ className: p.className || '未设置班级' });
     app
       .cloudMyClass()
       .then((r) => {
+        if (seq !== this._seq) return; // 过期响应，丢弃
         if (r.class && r.class.name) this.setData({ className: r.class.name });
         if (r.class && r.class.inviteCode) this._inviteCode = r.class.inviteCode;
         const students = (r.students || []).map((s, i) => ({
@@ -41,6 +46,7 @@ Page({
         return app.cloudClassStats().catch(() => ({}));
       })
       .then((r) => {
+        if (seq !== this._seq) return; // 过期响应，丢弃
         const map = (r && r.studentLatest) || {};
         // 分数线跟着试卷满分走：150 分卷的及格线是 90、优秀线是 135，
         // 不能写死 60/90，否则 150 分卷会把 90 分标成优秀、把 90 分标成不及格

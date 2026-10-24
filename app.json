@@ -13,6 +13,7 @@
     "pages/teacher/score-publish/score-publish",
     "pages/teacher/score-input/score-input",
     "pages/teacher/broadcast/broadcast",
+    "pages/teacher/reviews/reviews",
     "pages/teacher/mine/mine",
     "pages/screen/screen",
     "pages/student/homework/homework",

@@ -65,19 +65,17 @@ Page({
       return;
     }
 
-    // 手机号：未同意不收集。填了但没勾选 → 引导去勾选，不静默丢弃
+    // 手机号：未同意不收集。填了但没勾选 → 引导去勾选，不静默丢弃。
+    // 用 ActionSheet 而不是 Modal：Modal 点「取消」或遮罩/返回键关闭也会走 cancel 分支，
+    // 用户只是想退出弹窗却被清空了云端手机号；ActionSheet 取消时可以明确什么都不做
     if (phone && !agree) {
-      wx.showModal({
-        title: '需要你的同意',
-        content:
-          '手机号为个人信息。请先阅读《隐私政策》并打开「我同意」开关；选择「清除手机号」会删除已保存的手机号。',
-        confirmText: '去勾选',
-        cancelText: '清除手机号',
+      wx.showActionSheet({
+        itemList: ['去勾选「我同意」开关', '清除手机号（撤回同意）'],
         success: (res) => {
-          if (res.confirm) return;
-          // 用户选择清除 → 手机号置空提交（撤回同意的结果）
-          this.doSave(name, '', agree);
-        }
+          if (res.tapIndex === 1) this.doSave(name, '', agree);
+          // tapIndex 0：回到页面勾选后再保存
+        },
+        fail: () => {} // 取消 / 遮罩关闭：不提交，手机号保持原样
       });
       return;
     }
@@ -87,6 +85,9 @@ Page({
 
   // 实际提交。phone 传空字符串 = 用户不同意/选择不保存，此时云端手机号会被清空（撤回同意的结果）
   doSave(name, phone, agree) {
+    // 防重复提交：快速双击会触发两次云调用和两个延时 navigateBack，把页面栈多弹一层
+    if (this._saving) return;
+    this._saving = true;
     const p = this.data.profile;
 
     // 本地立刻更新，界面不掉帧
@@ -114,6 +115,7 @@ Page({
       })
       .then((r) => {
         wx.hideLoading();
+        this._saving = false;
         if (!r.ok) {
           wx.showToast({ title: r.msg || '保存失败', icon: 'none' });
           return;
@@ -123,6 +125,7 @@ Page({
       })
       .catch(() => {
         wx.hideLoading();
+        this._saving = false;
         wx.showModal({
           title: '保存失败',
           content: '资料已更新到本机，但没能同步到云端。请确认已部署 updateProfile 云函数并检查网络后重试。',

@@ -25,4 +25,3 @@
     <view class="to-login">还没有账号？<text class="link" bindtap="goRegister">立即注册 ›</text></view>
   </view>
 </view>
-<!--OVO-->

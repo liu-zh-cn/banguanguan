@@ -8,6 +8,7 @@ Page({
       { icon: '🏫', label: '我的班级', extra: '查看学生', action: 'class' },
       { icon: '🎟️', label: '班级邀请码', extra: '发给学生', action: 'code' },
       { icon: '📝', label: '我的作业', action: 'homework' },
+      { icon: '💬', label: '我的点评', extra: '看学生回复', action: 'reviews' },
       { icon: '📢', label: '大屏广播', action: 'broadcast' },
       { icon: '📈', label: '发布成绩', action: 'score' },
       { icon: '⚙️', label: '设置', action: 'setting' }
@@ -85,6 +86,10 @@ Page({
     }
     if (action === 'broadcast') {
       wx.navigateTo({ url: '/pages/teacher/broadcast/broadcast' });
+      return;
+    }
+    if (action === 'reviews') {
+      wx.navigateTo({ url: '/pages/teacher/reviews/reviews' });
       return;
     }
     if (action === 'setting') {

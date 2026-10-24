@@ -17,7 +17,12 @@ exports.main = async (event) => {
 
   const e = await db.collection('exams').doc(examId).get().catch(() => null);
   if (!e || !e.data) return { ok: false, msg: '考试不存在' };
-  if (e.data.classId !== user.classId) return { ok: false, msg: '无权操作' };
+  if (!user.classId || e.data.classId !== user.classId) return { ok: false, msg: '无权操作' };
+
+  // 科目必须是这场考试建过的：含 . 或 $ 的自定义键名会污染 scores 对象结构，
+  // 混进 Object.values(scores) 的统计口径（classStats / myScores）
+  const subjects = Array.isArray(e.data.subjects) ? e.data.subjects : [];
+  if (subjects.indexOf(subject) === -1) return { ok: false, msg: '科目无效：' + subject };
 
   // 超过试卷满分就拒收，避免录入时手滑把 150 填进 100 分的卷子
   const fullScore = Number(e.data.fullScore) > 0 ? Number(e.data.fullScore) : 100;
@@ -58,7 +63,8 @@ exports.main = async (event) => {
       await db.collection('scores').doc(doc._id).update({
         data: {
           ['scores.' + subject]: score,
-          studentName: (it.name || doc.studentName || '').trim(),
+          // it.name 可能被传成对象导致 trim 抛错，循环中途崩掉会出现"前半已落库后半全丢"
+          studentName: String(it.name || doc.studentName || '').trim(),
           updatedAt: db.serverDate(),
           ts: Date.now()
         }
@@ -69,7 +75,7 @@ exports.main = async (event) => {
           classId: user.classId,
           examId,
           studentOpenid: openid,
-          studentName: (it.name || '').trim(),
+          studentName: String(it.name || '').trim(),
           scores: { [subject]: score },
           updatedAt: db.serverDate(),
           ts: Date.now()

@@ -20,9 +20,12 @@ Page({
 
   // 拉取成绩：默认最近一次已发布的考试，也可指定 examId 切换
   load(examId) {
+    // 请求序号：快速连点两场考试时，先发的响应后到会覆盖展示，最终显示的不是最后点击的那场
+    const seq = (this._seq = (this._seq || 0) + 1);
     app
       .cloudMyScores(examId)
       .then((r) => {
+        if (seq !== this._seq) return; // 过期响应，丢弃
         if (!r || !r.ok) return;
         if (!r.hasExam) {
           this.setData({ hasExam: false, exams: [], scores: [], examName: '' });

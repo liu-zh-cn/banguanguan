@@ -17,8 +17,15 @@
         </view>
       </view>
       <view class="rv-content">{{item.content}}</view>
+      <view class="rv-reply" wx:if="{{item.reply}}">
+        <view class="rv-reply-head">
+          <text class="rv-reply-label">我的回复</text>
+          <text class="rv-reply-time">{{item.replyTime}}</text>
+        </view>
+        <view class="rv-reply-text">{{item.reply}}</view>
+      </view>
       <view class="rv-foot">
-        <text class="reply-btn" data-id="{{item.id}}" bindtap="reply">回复老师</text>
+        <text class="reply-btn" data-id="{{item.id}}" bindtap="reply">{{item.reply ? '修改回复' : '回复老师'}}</text>
       </view>
     </view>
   </view>

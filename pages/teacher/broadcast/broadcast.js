@@ -62,7 +62,7 @@ Page({
         this.setData({ sending: false });
         if (res.ok) {
           this.setData({
-            history: [{ text, time: this.now() }].concat(this.data.history).slice(0, 8),
+            history: [{ id: Date.now(), text, time: this.now() }].concat(this.data.history).slice(0, 8),
             name: '',
             custom: ''
           });

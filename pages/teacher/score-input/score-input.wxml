@@ -31,7 +31,7 @@
         bindinput="onInput"
       />
     </view>
-    <view class="si-empty" wx:if="{{!rows.length}}">班里还没有学生，让学生用邀请码加入后就能录成绩了</view>
+    <view class="si-empty" wx:if="{{!loading && !rows.length}}">班里还没有学生，让学生用邀请码加入后就能录成绩了</view>
   </view>
 
   <view class="si-savebar">

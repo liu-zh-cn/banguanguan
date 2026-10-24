@@ -249,6 +249,14 @@ App({
       .then((res) => (res && res.result) || {});
   },
 
+  // 学生回复老师给自己的点评（可重复调用以修改回复）
+  cloudReplyReview(reviewId, content) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'replyReview', data: { reviewId, content } })
+      .then((res) => (res && res.result) || {});
+  },
+
   // ---------- 用户资料：本地缓存只负责展示，真实资料以云端 users 表为准 ----------
   // 注意：className 对学生只用于本地展示，学生真实班级由 joinClass 决定
   defaultProfile(role) {
