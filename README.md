@@ -209,7 +209,7 @@
 > 小程序内已提供《隐私政策》与《用户服务协议》（注册页、编辑资料页、设置页均可进入）。收集范围：openid（登录标识，自动生成）、姓名 / 学号 / 班级（班级内教务标识），手机号**仅对教师收集且为选填**，保存前需用户单独勾选同意。不调用微信用户信息、手机号、位置、相机、相册等任何接口。
 
 ## 联系方式：
-TEL：13451439399
+
 E-MAIL：liu20250115@outlook.com
 
 ## License
@@ -217,4 +217,3 @@ E-MAIL：liu20250115@outlook.com
 [MIT](LICENSE) © 2026 Timmy Liu
 
 本项目由未成年作者独立开发，经其法定监护人同意后以 MIT 许可证发布。
-Released with the consent of the author's legal guardian.

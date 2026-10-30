@@ -213,7 +213,6 @@ This mini program is an internal class-management tool (productivity category), 
 
 ## Contact
 
-TEL: 13451439399
 E-MAIL: liu20250115@outlook.com
 
 ## License
