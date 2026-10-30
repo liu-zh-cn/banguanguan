@@ -219,4 +219,24 @@ E-MAIL: liu20250115@outlook.com
 
 [MIT](LICENSE) © 2026 Timmy Liu
 
+This project was independently developed by a minor author and released under the MIT license with the consent of their legal guardian.
+
+## Can you promise me one thing before using it?
+
+This project is open source under the MIT license, so you’re free to use, modify, and distribute it. I can’t stop you, and I don’t need to.
+
+But if you really plan to do something with it, I hope you can:
+
+1. **Give it a Star** — it’s the most direct encouragement for the author
+
+2. **Open an Issue to let me know** — so I know where the code is going, and it helps me keep improving it
+
+This isn’t a legal requirement. MIT doesn’t allow extra conditions, so the two points above are just requests. It’s totally legal if you don’t follow them.
+
+I just hope this project won’t be just a bunch of files that nobody looks at.
+
+## License
+
+[MIT](LICENSE) © 2026 Timmy Liu
+
 This project was independently developed by a minor author and is released under the MIT License with the consent of the author's legal guardian.
