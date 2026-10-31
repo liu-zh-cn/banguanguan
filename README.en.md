@@ -215,12 +215,6 @@ This mini program is an internal class-management tool (productivity category), 
 
 E-MAIL: liu20250115@outlook.com
 
-## License
-
-[MIT](LICENSE) © 2026 Timmy Liu
-
-This project was independently developed by a minor author and released under the MIT license with the consent of their legal guardian.
-
 ## Can you promise me one thing before using it?
 
 This project is open source under the MIT license, so you’re free to use, modify, and distribute it. I can’t stop you, and I don’t need to.
