@@ -12,17 +12,17 @@ exports.main = async (event) => {
   const code = String(event.inviteCode || '').trim().toUpperCase();
   if (!code) return { ok: false, msg: '缺少邀请码' };
 
-  const gate = await guard.allowed(cloud, OPENID);
-  if (!gate.ok) return gate;
-
+  // 成功路径不碰限流表：大屏 5 秒轮询一次，每次多读一次 code_fails 会把配额吃光
+  //（720 轮/小时 × 多读一次 = 白烧 720 次数据库读）。
+  // 只有邀请码无效时才检查/记录失败，攻击者枚举照样会被锁定。
   const c = await db.collection('classes').where({ inviteCode: code }).limit(1).get();
   if (!c.data.length) {
+    const gate = await guard.allowed(cloud, OPENID);
+    if (!gate.ok) return gate;
     await guard.failed(cloud, OPENID);
     return { ok: false, msg: '邀请码无效' };
   }
   const cls = c.data[0];
-
-  await guard.passed(cloud, OPENID);
 
   const b = await db
     .collection('broadcasts')
