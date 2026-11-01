@@ -53,48 +53,36 @@
         <view class="pp-td c3">展示教师信息</view>
         <view class="pp-td c4">非必需</view>
       </view>
-      <view class="pp-tr">
-        <view class="pp-td c1">手机号</view>
-        <view class="pp-td c2">仅教师端 · 编辑资料（需单独勾选同意）</view>
-        <view class="pp-td c3">教师与家长之间的班级事务联系</view>
-        <view class="pp-td c4">非必需</view>
-      </view>
     </view>
 
-    <view class="pp-h">三、手机号的收集与授权</view>
-    <view class="pp-p"><b>手机号仅面向教师收集。</b>学生端不提供手机号填写入口，也不会保存学生的手机号。</view>
-    <view class="pp-p">手机号属于个人信息，我们仅在教师<b>主动填写并明确勾选同意</b>后方会保存。若不填写或不勾选，<b>不影响本小程序任何功能的使用</b>。教师可随时在「编辑资料」页修改或删除手机号，关闭同意开关即撤回授权。</view>
-    <view class="pp-p">我们不会调用微信的手机号快速验证（getPhoneNumber）能力，也不会从微信侧读取任何手机号，只保存用户手动输入的内容。</view>
+    <view class="pp-h">三、我们不收集的信息</view>
+    <view class="pp-p">本小程序<b>不收集手机号、邮箱等任何联系方式</b>，也不收集你的身份证号、人脸、指纹、精确位置、通讯录、相册、银行卡、支付信息，不读取你的微信昵称、头像。本小程序未使用 open-data 组件，未使用手机号快速验证（getPhoneNumber）、位置、相机、麦克风、相册相关接口。</view>
 
-    <view class="pp-h">四、我们不收集的信息</view>
-    <view class="pp-p">本小程序不收集你的身份证号、人脸、指纹、精确位置、通讯录、相册、银行卡、支付信息，也不读取你的微信昵称、头像。本小程序未使用 open-data 组件，未使用位置、相机、麦克风、相册相关接口。</view>
-
-    <view class="pp-h">五、信息的存储与保护</view>
+    <view class="pp-h">四、信息的存储与保护</view>
     <view class="pp-p">你的信息存储于微信云开发（CloudBase）数据库，由本小程序开发者自行管理，服务器位于中国境内。我们采取以下措施保护数据安全：</view>
     <view class="pp-li">· 每条业务数据均带班级标识（classId），云端查询一律按调用者身份反查所属班级后过滤；</view>
     <view class="pp-li">· 学生仅能查看本人数据，无法访问其他同学或其他班级的数据；</view>
     <view class="pp-li">· 资料修改接口采用服务端字段白名单，前端无法越权修改身份、班级等字段；</view>
     <view class="pp-li">· 数据保留期限为你使用本小程序期间，你删除或申请删除后我们将及时清除。</view>
 
-    <view class="pp-h">六、信息的共享、转让与公开披露</view>
+    <view class="pp-h">五、信息的共享、转让与公开披露</view>
     <view class="pp-p">我们不会向任何第三方出售、出租、共享或转让你的个人信息。除以下情形外，不会对外披露：</view>
     <view class="pp-li">· 你事先明确同意；</view>
     <view class="pp-li">· 法律法规要求或司法、行政机关依法要求提供。</view>
     <view class="pp-p">本小程序不使用广告、不会将信息用于用户画像或商业推广。</view>
 
-    <view class="pp-h">七、你的权利</view>
-    <view class="pp-li">· <b>查阅与更正</b>：在「编辑资料」页查看、修改你的姓名、班级、学号、手机号等信息；</view>
+    <view class="pp-h">六、你的权利</view>
+    <view class="pp-li">· <b>查阅与更正</b>：在「编辑资料」页查看、修改你的姓名、班级、学号等信息；</view>
     <view class="pp-li">· <b>删除</b>：清空对应字段即可删除；如需删除全部数据或注销账号，可通过下方联系方式提出；</view>
-    <view class="pp-li">· <b>撤回同意</b>：取消勾选手机号授权后，我们将不再保存该信息；</view>
     <view class="pp-li">· <b>投诉</b>：若你认为个人信息权益受到侵害，可通过下方联系方式联系我们。</view>
 
-    <view class="pp-h">八、未成年人保护</view>
+    <view class="pp-h">七、未成年人保护</view>
     <view class="pp-p">本小程序面向教师与学生使用。若使用者为未成年人，请在监护人指导下使用，并由监护人同意本政策。我们不会主动收集未成年人的额外信息。</view>
 
-    <view class="pp-h">九、政策更新</view>
+    <view class="pp-h">八、政策更新</view>
     <view class="pp-p">本政策可能因功能调整而更新。更新后会在本页面展示最新版本与更新日期，重大变更会以显著方式提示。</view>
 
-    <view class="pp-h">十、联系我们</view>
+    <view class="pp-h">九、联系我们</view>
     <view class="pp-p">开发者：本小程序个人开发者</view>
     <view class="pp-p">联系电话：13451439399</view>
     <view class="pp-p">联系邮箱：liu20250115@outlook.com</view>

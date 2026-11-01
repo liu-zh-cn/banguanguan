@@ -84,7 +84,7 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 
 | Collection | Content | Access | Permission |
 |------|------|----------|----------|
-| `users` | Users (unique `openid`): role / classId / name / student no. / subject / contact (phone is teacher-only, optional) | cloud functions only | read/write by creator only |
+| `users` | Users (unique `openid`): role / classId / name / student no. / subject | cloud functions only | read/write by creator only |
 | `classes` | Class: name, grade, motto, 6-char invite code (confusable characters removed) | cloud functions only | read/write by creator only |
 | `homeworks` | One homework assignment | cloud functions only | read/write by creator only |
 | `submissions` | One student's submission of one assignment | cloud functions only | read/write by creator only |
@@ -151,9 +151,9 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 - **Trust model (read this)**: the teacher role has **no approval workflow** — any WeChat user can self-register as a teacher and create a class. Isolation is per class: a self-proclaimed teacher only sees data of the class they created and of students who voluntarily joined with the invite code. This fits an internal class tool's trust assumptions (codes are handed out by the real teacher in person) and is **not suited to adversarial settings**; if someone impersonates a teacher, rebuild the class to rotate the invite code.
 - **Re-create-class guard**: when the teacher already has a class, `createClass` rejects with `needForce`; the frontend asks for explicit confirmation ("the old class will no longer be managed by you") before rebuilding, preventing accidental orphan classes.
 - **tts rate limiting**: the `tts` function has no login identity to check (screen devices may be unregistered), so it applies a light per-openid limit of 6 syntheses per minute per instance to protect the Baidu TTS endpoint and cloud storage from scripted abuse.
-- **updateProfile field whitelist**: teachers may edit `name / gender / phone / title / subject / signature / className`; students may edit `name / gender / studentNo / signature` (**no phone number is collected from students**). `openid`, `role` and `classId` are always ignored. Empty string deletes the field; omitted fields keep their values.
+- **updateProfile field whitelist**: teachers may edit `name / gender / title / subject / signature / className`; students may edit `name / gender / studentNo / signature`. `openid`, `role` and `classId` are always ignored. Empty string deletes the field; omitted fields keep their values. **No phone number or other contact info is collected in this version.**
 - **Data isolation**: `myClass` returns the roster to teachers only (students always get an empty `students` list and a class object without the invite code); `getExamScores` / `classStats` and other whole-class endpoints require `role === 'teacher'`; students only ever read their own scores and reviews.
-- **Privacy consent**: the phone number is collected from teachers only, with an explicit opt-in switch; the registration page has a mandatory "I have read and agree to the User Agreement and Privacy Policy" checkbox including a statement that minors have guardian consent. See `pages/privacy/`.
+- **Privacy consent**: no phone number or other contact info is collected in this version; the registration page has a mandatory "I have read and agree to the User Agreement and Privacy Policy" checkbox including a statement that minors have guardian consent. See `pages/privacy/`.
 - **Demo login** (`quickDemo`) only appears in **develop / trial versions** — decided by `wx.getAccountInfoSync().miniProgram.envVersion`; the whole entry is hidden in `release`. It bypasses WeChat identity checks and must stay disabled in production.
 
 ## Notes
@@ -172,8 +172,7 @@ After changing cloud functions, focus on these:
 - [ ] Teacher: create exam → enter scores → publish → student sees them
 - [ ] Student: try a teacher action → "teacher only" error appears
 - [ ] Edit profile: rename → kill and restart the mini program → the name persists (`updateProfile` deployed)
-- [ ] Edit profile: **clear the phone number → save → re-enter → phone is empty** (deletion really works)
-- [ ] Edit profile: students see no phone field; the class field is read-only
+- [ ] Edit profile: no phone field is shown (removed in this version); the class field is read-only
 - [ ] Score entry: **clear a score → save → switch subject and back → still empty**
 - [ ] Release build: the login page shows no "demo login"
 - [ ] Screen: status shows "connected", and does **not** replay the previous broadcast; a new broadcast appears within 5 seconds
@@ -209,7 +208,7 @@ This mini program is an internal class-management tool (productivity category), 
 2. Nothing is public: no following, comments, sharing, or feeds; users cannot browse other classes' content.
 3. Pages are empty before a class is created or joined — that is expected.
 
-> The Privacy Policy and User Agreement are available inside the mini program (from the registration, edit-profile and settings pages). Data collected: openid (login identifier, auto-generated); name / student no. / class (class-internal identifiers); phone number **collected from teachers only, optional**, with a separate consent checkbox. No WeChat user-profile, phone, location, camera or album APIs are used.
+> The Privacy Policy and User Agreement are available inside the mini program (from the registration, edit-profile and settings pages). Data collected: openid (login identifier, auto-generated); name / student no. / class (class-internal identifiers). **No phone number, email or any other contact info is collected**, and no WeChat user-profile, phone, location, camera or album APIs are used.
 
 ## Contact
 
