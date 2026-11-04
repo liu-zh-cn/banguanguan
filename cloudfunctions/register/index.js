@@ -24,10 +24,11 @@ exports.main = async (event) => {
   // 身份规则（服务端说了算，前端传的 role 只作为首次注册的初始值）：
   // 1. 已是学生的，永远保持学生，防止重新调用 register 把自己提成老师；
   // 2. 已有身份的，register 不改 role，只更新资料；
-  // 3. 首次注册按前端选择，未传时默认老师。
+  // 3. 首次注册只接受 teacher / student；乱传的 'admin' 之类不能入库，
+  //    否则该账号会在部分接口里被当成老师、部分接口里被当成学生。
   const finalRole = hasUser
     ? (exist.data[0].role === 'student' ? 'student' : (exist.data[0].role || 'teacher'))
-    : (role || 'teacher');
+    : (role === 'student' ? 'student' : 'teacher');
 
   const data = {
     role: finalRole,

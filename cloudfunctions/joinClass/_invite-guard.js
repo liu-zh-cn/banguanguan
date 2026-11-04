@@ -1,5 +1,5 @@
 // 邀请码校验的失败次数限制（getClassByCode / joinClass / getBroadcast 共用）
-// 说明：云函数各自独立打包、无法跨目录 require，所以这个文件在两个函数目录里各放一份
+// 说明：云函数各自独立打包、无法跨目录 require，所以这个文件在三个函数目录里各放一份
 //
 // 规则：同一 openid 在 10 分钟内失败 5 次，锁定 15 分钟；验证成功即清零。
 // 记录写在 code_fails 集合，由云函数管理端读写（不受集合权限配置影响）。
@@ -34,7 +34,7 @@ async function allowed(cloud, openid) {
   const now = Date.now();
   const until = rec.blockedUntil || 0;
   if (until > now) {
-    return { ok: false, msg: '尝试次数过多，请 ' + fmtMinutes(until - now) + '后再试' };
+    return { ok: false, code: 'RATE_LIMITED', msg: '尝试次数过多，请 ' + fmtMinutes(until - now) + '后再试' };
   }
   return { ok: true };
 }
@@ -67,8 +67,7 @@ async function failed(cloud, openid) {
 async function passed(cloud, openid) {
   const db = cloud.database();
   try {
-    const r = await db.collection(COLLECTION).where({ key: keyOf(openid) }).limit(1).get();
-    const rec = (r.data && r.data[0]) || null;
+    const rec = await readRecord(db, keyOf(openid));
     if (rec) await db.collection(COLLECTION).doc(rec._id).remove();
   } catch (e) {
     // 清理失败无副作用，下次成功还会再清一次

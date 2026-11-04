@@ -6,7 +6,8 @@ const _ = db.command;
 
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
-  const { examId, subject, items } = event;
+  const examId = String(event.examId || '');
+  const { subject, items } = event;
   if (!examId || !subject || !Array.isArray(items)) return { ok: false, msg: '参数错误' };
 
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
@@ -27,6 +28,23 @@ exports.main = async (event) => {
   // 超过试卷满分就拒收，避免录入时手滑把 150 填进 100 分的卷子
   const fullScore = Number(e.data.fullScore) > 0 ? Number(e.data.fullScore) : 100;
 
+  // 学生名单：只接受本班学生的 openid。否则手工构造请求就能给任意 openid 造成绩记录，
+  // 这些记录会混进 classStats / myScores 的全班统计
+  const stu = await db
+    .collection('users')
+    .where({ classId: user.classId, role: 'student' })
+    .field({ openid: true, name: true })
+    .limit(1000)
+    .get()
+    .catch(() => null);
+  if (!stu) return { ok: false, msg: '校验学生名单失败，请重试' };
+  const memberSet = new Set();
+  const memberName = {};
+  (stu.data || []).forEach((s) => {
+    memberSet.add(s.openid);
+    memberName[s.openid] = s.name || '';
+  });
+
   // 取出该考试已存在的成绩记录，按 openid 建索引
   const exist = await db.collection('scores').where({ examId }).limit(1000).get();
   const byOpenid = {};
@@ -36,9 +54,15 @@ exports.main = async (event) => {
 
   let saved = 0;
   let cleared = 0;
+  let skipped = 0;
   for (const it of items) {
     const openid = it && it.openid;
     if (!openid) continue;
+    // 不在本班名单里的 openid 一律丢弃，绝不入库
+    if (!memberSet.has(openid)) {
+      skipped++;
+      continue;
+    }
     const doc = byOpenid[openid];
     const raw = it.score;
 
@@ -63,26 +87,47 @@ exports.main = async (event) => {
       await db.collection('scores').doc(doc._id).update({
         data: {
           ['scores.' + subject]: score,
-          // it.name 可能被传成对象导致 trim 抛错，循环中途崩掉会出现"前半已落库后半全丢"
-          studentName: String(it.name || doc.studentName || '').trim(),
+          // 姓名以 users 表为准，不采信前端传的 it.name（可能被传成对象，也可能被改错）
+          studentName: String(memberName[openid] || doc.studentName || '').trim(),
           updatedAt: db.serverDate(),
           ts: Date.now()
         }
       });
     } else {
-      await db.collection('scores').add({
-        data: {
-          classId: user.classId,
-          examId,
-          studentOpenid: openid,
-          studentName: String(it.name || '').trim(),
-          scores: { [subject]: score },
-          updatedAt: db.serverDate(),
-          ts: Date.now()
-        }
-      });
+      // _id 用「考试id_openid」确定：并发保存（手机 + 平板）或网络重试时，
+      // 两个 add 只有一条成功，另一条撞 _id 后回落到更新分支，
+      // 不会出现同一学生的两条成绩文档（否则统计会把他算两遍）
+      try {
+        await db.collection('scores').add({
+          data: {
+            _id: examId + '_' + openid,
+            classId: user.classId,
+            examId,
+            studentOpenid: openid,
+            studentName: String(memberName[openid] || '').trim(),
+            scores: { [subject]: score },
+            updatedAt: db.serverDate(),
+            ts: Date.now()
+          }
+        });
+      } catch (err) {
+        const again = await db
+          .collection('scores')
+          .where({ examId, studentOpenid: openid })
+          .limit(1)
+          .get();
+        if (!again.data || !again.data.length) throw err;
+        await db.collection('scores').doc(again.data[0]._id).update({
+          data: {
+            ['scores.' + subject]: score,
+            studentName: String(memberName[openid] || again.data[0].studentName || '').trim(),
+            updatedAt: db.serverDate(),
+            ts: Date.now()
+          }
+        });
+      }
     }
     saved++;
   }
-  return { ok: true, saved, cleared };
+  return { ok: true, saved, cleared, skipped };
 };

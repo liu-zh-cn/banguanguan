@@ -10,7 +10,7 @@ const guard = require('./_invite-guard');
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const code = String(event.inviteCode || '').trim().toUpperCase();
-  if (!code) return { ok: false, msg: '缺少邀请码' };
+  if (!code) return { ok: false, code: 'MISSING_INVITE_CODE', msg: '缺少邀请码' };
 
   // 成功路径不碰限流表：大屏 5 秒轮询一次，每次多读一次 code_fails 会把配额吃光
   //（720 轮/小时 × 多读一次 = 白烧 720 次数据库读）。
@@ -20,7 +20,7 @@ exports.main = async (event) => {
     const gate = await guard.allowed(cloud, OPENID);
     if (!gate.ok) return gate;
     await guard.failed(cloud, OPENID);
-    return { ok: false, msg: '邀请码无效' };
+    return { ok: false, code: 'INVALID_INVITE', msg: '邀请码无效' };
   }
   const cls = c.data[0];
 

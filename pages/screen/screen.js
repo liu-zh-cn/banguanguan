@@ -43,7 +43,7 @@ Page({
     // 标记已卸载：tts 是异步的，回来时页面可能已经销毁，不能再 setData
     this._unloaded = true;
     this.stopPolling();
-    if (this._audio) this._audio.destroy();
+    this.stopAudio();
   },
 
   onCode(e) {
@@ -65,6 +65,8 @@ Page({
           wx.showToast({ title: r.msg || '绑定失败', icon: 'none' });
           return;
         }
+        // 换绑前先停掉上一个班的语音，否则新班页面会继续播旧班的内容
+        this.stopAudio();
         this._inviteCode = code.toUpperCase();
         // 换绑新班级：重置静默基线，新班的当前广播只显示不朗读，避免拿旧 _lastTs 误判
         this._speakReady = undefined;
@@ -95,6 +97,7 @@ Page({
       success: (res) => {
         if (!res.confirm) return;
         this.stopPolling();
+        this.stopAudio();
         this._inviteCode = '';
         wx.removeStorageSync('screen_classId');
         wx.removeStorageSync('screen_className');
@@ -145,8 +148,11 @@ Page({
         if (!r || !r.ok) {
           const msg = (r && r.msg) || '获取广播失败';
           // 邀请码失效（班级被删/码被改）属于不可恢复错误：
-          // 继续每 5 秒轮询只会整夜白烧云函数调用配额，停轮询让用户重新绑定
-          if (r && (msg === '邀请码无效' || msg === '缺少邀请码')) {
+          // 继续每 5 秒轮询只会整夜白烧云函数调用配额，停轮询让用户重新绑定。
+          // 优先按云函数返回的 code 判断；msg 兜底兼容尚未重新部署的旧云函数
+          const fatalCode = r && (r.code === 'INVALID_INVITE' || r.code === 'MISSING_INVITE_CODE');
+          const legacyFatal = msg === '邀请码无效' || msg === '缺少邀请码';
+          if (fatalCode || legacyFatal) {
             this.stopPolling();
             wx.removeStorageSync('screen_classId');
             wx.removeStorageSync('screen_code');
@@ -191,6 +197,15 @@ Page({
         if (this._unloaded) return;
         this.setData({ connected: false, status: '网络异常，重试中…' });
       });
+  },
+
+  // 停止并释放当前音频：切班 / 解绑 / 退出页面后不能继续播上一个班的内容
+  stopAudio() {
+    if (this._audio) {
+      this._audio.destroy();
+      this._audio = null;
+    }
+    if (!this._unloaded && this.data.speaking) this.setData({ speaking: false });
   },
 
   // 调 tts 云函数拿到音频并播放

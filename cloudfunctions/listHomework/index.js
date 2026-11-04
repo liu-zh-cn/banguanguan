@@ -25,6 +25,15 @@ exports.main = async () => {
   if (user.role === 'teacher') {
     const ids = homeworks.map((h) => h._id);
     const subs = [];
+    // 只统计本班现有学生的提交：学生换班后，旧提交仍挂在原作业上，
+    // 按条数直接计数会出现「已交 41 / 总人数 40」、进度条超过 100%
+    const stu = await db
+      .collection('users')
+      .where({ classId, role: 'student' })
+      .field({ openid: true })
+      .limit(1000)
+      .get();
+    const memberSet = new Set((stu.data || []).map((s) => s.openid));
     if (ids.length) {
       // 提交总量（作业数 × 学生数）很容易超过单次 get 的 1000 条硬上限，
       // 之前 limit(1000) 会让老作业的「已交人数」静默偏小，这里分页拉全
@@ -46,7 +55,7 @@ exports.main = async () => {
       .count();
     const list = homeworks.map((h) => ({
       ...h,
-      done: subs.filter((x) => x.homeworkId === h._id).length,
+      done: subs.filter((x) => x.homeworkId === h._id && memberSet.has(x.studentOpenid)).length,
       total: totalRes.total
     }));
     return { ok: true, role: 'teacher', list, total: totalRes.total };
