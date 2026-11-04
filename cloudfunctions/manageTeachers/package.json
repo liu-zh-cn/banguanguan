@@ -1,0 +1,9 @@
+{
+  "name": "manageTeachers",
+  "version": "1.0.0",
+  "description": "班主任审核教师申请、移除教师、转让班主任",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -42,7 +42,7 @@
               data-id="{{item.id}}" bindtap="togglePublish">
           {{item.published ? '撤回发布' : '发布给学生'}}
         </view>
-        <view class="mini-btn" wx:if="{{!item.count}}" data-id="{{item.id}}" catchtap="removeExam">删除</view>
+        <view class="mini-btn" wx:if="{{!item.count && isOwner}}" data-id="{{item.id}}" catchtap="removeExam">删除</view>
       </view>
     </view>
     <view class="muted" style="text-align:center;padding:20rpx 0;" wx:if="{{truncated}}">考试较多，仅显示最近 500 场</view>

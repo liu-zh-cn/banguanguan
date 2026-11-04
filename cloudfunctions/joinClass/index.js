@@ -29,7 +29,7 @@ exports.main = async (event) => {
 
   // 老师误调「加入班级」不应被降级成学生，也不该覆盖他已管理的班级
   if (user.role === 'teacher') {
-    return { ok: false, msg: '当前身份为老师，无需加入班级' };
+    return { ok: false, msg: '老师请用「创建班级」页的申请加入，等班主任审核' };
   }
 
   // 已在该班，直接返回，不重复计数

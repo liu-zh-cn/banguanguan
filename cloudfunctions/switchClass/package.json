@@ -1,0 +1,9 @@
+{
+  "name": "switchClass",
+  "version": "1.0.0",
+  "description": "老师在自己加入的多个班级之间切换当前班级",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

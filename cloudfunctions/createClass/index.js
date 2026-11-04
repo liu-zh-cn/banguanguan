@@ -5,6 +5,7 @@ const db = cloud.database();
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 去掉易混的 I O 0 1
 const MAX_RETRY = 4;
+const MAX_CLASSES = 10; // 一个老师最多同时管理的班级数，防止误点/脚本刷出一堆空班
 
 function genCode() {
   let s = '';
@@ -46,18 +47,13 @@ exports.main = async (event) => {
   if (!cleanName) return { ok: false, msg: '班级名称不能为空' };
   const cleanStr = (v) => String(v == null ? '' : v).trim().slice(0, 100);
 
-  // 重复建班保护：老师已绑定班级时，直接再建会把 classId 指向新班，
-  // 旧班的学生/作业/成绩从此无人管理（成为孤儿班）。
-  // 默认拒绝并返回 needForce，前端二次确认「旧班不再由我管理」后才带 force 重建
-  if (user.classId && !event.force) {
-    const old = await db.collection('classes').doc(user.classId).get().catch(() => null);
-    if (old && old.data) {
-      return {
-        ok: false,
-        needForce: true,
-        msg: '你已是「' + (old.data.name || '未命名班级') + '」的老师。再建新班级后，原班级将不再由你管理，学生需凭新邀请码重新加入。确定继续吗？'
-      };
-    }
+  // 多班模型：classIds 记成员资格，classId 是当前班级。
+  // 旧实现会拦住「已有班级再建班」并要求 force，是因为旧模型下换班会弄丢原班；
+  // 现在原班级仍然留在 classIds 里、照常可管，所以不再需要强制确认
+  const ids = Array.isArray(user.classIds) ? user.classIds.filter(Boolean) : [];
+  if (user.classId && ids.indexOf(user.classId) === -1) ids.push(user.classId);
+  if (ids.length >= MAX_CLASSES) {
+    return { ok: false, msg: '最多同时管理 ' + MAX_CLASSES + ' 个班级' };
   }
 
   let inviteCode = '';
@@ -81,10 +77,10 @@ exports.main = async (event) => {
     }
   });
 
-  // 把班级绑定到当前老师；role 上面已校验为 teacher，这里不再改写
+  // 把班级写进成员数组，并切换到新班；原班级留在 classIds 里，仍然可管理
   await db.collection('users').doc(user._id).update({
-    data: { classId: add._id, className: cleanName }
+    data: { classId: add._id, className: cleanName, classIds: ids.concat(add._id) }
   });
 
-  return { ok: true, classId: add._id, inviteCode, name };
+  return { ok: true, classId: add._id, inviteCode, name, classCount: ids.length + 1 };
 };

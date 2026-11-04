@@ -39,15 +39,40 @@
     <button class="btn-primary" bindtap="submit">创建班级</button>
   </view>
 
-  <!-- 我创建的班级：云端实时数据，班级删除 / 换账号后自动消失 -->
+  <!-- 我加入的班级：多班老师在这里切换当前班级 -->
+  <view class="card" wx:if="{{classes.length}}">
+    <view class="section-title">我的班级</view>
+    <view class="my-item" wx:for="{{classes}}" wx:key="id">
+      <view class="flex-1">
+        <view class="my-name">{{item.name}}</view>
+        <view class="muted">{{item.isOwner ? '班主任' : '任课老师'}}</view>
+      </view>
+      <text class="muted" wx:if="{{item.active}}">当前</text>
+      <text class="code-link" wx:else data-id="{{item.id}}" catchtap="switchTo">切换</text>
+    </view>
+  </view>
+
+  <!-- 当前班级：邀请码跟着当前班级走，换班后自动变 -->
   <view class="card" wx:if="{{myClass}}">
-    <view class="section-title">我创建的班级</view>
+    <view class="section-title">当前班级</view>
     <view class="my-item">
       <view class="flex-1">
         <view class="my-name">{{myClass.name}}</view>
-        <view class="muted">班主任 {{myClass.teacher}} · 邀请码 {{myClass.inviteCode || '—'}}{{myClass.expectedCount ? ' · 预计 ' + myClass.expectedCount + ' 人' : ''}}</view>
+        <view class="muted">班主任 {{myClass.ownerName || '—'}} · 邀请码 {{myClass.inviteCode || '—'}}{{myClass.expectedCount ? ' · 预计 ' + myClass.expectedCount + ' 人' : ''}}</view>
       </view>
       <text class="code-link" wx:if="{{myClass.inviteCode}}" data-code="{{myClass.inviteCode}}" catchtap="copyCode">复制</text>
     </view>
+  </view>
+
+  <!-- 申请加入别人的班级：班主任同意前读不到该班任何数据 -->
+  <view class="card">
+    <view class="section-title">加入别人的班级</view>
+    <view class="f-row">
+      <text class="f-label">邀请码</text>
+      <input class="f-input" placeholder="6 位邀请码" maxlength="6" value="{{applyCode}}" bindinput="onApplyInput" />
+    </view>
+    <button class="btn-primary" style="margin-top:16rpx;" bindtap="applyJoin">申请加入</button>
+    <view class="muted" style="margin-top:16rpx;">需要对方班主任同意。同意前你看不到该班的学生、成绩和作业。</view>
+    <view class="muted" wx:if="{{pendingApply}}" style="margin-top:8rpx;">已申请「{{pendingApply.className}}」，等待班主任审核。</view>
   </view>
 </view>

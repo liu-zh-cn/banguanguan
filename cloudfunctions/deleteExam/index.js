@@ -15,7 +15,12 @@ exports.main = async (event) => {
   if (!u.data.length) return { ok: false, msg: '未注册' };
   const user = u.data[0];
   if (user.role !== 'teacher') return { ok: false, msg: '仅老师可删除考试' };
-  if (!user.classId) return { ok: false, msg: '请先创建班级' };
+  if (!user.classId) return { ok: false, msg: '请先选择班级' };
+
+  // 删考试属于班主任专属操作：普通老师可以录成绩，但不能让一场考试连带成绩消失
+  const c = await db.collection('classes').doc(user.classId).get().catch(() => null);
+  if (!c || !c.data) return { ok: false, msg: '班级不存在' };
+  if (c.data.ownerOpenid !== OPENID) return { ok: false, msg: '仅班主任可删除考试' };
 
   const e = await db.collection('exams').doc(examId).get().catch(() => null);
   if (!e || !e.data) return { ok: false, msg: '考试不存在' };

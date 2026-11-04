@@ -13,6 +13,12 @@ exports.main = async () => {
   if (!classId) return { ok: true, list: [], role: user.role };
 
   const isTeacher = user.role === 'teacher';
+  // 删除考试是班主任专属：把身份一并下发，前端据此隐藏删除入口（服务端 deleteExam 还会再拦）
+  let isOwner = false;
+  if (isTeacher) {
+    const c = await db.collection('classes').doc(classId).get().catch(() => null);
+    isOwner = !!(c && c.data && c.data.ownerOpenid === OPENID);
+  }
   const where = isTeacher ? { classId } : { classId, published: true };
   // 分页拉全：limit(50) 会让第 51 场以后的考试静默消失
   const PAGE = 50;
@@ -76,5 +82,5 @@ exports.main = async () => {
     });
   }
 
-  return { ok: true, list: exams, role: user.role, truncated };
+  return { ok: true, list: exams, role: user.role, truncated, isOwner };
 };

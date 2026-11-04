@@ -1,5 +1,6 @@
 const app = getApp();
 const { PALETTE } = require('../../../utils/constants');
+const { fmtTime } = require('../../../utils/format');
 
 Page({
   data: {
@@ -9,6 +10,11 @@ Page({
     filter: 'all',
     className: '未设置班级',
     expectedCount: 0,
+    // 教师团队：班主任 + 任课老师；只有班主任能审核 / 移除 / 转让
+    isOwner: false,
+    teachers: [],
+    pending: [],
+    classes: [],
     // 分数线跟着试卷满分走，拿到 classStats 后再刷新
     passLine: 60,
     excellentLine: 90
@@ -28,7 +34,11 @@ Page({
         if (seq !== this._seq) return; // 过期响应，丢弃
         this.setData({
           className: (r.class && r.class.name) || this.data.className,
-          expectedCount: Number(r.class && r.class.expectedCount) || 0
+          expectedCount: Number(r.class && r.class.expectedCount) || 0,
+          isOwner: !!r.isOwner,
+          teachers: r.teachers || [],
+          pending: (r.pending || []).map((p) => ({ ...p, timeText: fmtTime(p.ts) })),
+          classes: r.classes || []
         });
         if (r.class && r.class.inviteCode) this._inviteCode = r.class.inviteCode;
         const students = (r.students || []).map((s, i) => ({
@@ -162,5 +172,117 @@ Page({
 
   goCreate() {
     wx.navigateTo({ url: '/pages/create-class/create-class' });
+  },
+
+  // ---------- 教师团队管理（仅班主任） ----------
+  // 点教师：弹出「转让班主任 / 移出班级」
+  onTapTeacher(e) {
+    if (!this.data.isOwner) return;
+    const { openid, name, owner, me } = e.currentTarget.dataset;
+    if (me || owner) return;
+    if (!openid) return;
+    wx.showActionSheet({
+      itemList: ['转让班主任', '移出班级'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          wx.showModal({
+            title: '转让班主任',
+            content: '将「' + name + '」设为班主任？你会降为普通老师，之后不能再审核或移除教师。',
+            confirmText: '确认转让',
+            success: (r) => {
+              if (r.confirm) this.doManage('transfer', openid);
+            }
+          });
+          return;
+        }
+        wx.showModal({
+          title: '移出班级',
+          content: '将「' + name + '」移出本班？对方会立即看不到本班的学生、成绩和作业。',
+          confirmText: '移出',
+          confirmColor: '#E23B41',
+          success: (r) => {
+            if (r.confirm) this.doManage('remove', openid);
+          }
+        });
+      }
+    });
+  },
+
+  approveTeacher(e) {
+    const { openid, name } = e.currentTarget.dataset;
+    wx.showModal({
+      title: '同意加入',
+      content: '同意「' + name + '」加入本班？同意后对方可以看本班学生、录成绩、布置作业。',
+      success: (r) => {
+        if (r.confirm) this.doManage('approve', openid);
+      }
+    });
+  },
+
+  rejectTeacher(e) {
+    const { openid, name } = e.currentTarget.dataset;
+    wx.showModal({
+      title: '拒绝申请',
+      content: '拒绝「' + name + '」的加入申请？对方可以重新申请。',
+      confirmColor: '#E23B41',
+      success: (r) => {
+        if (r.confirm) this.doManage('reject', openid);
+      }
+    });
+  },
+
+  doManage(action, openid) {
+    if (this._managing) return;
+    this._managing = true;
+    wx.showLoading({ title: '处理中', mask: true });
+    app
+      .cloudManageTeachers(action, openid)
+      .then((r) => {
+        wx.hideLoading();
+        this._managing = false;
+        if (!r.ok) {
+          wx.showToast({ title: r.msg || '操作失败', icon: 'none' });
+          return;
+        }
+        wx.showToast({ title: r.msg || '已处理', icon: 'success' });
+        this.onShow();
+      })
+      .catch(() => {
+        wx.hideLoading();
+        this._managing = false;
+        wx.showToast({ title: '网络/云函数错误', icon: 'none' });
+      });
+  },
+
+  // 多班老师切换当前班级：只改服务端 classId，各页面重新加载就跟着换班
+  switchClass() {
+    const list = (this.data.classes || []).filter((x) => !x.active);
+    if (!list.length) {
+      wx.showToast({ title: '还没有其他班级', icon: 'none' });
+      return;
+    }
+    wx.showActionSheet({
+      itemList: list.map((x) => x.name + (x.isOwner ? '（班主任）' : '')),
+      success: (res) => {
+        const target = list[res.tapIndex];
+        if (!target) return;
+        wx.showLoading({ title: '切换中', mask: true });
+        app
+          .cloudSwitchClass(target.id)
+          .then((r) => {
+            wx.hideLoading();
+            if (!r.ok) {
+              wx.showToast({ title: r.msg || '切换失败', icon: 'none' });
+              return;
+            }
+            app.syncTeacherClass(r.classId, r.className);
+            wx.reLaunch({ url: '/pages/teacher/class/class' });
+          })
+          .catch(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '切换失败', icon: 'none' });
+          });
+      }
+    });
   }
 });

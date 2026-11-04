@@ -80,3 +80,34 @@
   box-shadow: 0 14rpx 34rpx rgba(61, 90, 254, 0.4);
   z-index: 100;
 }
+
+/* 教师团队 / 待审核申请 */
+.teacher-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #F0F2F8;
+}
+.teacher-item:last-child { border-bottom: none; }
+.t-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+.mini-btn {
+  padding: 14rpx 26rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  background: #F0F2F8;
+  color: #5A6072;
+  margin-left: 12rpx;
+}
+.mini-btn--primary { background: var(--primary-light); color: var(--primary-deep); font-weight: 600; }
+.mini-btn--danger { background: #FFE6E7; color: #D63B41; font-weight: 600; }

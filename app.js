@@ -93,6 +93,30 @@ App({
     );
   },
 
+  // 老师凭邀请码申请加入别人的班级（需对方班主任审核）
+  cloudApplyJoinClass(inviteCode) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud.callFunction({ name: 'applyJoinClass', data: { inviteCode } }).then(
+      (res) => (res && res.result) || {}
+    );
+  },
+
+  // 班主任管理教师团队：action = approve / reject / remove / transfer
+  cloudManageTeachers(action, openid) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud.callFunction({ name: 'manageTeachers', data: { action, openid } }).then(
+      (res) => (res && res.result) || {}
+    );
+  },
+
+  // 多班老师切换当前班级
+  cloudSwitchClass(classId) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud.callFunction({ name: 'switchClass', data: { classId } }).then(
+      (res) => (res && res.result) || {}
+    );
+  },
+
   // 拉取当前用户的班级上下文（classId / 班级信息 / 学生名单）
   cloudMyClass() {
     if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
@@ -289,5 +313,14 @@ App({
       this.globalData.teacherName = profile.name;
       this.globalData.className = profile.className;
     }
+  },
+
+  // 切换班级后同步本地展示用的班级名；真实班级以服务端 users.classId 为准
+  syncTeacherClass(classId, className) {
+    this.globalData.classId = classId;
+    this.globalData.className = className;
+    const p = this.getProfile('teacher');
+    p.className = className;
+    this.saveProfile('teacher', p);
   }
 });

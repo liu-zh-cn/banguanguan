@@ -28,7 +28,7 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 ### Teacher
 
 - **Dashboard**: headcount, average score, excellence & pass rates; four charts (per-subject bar chart, exam trend line chart, score distribution pie chart, per-subject radar chart), all computed from real scores in real time
-- **Class management**: student roster (with latest average score), one-tap copy of the class invite code, tap a student to write a review (praise / progress / suggestion)
+- **Class management**: student roster (with latest average score), one-tap copy of the class invite code, tap a student to write a review (praise / progress / suggestion); teacher team (the head teacher approves joining teachers, removes teachers and transfers ownership)
 - **My reviews**: browse all reviews you have written, with student replies highlighted
 - **Assign homework**: pick a subject, write the title and requirements, set a due date, watch submission progress (including a late-submission count) live; homework can be withdrawn (student submissions are cleaned up as well)
 - **Publish scores**: create an exam (custom subjects supported) → enter per-subject scores → publish / unpublish; students only see published exams
@@ -44,7 +44,7 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 ### Misc
 
 - Login: automatic identity via WeChat `openid`, no username or password
-- Classroom screen (`screen` page): binds to a class with the invite code and polls for broadcasts every 5 seconds with voice playback
+- Classroom screen (`screen` page): binds to a class with the invite code and polls for broadcasts starting at 5 seconds (backing off to 30 seconds while idle) with voice playback
 
 ## Project Structure
 
@@ -64,7 +64,7 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 │   └── chart/             # Hand-drawn Canvas charts (bar / line / pie / radar)
 ├── utils/                 # Shared constants / time formatting / unsaved-changes guard
 ├── assets/                # Images
-└── cloudfunctions/        # 25 cloud functions
+└── cloudfunctions/        # 28 cloud functions
 ```
 
 ## Getting Started
@@ -72,7 +72,7 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 1. Import the project into WeChat DevTools
 2. Enable Cloud Base and set `CLOUD_ENV` at the top of `app.js` to your environment ID
 3. In the Cloud Console → Database, create the collections below following *Data Model & Permissions* (permissions and indexes included)
-4. For each of the 25 cloud functions under `cloudfunctions/`: right-click → *Upload and Deploy: Cloud Install Dependencies*
+4. For each of the 28 cloud functions under `cloudfunctions/`: right-click → *Upload and Deploy: Cloud Install Dependencies*
 5. Compile and run
 
 > **Two most common pitfalls**
@@ -85,8 +85,8 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 
 | Collection | Content | Access | Permission |
 |------|------|----------|----------|
-| `users` | Users (unique `openid`): role / classId / name / student no. / gender / signature / subject / title | cloud functions only | read/write by creator only |
-| `classes` | Class: name, grade, motto, 6-char invite code (confusable characters removed) | cloud functions only | read/write by creator only |
+| `users` | Users (unique `openid`): role / classId (current class) / classIds (classes a teacher joined) / pending application / name / student no. / gender / signature / subject / title | cloud functions only | read/write by creator only |
+| `classes` | Class: name, grade, motto, 6-char invite code (confusable characters removed), `ownerOpenid` (head teacher) | cloud functions only | read/write by creator only |
 | `homeworks` | One homework assignment | cloud functions only | read/write by creator only |
 | `submissions` | One student's submission of one assignment | cloud functions only | read/write by creator only |
 | `exams` | One exam: name, date, subject list, full score, published flag | cloud functions only | read/write by creator only |
@@ -110,6 +110,7 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 | `users` | `openid` | **unique (required)** | Locates the current user everywhere; **the unique index is also what makes register's concurrent-dedup work** — without it, concurrent registrations can create duplicate user documents |
 | `classes` | `inviteCode` | **unique (required)** | Look up class by code; uniqueness guarantees no two classes share a code |
 | `users` | `classId` | normal | Class roster queries |
+| `users` | `classIds` | normal | A teacher's class memberships / owner-side pending & teacher queries |
 | `homeworks` | `classId + ts` | compound | Homework list, newest first |
 | `exams` | `classId + ts` | compound | Exam list / trend chart ordering |
 | `scores` | `examId` | normal | All scores of one exam |
@@ -119,23 +120,26 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 | `code_fails` | `key` | unique | Rate-limit record lookup |
 | `rate_limits` | `ts` | normal | Timer cleanup of expired counters |
 
-## Cloud Functions (25)
+## Cloud Functions (28)
 
 | Group | Function | Responsibility |
 |------|--------|------|
 | Account | `login` | Get openid, check registration |
 | | `register` | First-time registration / profile update (**role rules below**) |
 | | `updateProfile` | Update profile with a server-side field whitelist |
-| | `myClass` | Current user + class + roster (roster & invite code returned to teachers only) |
-| Class | `createClass` | Create a class, generate a collision-checked unique invite code |
+| | `myClass` | Current user + class + roster + teacher team / pending applications (roster & invite code returned to teachers only) |
+| Class | `createClass` | Create a class, generate a collision-checked unique invite code (at most 10 classes per teacher) |
 | | `joinClass` | Student joins a class by invite code |
+| | `applyJoinClass` | Teacher applies to join a class by invite code, awaiting owner approval |
+| | `manageTeachers` | Owner approves teacher requests / removes teachers / transfers ownership |
+| | `switchClass` | A teacher with multiple classes switches the current class |
 | | `getClassByCode` | Screen resolves a class by invite code (read-only) |
 | Homework | `assignHomework` | Assign homework |
 | | `listHomework` | Homework list (teachers get submission progress, students get their own status) |
 | | `submitHomework` | Student submits homework |
 | | `deleteHomework` | Withdraw homework and clean up submissions |
 | Exams / Scores | `createExam` | Create an exam (with subject list) |
-| | `deleteExam` | Delete an exam that has no scores and is unpublished |
+| | `deleteExam` | Delete an exam that has no scores and is unpublished (owner only) |
 | | `listExams` | Exam list (teachers get averages and score counts) |
 | | `inputScores` | Upsert per-student per-subject scores |
 | | `getExamScores` | Input page data: exam + roster + entered scores |
@@ -156,12 +160,16 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 - **Register role rules**: existing students stay students forever (no privilege escalation via re-registering); existing users only update their profile; first-time registration uses the frontend choice, defaulting to teacher.
 - **Trust model (read this)**: the teacher role has **no approval workflow by default** — any WeChat user can self-register as a teacher and create a class. Isolation is per class: a self-proclaimed teacher only sees data of the class they created and of students who voluntarily joined with the invite code. This fits an internal class tool's trust assumptions (codes are handed out by the real teacher in person) and is **not suited to adversarial settings**; if someone impersonates a teacher, rebuild the class to rotate the invite code.
 - **Optional teacher approval gate**: setting the environment variable `REQUIRE_TEACHER_APPROVAL=1` on the `createClass` function makes class creation require `users.verifiedTeacher === true`. It stays off by default so the self-service flow is unchanged; when enabled, an administrator flips `verifiedTeacher: true` on approved teachers in the database.
-- **Re-create-class guard**: when the teacher already has a class, `createClass` rejects with `needForce`; the frontend asks for explicit confirmation ("the old class will no longer be managed by you") before rebuilding, preventing accidental orphan classes.
+- **A class can have multiple teachers**: `users.classIds` holds the classes a teacher belongs to (membership), `users.classId` is the *current* class (every teacher-facing function reads only this), and `classes.ownerOpenid` is the head teacher (owner). Students still belong to exactly one class.
+- **Joining requires owner approval**: a teacher calling `applyJoinClass` with the invite code only writes `applyClassId` (pending); `classId` stays untouched, so until approved they cannot read any students / scores / homework of that class. The owner approves or rejects from the class page via `manageTeachers`.
+- **Owner-only actions**: approving / rejecting teachers, removing teachers, transferring ownership, and deleting exams. Every other teaching action (score entry, publishing, assigning / withdrawing homework, reviews, broadcast, dashboard) is shared by all teachers of the class.
+- **Switching classes**: `switchClass` only accepts a class in `classIds`; switching simply rewrites `users.classId`, and all other teacher-facing functions follow the current class, so classes never leak into each other. When the owner removes a teacher, their current class falls back to the first remaining one.
+- **Class creation rules**: a teacher manages at most 10 classes at a time; creating a new class no longer overwrites the old one (it stays in `classIds` and remains accessible), which is why the old `needForce` confirmation is gone.
 - **sendBroadcast rate limiting**: one teacher can send at most 6 broadcasts per minute; counters live in `rate_limits`, work across function instances, and return `code: RATE_LIMITED` when exceeded — a compromised account cannot flood the screen.
 - **tts rate limiting & caching**: the `tts` function has no login identity to check (screen devices may be unregistered), so it keeps counters in the `rate_limits` collection for **cross-instance** limiting (6 syntheses per openid per minute, even with multiple function instances) to protect the Baidu TTS endpoint and cloud storage from scripted abuse. Audio is cached as `tts/<md5>.mp3` and recorded in `tts_cache`, so repeating the same text no longer calls the third-party endpoint or takes extra storage.
 - **updateProfile field whitelist**: teachers may edit `name / gender / title / subject / signature / className`; students may edit `name / gender / studentNo / signature`. `openid`, `role` and `classId` are always ignored. Empty string deletes the field; omitted fields keep their values. **No phone number or other contact info is collected in this version.**
 - **Text length caps**: homework title 100, homework requirement 2000, student submission 2000, review 500, student reply 200, broadcast 200, TTS 200 characters. The server truncates or rejects; the frontend only shows hints.
-- **Data isolation**: `myClass` returns the roster to teachers only (students always get an empty `students` list and a class object without the invite code); `getExamScores` / `classStats` and other whole-class endpoints require `role === 'teacher'`; students only ever read their own scores and reviews.
+- **Data isolation**: `myClass` returns the roster to teachers only (students always get an empty `students` list and a class object without the invite code); pending teachers and teachers outside the class get an empty `class` object; `getExamScores` / `classStats` and other whole-class endpoints require `role === 'teacher'` and stay scoped to the current class; students only ever read their own scores and reviews.
 - **Privacy consent**: no phone number or other contact info is collected in this version; the registration page has a mandatory "I have read and agree to the User Agreement and Privacy Policy" checkbox including a statement that minors have guardian consent. See `pages/privacy/`.
 - **Demo login** (`quickDemo`) only appears in **develop / trial versions** — decided by `wx.getAccountInfoSync().miniProgram.envVersion`; the whole entry is hidden in `release`. It bypasses WeChat identity checks and must stay disabled in production.
 
@@ -175,7 +183,8 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 - **Full score**: on the "Publish scores" page you can pick 100 / 120 / 150 / 200 (default 150, auto-following the most recent exam); it is stored in `exams.fullScore` at exam creation. Input validation (0 ≤ score ≤ full score), bar & radar chart Y axes, detail progress bars, excellence (90%) and pass (60%) rates, and the class-page excellent / at-risk filters are all scaled by it. Old exams without the field fall back to 100. Not editable after creation.
 - List queries now fetch in batches: up to 1000 students, 500 homework / exam / review rows, and 200 exams in the student exam switcher. When a cap is hit the response carries `truncated: true` and the page shows "showing the latest N only" instead of silently dropping data.
 - **Class size has a single source**: the real headcount always comes from the `users` table; `classes.expectedCount` only stores the "expected size" the teacher typed at creation and is displayed on the class and create-class pages. The old `classes.studentCount` field is no longer maintained.
-- **Deleting an exam**: only exams that are **unpublished and have no scores** can be deleted; once a score exists the entry disappears and the server refuses as well, so student scores cannot vanish silently.
+- **Deleting an exam**: only exams that are **unpublished and have no scores** can be deleted, and only the **head teacher (owner)** gets the entry; once a score exists the entry disappears for everyone and the server refuses as well, so student scores cannot vanish silently.
+- **Teacher join & switching**: a teacher can have only one pending application at a time (applying again overwrites it); when approved while already teaching another class, the current class is not force-switched — they switch from the "Create class" page themselves. A teacher manages at most 10 classes.
 - **Unsaved-changes guard**: leaving the edit-profile / assign-homework / create-class pages after edits pops a "not saved yet" confirmation; saving or publishing clears it. It is skipped silently below base library 2.12.0.
 - **No fake default profile**: fields a new account never filled show "not set" instead of placeholder names such as "刘同学 / 李老师".
 - **Search indexing**: `sitemap.json` is set to `disallow *` — an internal class tool should not be indexed by WeChat.
@@ -197,12 +206,15 @@ After changing cloud functions, focus on these:
 - [ ] Due date: set it to yesterday → the student sees "expired / submit late" → after submitting, "late" appears for the student and the teacher's progress shows "late 1"
 - [ ] TTS cache: send the same broadcast twice → the second one skips Baidu (`tts_cache` hit) and cloud storage keeps a single file
 - [ ] Broadcast rate limit: send 7 messages within a minute → the 7th is rejected as "too frequent"
-- [ ] Delete exam: a new empty exam can be deleted; after entering one score the entry disappears and a forced call is refused
+- [ ] Delete exam: a new empty exam can be deleted; after entering one score the entry disappears and a forced call is refused; a non-owner teacher never sees the delete button
 - [ ] Form guard: change one character in edit-profile then go back → "not saved" prompt; after saving it no longer prompts
 - [ ] Default profile: a fresh account shows no sample name / signature on "Me"
 - [ ] Dashboard cache: enter scores then open stats immediately → numbers are fresh (writes invalidate the cache)
 - [ ] Review reply: student replies → teacher sees the highlighted reply under "Me → My reviews" → student edits the reply and the teacher side updates
-- [ ] Re-create class: with an existing class, tapping "Create class" shows a confirmation warning that the old class will no longer be managed by you
+- [ ] Multiple teachers: teacher B applies with the code → B sees no class data yet → owner A sees the pending request on the class page → after approval B can see the roster and scores
+- [ ] Remove teacher: A removes B → B's class page shows no students of that class and score entry is refused
+- [ ] Transfer ownership: A transfers to B → A loses the approve / delete entries and B gains them
+- [ ] Switching classes: one teacher in two classes → after switching, roster / scores / homework all follow the new class
 - [ ] Screen: bind, background the app for 30s, have the teacher send a broadcast → returning to the screen page should speak the new broadcast automatically
 - [ ] "Me" page stats: class rank / pending homework / received reviews show real numbers
 

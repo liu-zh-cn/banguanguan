@@ -3,14 +3,49 @@
     <view class="row-between">
       <view>
         <view class="hero-title">班级管理</view>
-        <view class="hero-sub">共 {{all.length}} 名学生{{expectedCount ? ' · 预计 ' + expectedCount + ' 人' : ''}} · {{className}}</view>
+        <view class="hero-sub">共 {{all.length}} 名学生{{expectedCount ? ' · 预计 ' + expectedCount + ' 人' : ''}} · {{className}}{{isOwner ? ' · 班主任' : ''}}</view>
       </view>
-      <view class="hero-create" bindtap="goCreate">＋ 创建班级</view>
+      <view style="display:flex;align-items:center;">
+        <view class="hero-create" wx:if="{{classes.length > 1}}" style="margin-right:12rpx;" bindtap="switchClass">切换班级</view>
+        <view class="hero-create" bindtap="goCreate">＋ 创建班级</view>
+      </view>
     </view>
 
     <view class="search-box">
       <text class="search-ico">🔍</text>
       <input class="search-input" placeholder="搜索学生姓名" value="{{keyword}}" bindinput="onSearch" />
+    </view>
+  </view>
+
+  <!-- 教师团队：班主任可点其他老师进行转让/移出 -->
+  <view class="card" wx:if="{{teachers.length}}">
+    <view class="row-between">
+      <view class="section-title" style="margin-bottom:0;">教师团队</view>
+      <view class="muted">{{teachers.length}} 人{{isOwner ? ' · 你可管理' : ''}}</view>
+    </view>
+    <view class="teacher-item" wx:for="{{teachers}}" wx:key="openid"
+          data-openid="{{item.openid}}" data-name="{{item.name}}" data-owner="{{item.isOwner}}" data-me="{{item.isMe}}"
+          bindtap="onTapTeacher">
+      <view class="t-avatar" style="background:{{index === 0 ? 'linear-gradient(135deg,#FFB020,#FF8A00)' : 'linear-gradient(135deg,#5B7CFF,#3D5AFE)'}};">{{item.name[0]}}</view>
+      <view class="flex-1">
+        <view class="stu-name">{{item.name}}{{item.isMe ? '（我）' : ''}}</view>
+        <view class="muted">{{item.isOwner ? '班主任' : (item.subject || '任课老师')}}</view>
+      </view>
+      <text class="muted" wx:if="{{item.isOwner}}">管理员</text>
+      <text class="code-link" wx:elif="{{isOwner}}">管理 ›</text>
+    </view>
+  </view>
+
+  <!-- 待审核申请：仅班主任可见，同意后对方才能看到本班数据 -->
+  <view class="card" wx:if="{{isOwner && pending.length}}">
+    <view class="section-title">待审核申请（{{pending.length}}）</view>
+    <view class="teacher-item" wx:for="{{pending}}" wx:key="openid">
+      <view class="flex-1">
+        <view class="stu-name">{{item.name}}</view>
+        <view class="muted">{{item.subject || '老师'}} · {{item.timeText}}</view>
+      </view>
+      <view class="mini-btn mini-btn--primary" data-openid="{{item.openid}}" data-name="{{item.name}}" catchtap="approveTeacher">同意</view>
+      <view class="mini-btn mini-btn--danger" data-openid="{{item.openid}}" data-name="{{item.name}}" catchtap="rejectTeacher">拒绝</view>
     </view>
   </view>
 
