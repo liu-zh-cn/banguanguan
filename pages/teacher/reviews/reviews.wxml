@@ -27,5 +27,6 @@
     </view>
   </view>
 
+  <view class="muted" style="text-align:center;padding:24rpx 0;" wx:if="{{truncated}}">点评较多，仅显示最近 500 条</view>
   <view class="empty" wx:if="{{!list.length}}">你还没有写过点评，去「班级管理」点学生头像写一条吧</view>
 </view>

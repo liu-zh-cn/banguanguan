@@ -28,6 +28,7 @@
       bindtap="pickExam"
     >{{item.name}}</view>
   </view>
+  <view class="muted" style="text-align:center;padding:10rpx 0;" wx:if="{{truncated}}">考试较多，仅显示最近 200 场</view>
 
   <view class="card" wx:if="{{hasExam && scores.length}}">
     <view class="section-title">各科成绩（满分 {{fullScore}}）</view>

@@ -38,12 +38,19 @@ exports.main = async () => {
     // 学生名单含全班同学的 openid / 姓名 / 学号 / 电话，只下发给老师。
     // 学生端只需要 class.name 和 user，拿到名单属于越权读取他人信息。
     if (user.role === 'teacher') {
-      const s = await db
-        .collection('users')
-        .where({ classId: user.classId, role: 'student' })
-        .limit(200)
-        .get();
-      students = s.data || [];
+      // 分页拉全：之前 limit(200) 会让第 201 名学生在名单里静默消失，
+      // 且学号兜底成 i+1 后与录入页对不上
+      const PAGE = 100;
+      for (let skip = 0; skip < 1000; skip += PAGE) {
+        const s = await db
+          .collection('users')
+          .where({ classId: user.classId, role: 'student' })
+          .skip(skip)
+          .limit(PAGE)
+          .get();
+        (s.data || []).forEach((x) => students.push(x));
+        if (!s.data || s.data.length < PAGE) break;
+      }
     }
   }
 

@@ -28,7 +28,7 @@ Page({
       .then((r) => {
         if (r.class && r.class.name) this.setData({ className: r.class.name });
       })
-      .catch(() => {});
+      .catch(() => app.showError('班级信息加载失败'));
     this.loadStats();
   },
 
@@ -54,7 +54,7 @@ Page({
           chartData: c.data
         });
       })
-      .catch(() => {});
+      .catch(() => app.showError('统计数据加载失败'));
   },
 
   switchChart(e) {

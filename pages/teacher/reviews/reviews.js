@@ -23,6 +23,7 @@ function fmtTime(ts) {
 Page({
   data: {
     list: [],
+    truncated: false,
     repliedCount: 0
   },
 
@@ -51,6 +52,7 @@ Page({
         });
         this.setData({
           list,
+          truncated: !!r.truncated,
           repliedCount: list.filter((x) => x.reply).length
         });
       })

@@ -22,7 +22,8 @@ function fmtTime(ts) {
 
 Page({
   data: {
-    list: []
+    list: [],
+    truncated: false
   },
 
   onShow() {
@@ -48,9 +49,9 @@ Page({
             avatarColor: t.color
           };
         });
-        this.setData({ list });
+        this.setData({ list, truncated: !!(r && r.truncated) });
       })
-      .catch(() => {});
+      .catch(() => app.showError('点评加载失败'));
   },
 
   // 回复老师：已回复过则弹窗预填旧内容，可修改

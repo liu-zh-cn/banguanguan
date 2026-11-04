@@ -43,7 +43,10 @@ Page({
         this.setData({ all: students });
         this.applyFilter();
         // 再拉一次统计，给每人标上最近一次考试的均分
-        return app.cloudClassStats().catch(() => ({}));
+        return app.cloudClassStats().catch(() => {
+          app.showError('成绩统计加载失败');
+          return {};
+        });
       })
       .then((r) => {
         if (seq !== this._seq) return; // 过期响应，丢弃
@@ -63,7 +66,7 @@ Page({
         this.setData({ all });
         this.applyFilter();
       })
-      .catch(() => {});
+      .catch(() => app.showError('班级数据加载失败'));
   },
 
   onSearch(e) {

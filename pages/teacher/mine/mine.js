@@ -28,13 +28,13 @@ Page({
         const student = r.students ? r.students.length : (r.class && r.class.studentCount) || 0;
         this.setData({ 'stats.student': student });
       })
-      .catch(() => {});
+      .catch(() => app.showError('班级信息加载失败'));
     app
       .cloudListHomework()
       .then((r) => {
         this.setData({ 'stats.homework': (r.list || []).length });
       })
-      .catch(() => {});
+      .catch(() => app.showError('作业数据加载失败'));
     // 未发布成绩的考试数：之前这个格子永远是「—」
     app
       .cloudListExams()
@@ -43,7 +43,7 @@ Page({
         const pending = (r.list || []).filter((e) => !e.published).length;
         this.setData({ 'stats.exam': pending });
       })
-      .catch(() => {});
+      .catch(() => app.showError('考试数据加载失败'));
   },
 
   // 本地缓存只用于展示，姓名 / 班级以云端 users 表为准（每个页面生命周期同步一次）

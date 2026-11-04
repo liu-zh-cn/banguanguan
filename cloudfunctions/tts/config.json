@@ -1,0 +1,9 @@
+{
+  "triggers": [
+    {
+      "name": "cleanTtsCache",
+      "type": "timer",
+      "config": "0 0 4 * * * *"
+    }
+  ]
+}

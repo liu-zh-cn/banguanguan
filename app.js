@@ -38,6 +38,15 @@ App({
     });
   },
 
+  // 统一失败提示：一页并发多个请求时，1.5 秒内只弹一次，避免 toast 刷屏；
+  // 空 catch 会把加载失败变成「一直空着」，用户既不知道出错也无法重试
+  showError(msg) {
+    const now = Date.now();
+    if (now - (this._lastErrorAt || 0) < 1500) return;
+    this._lastErrorAt = now;
+    wx.showToast({ title: msg || '加载失败，请重试', icon: 'none' });
+  },
+
   // ---------- 云开发：登录 / 注册 ----------
   // 调 login 云函数拿 openid，并查询该微信是否已注册
   cloudLogin() {

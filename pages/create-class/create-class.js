@@ -41,7 +41,7 @@ Page({
           }
         });
       })
-      .catch(() => {});
+      .catch(() => app.showError('班级信息加载失败'));
   },
 
   onInput(e) {

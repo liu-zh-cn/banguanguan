@@ -46,7 +46,7 @@
         </view>
         <text class="del" data-id="{{item.id}}" catchtap="remove">撤回</text>
       </view>
-      <view class="hw-meta muted">截止 {{item.deadline || '未设置'}} · 已交 {{item.done}}/{{item.total}}</view>
+      <view class="hw-meta muted">截止 {{item.deadline || '未设置'}} · 已交 {{item.done}}/{{item.total}}{{item.lateCount ? ' · 迟交 ' + item.lateCount : ''}}</view>
       <view class="progress-row">
         <view class="progress-track">
           <view class="progress-bar" style="width: {{item.pct}}%"></view>
@@ -54,6 +54,7 @@
         <text class="progress-text">{{item.pct}}%</text>
       </view>
     </view>
+    <view class="muted" style="text-align:center;padding:20rpx 0;" wx:if="{{truncated}}">作业较多，仅显示最近 500 条</view>
   </view>
 
   <bottom-nav role="teacher" active="{{2}}" />

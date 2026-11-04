@@ -20,16 +20,22 @@
         <text class="tag tag-blue">{{item.subject}}</text>
         <text class="hw-title">{{item.title}}</text>
       </view>
-      <text class="tag {{item.status === '已提交' ? 'tag-green' : 'tag-orange'}}">{{item.status}}</text>
+      <view class="row">
+        <text class="tag tag-red" wx:if="{{item.late}}">迟交</text>
+        <text class="tag {{item.status === '已提交' ? 'tag-green' : (item.expired ? 'tag-red' : 'tag-orange')}}">
+          {{item.status === '已提交' ? '已提交' : (item.expired ? '已截止' : '待完成')}}
+        </text>
+      </view>
     </view>
     <view class="muted hw-deadline">⏰ 截止 {{item.deadline}}</view>
     <view class="hw-foot" wx:if="{{item.status !== '已提交'}}">
-      <view class="submit-mini" data-id="{{item.id}}" catchtap="onSubmit">去提交</view>
+      <view class="submit-mini" data-id="{{item.id}}" catchtap="onSubmit">{{item.expired ? '补交' : '去提交'}}</view>
     </view>
     <view class="muted done-tip" wx:else>✅ 已提交</view>
   </view>
 
   <view class="empty" wx:if="{{!list.length}}">该分类下暂无作业 🎉</view>
+  <view class="muted" style="text-align:center;padding:24rpx 0;" wx:if="{{truncated}}">作业较多，仅显示最近 500 条</view>
 
   <bottom-nav role="student" active="{{0}}" />
 </view>

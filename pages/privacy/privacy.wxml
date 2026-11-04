@@ -7,7 +7,7 @@
   <!-- ============ 隐私政策 ============ -->
   <view class="pp-card card" wx:if="{{tab === 'privacy'}}">
     <view class="pp-title">班管管隐私政策</view>
-    <view class="pp-meta muted">更新日期：2026 年 10 月 23 日　生效日期：2026 年 10 月 23 日</view>
+    <view class="pp-meta muted">更新日期：2026 年 11 月 4 日　生效日期：2026 年 11 月 4 日</view>
 
     <view class="pp-h">一、引言</view>
     <view class="pp-p">班管管（以下简称"本小程序"）是一款面向中小学班主任的班级内部管理工具，用于作业发布、成绩登记、班级统计与班级事务通知。我们深知个人信息对你的重要性，并会尽力保护你的个人信息安全可靠。本政策说明我们收集哪些信息、为何收集、如何保存，以及你享有的权利。</view>
@@ -36,6 +36,12 @@
         <view class="pp-td c4">必需</view>
       </view>
       <view class="pp-tr">
+        <view class="pp-td c1">性别</view>
+        <view class="pp-td c2">注册 / 编辑资料</view>
+        <view class="pp-td c3">班级名单中区分学生</view>
+        <view class="pp-td c4">非必需</view>
+      </view>
+      <view class="pp-tr">
         <view class="pp-td c1">所在班级</view>
         <view class="pp-td c2">注册 / 编辑资料</view>
         <view class="pp-td c3">将数据归入正确班级</view>
@@ -48,7 +54,19 @@
         <view class="pp-td c4">非必需</view>
       </view>
       <view class="pp-tr">
+        <view class="pp-td c1">个性签名</view>
+        <view class="pp-td c2">编辑资料</view>
+        <view class="pp-td c3">展示个人简介</view>
+        <view class="pp-td c4">非必需</view>
+      </view>
+      <view class="pp-tr">
         <view class="pp-td c1">任教学科</view>
+        <view class="pp-td c2">教师注册 / 编辑资料</view>
+        <view class="pp-td c3">展示教师信息</view>
+        <view class="pp-td c4">非必需</view>
+      </view>
+      <view class="pp-tr">
+        <view class="pp-td c1">教师职务</view>
         <view class="pp-td c2">教师注册 / 编辑资料</view>
         <view class="pp-td c3">展示教师信息</view>
         <view class="pp-td c4">非必需</view>
@@ -72,7 +90,7 @@
     <view class="pp-p">本小程序不使用广告、不会将信息用于用户画像或商业推广。</view>
 
     <view class="pp-h">六、你的权利</view>
-    <view class="pp-li">· <b>查阅与更正</b>：在「编辑资料」页查看、修改你的姓名、班级、学号等信息；</view>
+    <view class="pp-li">· <b>查阅与更正</b>：在「编辑资料」页查看、修改你的姓名、班级、学号、性别、个性签名等信息；</view>
     <view class="pp-li">· <b>删除</b>：清空对应字段即可删除；如需删除全部数据或注销账号，可通过下方联系方式提出；</view>
     <view class="pp-li">· <b>投诉</b>：若你认为个人信息权益受到侵害，可通过下方联系方式联系我们。</view>
 
@@ -92,7 +110,7 @@
   <!-- ============ 用户服务协议 ============ -->
   <view class="pp-card card" wx:else>
     <view class="pp-title">班管管用户服务协议</view>
-    <view class="pp-meta muted">更新日期：2026 年 10 月 23 日　生效日期：2026 年 10 月 23 日</view>
+    <view class="pp-meta muted">更新日期：2026 年 11 月 4 日　生效日期：2026 年 11 月 4 日</view>
 
     <view class="pp-h">一、协议范围</view>
     <view class="pp-p">本协议是你与班管管小程序开发者之间关于使用本小程序所订立的协议。本小程序是一款面向中小学班主任的班级内部管理工具，提供作业管理、成绩登记、班级统计与班级事务通知等功能。</view>

@@ -4,6 +4,7 @@ Page({
   data: {
     all: [],
     list: [],
+    truncated: false,
     tab: 'all',
     className: '未设置班级',
     name: '',
@@ -32,12 +33,14 @@ Page({
           subject: h.subject,
           title: h.title,
           deadline: h.deadline || '未设置',
-          status: h.myStatus || '待完成'
+          status: h.myStatus || '待完成',
+          late: !!h.myLate,
+          expired: !!h.expired
         }));
-        this.setData({ all: list });
+        this.setData({ all: list, truncated: !!r.truncated });
         this.applyTab();
       })
-      .catch(() => {});
+      .catch(() => app.showError('作业加载失败'));
 
     app
       .cloudMyClass()
@@ -45,7 +48,7 @@ Page({
         if (rr.class && rr.class.name) this.setData({ className: rr.class.name });
         if (rr.user && rr.user.name) this.setData({ name: rr.user.name });
       })
-      .catch(() => {});
+      .catch(() => app.showError('班级信息加载失败'));
   },
 
   setTab(e) {
@@ -74,7 +77,8 @@ Page({
           .then((r) => {
             wx.hideLoading();
             if (r.ok) {
-              wx.showToast({ title: '已提交', icon: 'success' });
+              // 截止日之后再提交不拦，但要明确告诉学生这是迟交
+              wx.showToast({ title: r.late ? '已提交（迟交）' : '已提交', icon: 'success' });
               this.load();
             } else {
               wx.showToast({ title: r.msg || '提交失败', icon: 'none' });

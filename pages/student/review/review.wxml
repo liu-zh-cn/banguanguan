@@ -30,6 +30,7 @@
     </view>
   </view>
 
+  <view class="muted" style="text-align:center;padding:24rpx 0;" wx:if="{{truncated}}">点评较多，仅显示最近 500 条</view>
   <view class="empty" wx:if="{{!list.length}}">老师还没有给你写点评，继续加油吧！</view>
 
   <bottom-nav role="student" active="{{2}}" />

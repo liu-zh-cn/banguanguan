@@ -3,6 +3,7 @@ const app = getApp();
 Page({
   data: {
     exams: [],
+    truncated: false,
     // 试卷满分：录入 / 图表 / 进度条都按它换算，避免把 150 分卷当成 100 分
     fullScores: [100, 120, 150, 200],
     fullScoreIndex: 2
@@ -30,7 +31,7 @@ Page({
           // 有没有录成绩看分数条数，不能看平均分（0 分的考试会被误判成没录）
           count: x.scoreCount || 0
         }));
-        this.setData({ exams });
+        this.setData({ exams, truncated: !!(r && r.truncated) });
         // 满分选择器默认跟随最近一次考试，避免：上次建的是 100 分卷，这次进来静默变回 150
         const last = exams[0];
         if (last) {

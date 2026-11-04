@@ -8,6 +8,7 @@ Page({
     content: '',
     deadline: '',
     list: [],
+    truncated: false,
     loading: false
   },
 
@@ -23,9 +24,11 @@ Page({
         const list = ((r && r.list) || []).map((h) => ({
           ...h,
           id: h._id,
-          pct: h.total ? Math.round((h.done / h.total) * 100) : 0
+          lateCount: h.late || 0,
+          // done 已由云函数限定为「本班在册学生的提交」，这里再限一次上限兜底
+          pct: h.total ? Math.min(100, Math.round((h.done / h.total) * 100)) : 0
         }));
-        this.setData({ loading: false, list });
+        this.setData({ loading: false, list, truncated: !!(r && r.truncated) });
       })
       .catch(() => {
         this.setData({ loading: false });

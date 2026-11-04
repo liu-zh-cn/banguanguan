@@ -28,7 +28,7 @@ Page({
         const todo = (r.list || []).filter((h) => (h.myStatus || '待完成') === '待完成').length;
         this.setData({ 'stats.todo': todo });
       })
-      .catch(() => {});
+      .catch(() => app.showError('作业数据加载失败'));
 
     app
       .cloudMyScores('')
@@ -37,14 +37,14 @@ Page({
         // rank 为 0 表示还没有已发布的成绩，保持「—」
         if (r.rank) this.setData({ 'stats.rank': '第 ' + r.rank + ' 名' });
       })
-      .catch(() => {});
+      .catch(() => app.showError('成绩加载失败'));
 
     app
       .cloudListReviews()
       .then((r) => {
         if (r && r.ok) this.setData({ 'stats.review': (r.list || []).length });
       })
-      .catch(() => {});
+      .catch(() => app.showError('点评加载失败'));
   },
 
   // 本地缓存只用于展示，姓名 / 班级以云端 users 表为准（每个页面生命周期同步一次）

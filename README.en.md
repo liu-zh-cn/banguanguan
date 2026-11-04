@@ -30,13 +30,13 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 - **Dashboard**: headcount, average score, excellence & pass rates; four charts (per-subject bar chart, exam trend line chart, score distribution pie chart, per-subject radar chart), all computed from real scores in real time
 - **Class management**: student roster (with latest average score), one-tap copy of the class invite code, tap a student to write a review (praise / progress / suggestion)
 - **My reviews**: browse all reviews you have written, with student replies highlighted
-- **Assign homework**: pick a subject, write the title and requirements, set a due date, watch submission progress live; homework can be withdrawn (student submissions are cleaned up as well)
+- **Assign homework**: pick a subject, write the title and requirements, set a due date, watch submission progress (including a late-submission count) live; homework can be withdrawn (student submissions are cleaned up as well)
 - **Publish scores**: create an exam (custom subjects supported) → enter per-subject scores → publish / unpublish; students only see published exams
 - **Screen broadcast**: push messages to a classroom screen with automatic text-to-speech
 
 ### Student
 
-- **Homework**: filter by status (all / to-do / submitted), submit homework online
+- **Homework**: filter by status (all / to-do / submitted), submit homework online; submissions after the due date are allowed but marked "late"
 - **Scores**: total, average, class rank; per-subject comparison with the class average and per-subject rank; switch between past exams
 - **Reviews**: timeline of teacher reviews; **reply to your teacher** (replies can be edited)
 - **Me**: class rank / pending homework / received reviews at a glance; edit profile, join a class with an invite code
@@ -75,7 +75,7 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 5. Compile and run
 
 > **Two most common pitfalls**
-> 1. All **9 collections must use "read/write by creator only"** — no exception is needed. The screen reads broadcasts through a cloud function; the frontend never touches the database directly.
+> 1. All **11 collections must use "read/write by creator only"** — no exception is needed. The screen reads broadcasts through a cloud function; the frontend never touches the database directly.
 > 2. After editing a cloud function you must **re-upload that cloud function** — uploading the mini program alone does not update it.
 
 ## Data Model & Permissions
@@ -84,7 +84,7 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 
 | Collection | Content | Access | Permission |
 |------|------|----------|----------|
-| `users` | Users (unique `openid`): role / classId / name / student no. / subject | cloud functions only | read/write by creator only |
+| `users` | Users (unique `openid`): role / classId / name / student no. / gender / signature / subject / title | cloud functions only | read/write by creator only |
 | `classes` | Class: name, grade, motto, 6-char invite code (confusable characters removed) | cloud functions only | read/write by creator only |
 | `homeworks` | One homework assignment | cloud functions only | read/write by creator only |
 | `submissions` | One student's submission of one assignment | cloud functions only | read/write by creator only |
@@ -93,9 +93,11 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 | `reviews` | One teacher review (with student reply `reply` / `replyTs`) | cloud functions only | read/write by creator only |
 | `broadcasts` | Screen broadcast messages | cloud functions only | read/write by creator only |
 | `code_fails` | Rate-limit records for consecutive wrong invite codes (auto-cleaned) | cloud functions only | read/write by creator only |
+| `tts_cache` | MD5 of spoken text → cloud-storage fileID; each text is synthesized only once | cloud functions only | read/write by creator only |
+| `rate_limits` | Generic rate-limit counters (currently `tts`), bucketed per minute, cleaned by timer | cloud functions only | read/write by creator only |
 
 > **Why the strictest permission still works**
-> Cloud functions run with admin privileges and **bypass collection permission rules entirely**. Every read/write in this project happens inside cloud functions (the screen included: the `getBroadcast` function reads broadcasts while the page only polls it), so all 9 collections can safely use "read/write by creator only".
+> Cloud functions run with admin privileges and **bypass collection permission rules entirely**. Every read/write in this project happens inside cloud functions (the screen included: the `getBroadcast` function reads broadcasts while the page only polls it), so all 11 collections can safely use "read/write by creator only".
 
 ### Suggested indexes
 
@@ -113,6 +115,7 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 | `reviews` | `teacherOpenid` / `studentOpenid` | normal | Review lists |
 | `broadcasts` | `classId + ts` | compound | Latest broadcast for the screen |
 | `code_fails` | `key` | unique | Rate-limit record lookup |
+| `rate_limits` | `ts` | normal | Timer cleanup of expired counters |
 
 ## Cloud Functions (24)
 
@@ -141,7 +144,7 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 | | `replyReview` | Student replies to a received review (own reviews only, editable) |
 | Screen | `sendBroadcast` | Send a broadcast (class taken from the sender) |
 | | `getBroadcast` | Screen gets the latest broadcast by invite code (5s polling) |
-| | `tts` | Text-to-speech, upload to cloud storage, return fileID |
+| | `tts` | Text-to-speech: caches audio by text MD5, cross-instance rate limiting, timer cleanup of audio older than 30 days |
 
 ### Security design
 
@@ -150,7 +153,7 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 - **Register role rules**: existing students stay students forever (no privilege escalation via re-registering); existing users only update their profile; first-time registration uses the frontend choice, defaulting to teacher.
 - **Trust model (read this)**: the teacher role has **no approval workflow** — any WeChat user can self-register as a teacher and create a class. Isolation is per class: a self-proclaimed teacher only sees data of the class they created and of students who voluntarily joined with the invite code. This fits an internal class tool's trust assumptions (codes are handed out by the real teacher in person) and is **not suited to adversarial settings**; if someone impersonates a teacher, rebuild the class to rotate the invite code.
 - **Re-create-class guard**: when the teacher already has a class, `createClass` rejects with `needForce`; the frontend asks for explicit confirmation ("the old class will no longer be managed by you") before rebuilding, preventing accidental orphan classes.
-- **tts rate limiting**: the `tts` function has no login identity to check (screen devices may be unregistered), so it applies a light per-openid limit of 6 syntheses per minute per instance to protect the Baidu TTS endpoint and cloud storage from scripted abuse.
+- **tts rate limiting & caching**: the `tts` function has no login identity to check (screen devices may be unregistered), so it keeps counters in the `rate_limits` collection for **cross-instance** limiting (6 syntheses per openid per minute, even with multiple function instances) to protect the Baidu TTS endpoint and cloud storage from scripted abuse. Audio is cached as `tts/<md5>.mp3` and recorded in `tts_cache`, so repeating the same text no longer calls the third-party endpoint or takes extra storage.
 - **updateProfile field whitelist**: teachers may edit `name / gender / title / subject / signature / className`; students may edit `name / gender / studentNo / signature`. `openid`, `role` and `classId` are always ignored. Empty string deletes the field; omitted fields keep their values. **No phone number or other contact info is collected in this version.**
 - **Data isolation**: `myClass` returns the roster to teachers only (students always get an empty `students` list and a class object without the invite code); `getExamScores` / `classStats` and other whole-class endpoints require `role === 'teacher'`; students only ever read their own scores and reviews.
 - **Privacy consent**: no phone number or other contact info is collected in this version; the registration page has a mandatory "I have read and agree to the User Agreement and Privacy Policy" checkbox including a statement that minors have guardian consent. See `pages/privacy/`.
@@ -159,11 +162,11 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 ## Notes
 
 - Voice playback uses the **Baidu Translate TTS endpoint** (`fanyi.baidu.com/gettts`) — an unofficial API with no availability guarantee; replace the URL inside the `tts` function if it breaks. An older Youdao endpoint returned HTTP 500 for Chinese and was dropped. Max 200 characters per synthesis.
-- Audio from `tts` is uploaded to the `tts/` directory in cloud storage — watch cleanup and quota for long-term use.
+- Audio from `tts` is uploaded to the `tts/` directory, named by text MD5 and recorded in `tts_cache`. A timer trigger in `tts/config.json` runs daily at 04:00 and deletes audio plus cache records older than 30 days (keep the trigger config when uploading the `tts` function). **Audio uploaded by older versions (`timestamp_random.mp3`) is not in `tts_cache`; clean it once manually in the cloud storage console after upgrading. If you manually delete the new cached files under `tts/`, clear the `tts_cache` collection too, otherwise the cache will point to deleted audio.**
 - Default subjects are six (Chinese / Math / English / Physics / Chemistry / Biology); a new exam accepts custom subjects separated by commas or 、.
 - The "latest score" in the roster is the average of the most recent exam; shows "—" before any score is entered.
 - **Full score**: on the "Publish scores" page you can pick 100 / 120 / 150 / 200 (default 150, auto-following the most recent exam); it is stored in `exams.fullScore` at exam creation. Input validation (0 ≤ score ≤ full score), bar & radar chart Y axes, detail progress bars, excellence (90%) and pass (60%) rates, and the class-page excellent / at-risk filters are all scaled by it. Old exams without the field fall back to 100. Not editable after creation.
-- Several list queries still use `limit` (homework list 100, exam list 50, reviews 100, roster 200 on the score-entry page); exceeding it **silently truncates**. Paginate if your class is much larger. Score statistics (`classStats`) and submission counts (`listHomework`) already fetch in batches and are not affected.
+- List queries now fetch in batches: up to 1000 students, 500 homework / exam / review rows, and 200 exams in the student exam switcher. When a cap is hit the response carries `truncated: true` and the page shows "showing the latest N only" instead of silently dropping data.
 
 ## Suggested regression checklist
 
@@ -179,6 +182,8 @@ After changing cloud functions, focus on these:
 - [ ] Invite code: 5 wrong attempts → "too many attempts" toast
 - [ ] Full score: create a 150-point exam → entering 160 is rejected → chart axes, progress bars and the "excellent" filter scale by 150
 - [ ] Withdraw homework: it disappears from the list and student submissions are deleted
+- [ ] Due date: set it to yesterday → the student sees "expired / submit late" → after submitting, "late" appears for the student and the teacher's progress shows "late 1"
+- [ ] TTS cache: send the same broadcast twice → the second one skips Baidu (`tts_cache` hit) and cloud storage keeps a single file
 - [ ] Review reply: student replies → teacher sees the highlighted reply under "Me → My reviews" → student edits the reply and the teacher side updates
 - [ ] Re-create class: with an existing class, tapping "Create class" shows a confirmation warning that the old class will no longer be managed by you
 - [ ] Screen: bind, background the app for 30s, have the teacher send a broadcast → returning to the screen page should speak the new broadcast automatically
@@ -208,7 +213,7 @@ This mini program is an internal class-management tool (productivity category), 
 2. Nothing is public: no following, comments, sharing, or feeds; users cannot browse other classes' content.
 3. Pages are empty before a class is created or joined — that is expected.
 
-> The Privacy Policy and User Agreement are available inside the mini program (from the registration, edit-profile and settings pages). Data collected: openid (login identifier, auto-generated); name / student no. / class (class-internal identifiers). **No phone number, email or any other contact info is collected**, and no WeChat user-profile, phone, location, camera or album APIs are used.
+> The Privacy Policy and User Agreement are available inside the mini program (from the registration, edit-profile and settings pages). Data collected: openid (login identifier, auto-generated); name / student no. / class (class-internal identifiers), plus optional gender / signature / subject / teacher title. **No phone number, email or any other contact info is collected**, and no WeChat user-profile, phone, location, camera or album APIs are used.
 
 ## Contact
 

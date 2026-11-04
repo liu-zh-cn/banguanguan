@@ -48,17 +48,22 @@ exports.main = async () => {
   if (!exams.length) return empty;
 
   // 拉这 50 场考试的成绩。注意：云函数单次 get 平台硬上限 1000 条，
-  // 之前的 limit(5000) 实际只拿到无排序的前 1000 条（老考试整段消失且无报错），
-  // 改为按考试 id 分批拉全：每批 4 场 × 每场 ≤200 名学生 ≈ 800 条，留出余量
+  // 之前的 limit(5000) 实际只拿到无排序的前 1000 条（老考试整段消失且无报错）。
+  // 改为按考试 id 分批 + 批内分页：每批 4 场，即使每场 1000 名学生也能拉全
   const examIds = exams.map((e) => e._id);
   const docs = [];
   for (let i = 0; i < examIds.length; i += 4) {
-    const part = await db
-      .collection('scores')
-      .where({ examId: _.in(examIds.slice(i, i + 4)) })
-      .limit(1000)
-      .get();
-    (part.data || []).forEach((d) => docs.push(d));
+    const partIds = examIds.slice(i, i + 4);
+    for (let skip = 0; ; skip += 1000) {
+      const part = await db
+        .collection('scores')
+        .where({ examId: _.in(partIds) })
+        .skip(skip)
+        .limit(1000)
+        .get();
+      (part.data || []).forEach((d) => docs.push(d));
+      if (!part.data || part.data.length < 1000) break;
+    }
   }
   if (!docs.length) return empty;
 

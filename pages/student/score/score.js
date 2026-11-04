@@ -8,6 +8,7 @@ Page({
     rank: 0,
     barData: {},
     exams: [],
+    truncated: false,
     examId: '',
     examName: '',
     fullScore: 100,
@@ -28,7 +29,7 @@ Page({
         if (seq !== this._seq) return; // 过期响应，丢弃
         if (!r || !r.ok) return;
         if (!r.hasExam) {
-          this.setData({ hasExam: false, exams: [], scores: [], examName: '' });
+          this.setData({ hasExam: false, exams: [], scores: [], examName: '', truncated: false });
           return;
         }
         const rows = (r.rows || []).map((s) => ({
@@ -39,6 +40,7 @@ Page({
         this.setData({
           hasExam: true,
           exams: r.exams || [],
+          truncated: !!r.truncated,
           examId: r.examId,
           examName: r.examName + (r.date ? ' · ' + r.date : ''),
           fullScore: r.fullScore || 100,
@@ -53,7 +55,7 @@ Page({
           }
         });
       })
-      .catch(() => {});
+      .catch(() => app.showError('成绩加载失败'));
   },
 
   pickExam(e) {

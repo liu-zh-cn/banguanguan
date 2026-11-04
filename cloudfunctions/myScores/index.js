@@ -16,21 +16,31 @@ exports.main = async (event) => {
   const classId = user.classId || '';
   if (!classId) return { ok: true, hasExam: false, exams: [] };
 
-  // 已发布的考试（新→旧）
-  const ex = await db
-    .collection('exams')
-    .where({ classId, published: true })
-    .orderBy('ts', 'desc')
-    .limit(50)
-    .get();
-  const exams = (ex.data || []).map((e) => ({
+  // 已发布的考试（新→旧）。分页拉全：limit(50) 会让第 51 场以后的旧考试
+  // 在学生的「切换考试」里静默消失
+  const PAGE = 50;
+  const MAX_EXAMS = 200;
+  const raw = [];
+  for (let skip = 0; skip < MAX_EXAMS; skip += PAGE) {
+    const ex = await db
+      .collection('exams')
+      .where({ classId, published: true })
+      .orderBy('ts', 'desc')
+      .skip(skip)
+      .limit(PAGE)
+      .get();
+    (ex.data || []).forEach((e) => raw.push(e));
+    if (!ex.data || ex.data.length < PAGE) break;
+  }
+  const truncated = raw.length >= MAX_EXAMS;
+  const exams = raw.map((e) => ({
     _id: e._id,
     name: e.name,
     date: e.date || '',
     fullScore: Number(e.fullScore) > 0 ? Number(e.fullScore) : 100,
     subjects: e.subjects || []
   }));
-  if (!exams.length) return { ok: true, hasExam: false, exams: [] };
+  if (!exams.length) return { ok: true, hasExam: false, exams: [], truncated: false };
 
   const wantId = event.examId || '';
   const exam = exams.find((e) => e._id === wantId) || exams[0];
@@ -70,6 +80,7 @@ exports.main = async (event) => {
     examName: exam.name,
     date: exam.date,
     fullScore: exam.fullScore,
+    truncated,
     rows,
     total: myTotal,
     avg: mean(rows.map((r) => r.score)),

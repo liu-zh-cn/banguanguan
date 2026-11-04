@@ -19,12 +19,20 @@ exports.main = async (event) => {
   // 先判 classId 非空再比对，避免「双方都 undefined」误判为同班
   if (!user.classId || e.data.classId !== user.classId) return { ok: false, msg: '无权查看' };
 
-  const s = await db
-    .collection('users')
-    .where({ classId: user.classId, role: 'student' })
-    .limit(200)
-    .get();
-  const students = (s.data || []).map((x, i) => ({
+  // 分页拉全名单：limit(200) 会让第 201 名学生在这里静默消失，没法给他录分
+  const RAW = [];
+  const PAGE = 100;
+  for (let skip = 0; skip < 1000; skip += PAGE) {
+    const s = await db
+      .collection('users')
+      .where({ classId: user.classId, role: 'student' })
+      .skip(skip)
+      .limit(PAGE)
+      .get();
+    (s.data || []).forEach((x) => RAW.push(x));
+    if (!s.data || s.data.length < PAGE) break;
+  }
+  const students = RAW.map((x, i) => ({
     openid: x.openid,
     name: x.name || '未命名',
     no: x.studentNo || String(i + 1).padStart(2, '0')

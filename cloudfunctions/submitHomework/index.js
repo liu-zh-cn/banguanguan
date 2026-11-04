@@ -3,6 +3,13 @@ const cloud = require('wx-server-sdk');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 
+// 北京时间的 YYYY-MM-DD（云函数环境时区是 UTC）
+function todayStr() {
+  const d = new Date(Date.now() + 8 * 3600 * 1000);
+  const p = (n) => String(n).padStart(2, '0');
+  return d.getUTCFullYear() + '-' + p(d.getUTCMonth() + 1) + '-' + p(d.getUTCDate());
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const { homeworkId } = event;
@@ -22,17 +29,25 @@ exports.main = async (event) => {
   if (!hw || !hw.data) return { ok: false, msg: '作业不存在' };
   if ((hw.data.classId || '') !== user.classId) return { ok: false, msg: '无权提交该作业' };
 
+  // 截止日期之前只是展示字段，现在真正参与判定：
+  // 过期仍允许提交（学生可能补交），但会打上 late 标记，老师端能看到迟交人数
+  const overdue = !!hw.data.deadline && todayStr() > hw.data.deadline;
+
   const exist = await db
     .collection('submissions')
     .where({ homeworkId, studentOpenid: OPENID })
     .limit(1)
     .get();
 
+  // 以首次提交为准：按时交过的同学，过期后再修改内容不应被改成迟交
+  const late = exist.data.length ? !!exist.data[0].late : overdue;
+
   if (exist.data.length) {
     await db.collection('submissions').doc(exist.data[0]._id).update({
       data: {
         status: '已提交',
         content,
+        late,
         submittedAt: db.serverDate(),
         ts: Date.now()
       }
@@ -50,6 +65,7 @@ exports.main = async (event) => {
           studentName: user.name || '',
           status: '已提交',
           content,
+          late,
           submittedAt: db.serverDate(),
           ts: Date.now()
         }
@@ -62,9 +78,9 @@ exports.main = async (event) => {
         .get();
       if (!again.data.length) throw e;
       await db.collection('submissions').doc(again.data[0]._id).update({
-        data: { status: '已提交', content, submittedAt: db.serverDate(), ts: Date.now() }
+        data: { status: '已提交', content, late, submittedAt: db.serverDate(), ts: Date.now() }
       });
     }
   }
-  return { ok: true };
+  return { ok: true, late };
 };

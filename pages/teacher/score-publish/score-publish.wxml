@@ -44,6 +44,7 @@
         </view>
       </view>
     </view>
+    <view class="muted" style="text-align:center;padding:20rpx 0;" wx:if="{{truncated}}">考试较多，仅显示最近 500 场</view>
     <view class="muted" style="text-align:center;padding:60rpx 0;" wx:if="{{!exams.length}}">还没有考试，点上方「＋ 新建考试」开始</view>
   </view>
 
