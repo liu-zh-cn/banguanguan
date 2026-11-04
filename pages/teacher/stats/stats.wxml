@@ -29,6 +29,9 @@
       <view class="stat-label">及格率</view>
     </view>
   </view>
+  <view class="muted" style="padding:0 24rpx 20rpx;font-size:22rpx;line-height:1.6;">
+    班级均分按最近一次考试的全部已录分数计算；优秀率 / 及格率按每位学生的均分统计。缺考与老师尚未录入目前都计为“未参与”，不计入分母。
+  </view>
 
   <!-- 图表切换入口 -->
   <view class="card">

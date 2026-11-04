@@ -2,7 +2,7 @@
   "compileType": "miniprogram",
   "appid": "wx192100c811d11c22",
   "projectname": "bangguanguan",
-  "libVersion": "3.0.0",
+  "libVersion": "3.16.3",
   "miniprogramRoot": "./",
   "cloudfunctionRoot": "cloudfunctions/",
   "setting": {

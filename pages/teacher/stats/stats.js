@@ -39,9 +39,9 @@ Page({
       .then((r) => {
         if (!r || !r.ok) return;
         const charts = {
-          bar: { title: '各科平均分', desc: '最近一次考试 · 满分 ' + (r.fullScore || 100) + ' 分', data: r.subjectAvg || {} },
-          line: { title: '考试平均分趋势', desc: '历次考试', data: r.trend || {} },
-          pie: { title: '成绩分布', desc: '按学生均分统计', data: r.dist || {} },
+          bar: { title: '各科平均分', desc: '最近一次考试 · 满分 ' + (r.fullScore || 100) + ' 分 · 按全部已录分数计算', data: r.subjectAvg || {} },
+          line: { title: '考试平均分趋势', desc: '历次考试 · 每次考试的全部已录分数', data: r.trend || {} },
+          pie: { title: '成绩分布', desc: '按学生均分统计 · 缺考与未录入不计入', data: r.dist || {} },
           radar: { title: '各科均分雷达', desc: '最近一次考试 · 满分 ' + (r.fullScore || 100) + ' 分', data: r.radar || {} }
         };
         this._charts = charts;

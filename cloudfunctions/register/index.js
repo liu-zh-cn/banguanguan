@@ -26,9 +26,14 @@ exports.main = async (event) => {
   // 2. 已有身份的，register 不改 role，只更新资料；
   // 3. 首次注册只接受 teacher / student；乱传的 'admin' 之类不能入库，
   //    否则该账号会在部分接口里被当成老师、部分接口里被当成学生。
-  const finalRole = hasUser
-    ? (exist.data[0].role === 'student' ? 'student' : (exist.data[0].role || 'teacher'))
-    : (role === 'student' ? 'student' : 'teacher');
+  // 已存在的非法角色（历史脏数据里的 admin / 空值）不再原样保留：
+  // 学生保持不变，其余一律归一为老师；新用户仍按前端 role 白名单取值
+  const oldRole = hasUser ? exist.data[0].role : '';
+  const finalRole = oldRole === 'student'
+    ? 'student'
+    : (oldRole === 'teacher'
+      ? 'teacher'
+      : (hasUser ? 'teacher' : (role === 'student' ? 'student' : 'teacher')));
 
   const data = {
     role: finalRole,

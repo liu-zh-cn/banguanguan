@@ -22,7 +22,7 @@
 
     <view class="form-item column">
       <text class="form-label">作业要求</text>
-      <textarea class="form-textarea" placeholder="选填，描述作业内容与要求" value="{{content}}" bindinput="onContent" />
+      <textarea class="form-textarea" maxlength="2000" placeholder="选填，描述作业内容与要求（2000 字内）" value="{{content}}" bindinput="onContent" />
     </view>
 
     <view class="form-item">

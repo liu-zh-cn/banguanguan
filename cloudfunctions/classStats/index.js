@@ -4,6 +4,10 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 const _ = db.command;
 
+// 看板缓存：30 秒内重复进入直接读缓存，避免每次 onShow 都把全班成绩重算一遍。
+// 录成绩 / 新建考试 / 学生转班 / 删除考试时会把对应缓存删掉，正常情况下看不到旧数据。
+const CACHE_MS = 30 * 1000;
+
 function mean(arr) {
   if (!arr.length) return 0;
   return Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1));
@@ -17,6 +21,18 @@ exports.main = async () => {
   // 数据看板是老师端功能：总览与全班分布不对学生开放
   if (user.role !== 'teacher') return { ok: false, msg: '仅老师可查看班级数据' };
   const classId = user.classId || '';
+
+  if (classId) {
+    const cached = await db.collection('class_stats').doc(classId).get().catch(() => null);
+    if (
+      cached &&
+      cached.data &&
+      cached.data.payload &&
+      Date.now() - (cached.data.ts || 0) < CACHE_MS
+    ) {
+      return cached.data.payload;
+    }
+  }
 
   let studentCount = 0;
   if (classId) {
@@ -138,7 +154,7 @@ exports.main = async () => {
     ]
   };
 
-  return {
+  const result = {
     ok: true,
     hasData: true,
     overview,
@@ -152,4 +168,13 @@ exports.main = async () => {
     goodLine,
     studentLatest
   };
+
+  // 缓存写失败不影响返回：class_stats 集合没建时，看板照常实时计算
+  await db
+    .collection('class_stats')
+    .doc(classId)
+    .set({ data: { ts: Date.now(), payload: result } })
+    .catch(() => null);
+
+  return result;
 };

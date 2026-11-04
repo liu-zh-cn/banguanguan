@@ -44,6 +44,16 @@ Component({
       ctx.clearRect(0, 0, this._w, this._h);
     },
 
+    // 某张图暂时没有可用数据时给一句明确提示，避免看起来像“渲染坏了”
+    drawEmpty() {
+      const ctx = this._ctx;
+      ctx.fillStyle = '#A6ABC0';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('暂无数据', this._w / 2, this._h / 2);
+    },
+
     render() {
       if (!this._ready) return;
       this.clear();
@@ -58,6 +68,7 @@ Component({
     drawBar() {
       const ctx = this._ctx, w = this._w, h = this._h;
       const { labels = [], values = [], max: dMax } = this.data.data || {};
+      if (!values.length) return this.drawEmpty();
       const padL = 34, padR = 12, padT = 24, padB = 34;
       const cw = w - padL - padR, ch = h - padT - padB;
       const max = dMax || Math.max.apply(null, values.concat([1])) * 1.2;
@@ -105,6 +116,7 @@ Component({
     drawLine() {
       const ctx = this._ctx, w = this._w, h = this._h;
       const { labels = [], values = [] } = this.data.data || {};
+      if (!values.length) return this.drawEmpty();
       const padL = 34, padR = 16, padT = 24, padB = 34;
       const cw = w - padL - padR, ch = h - padT - padB;
       const max = Math.max.apply(null, values.concat([1])) * 1.1;
@@ -179,12 +191,13 @@ Component({
       const ctx = this._ctx, w = this._w, h = this._h;
       const items = (this.data.data && this.data.data.items) || [];
       const rawTotal = items.reduce((s, it) => s + (Number(it.value) || 0), 0);
-      // 全 0 时也用 1 作除数避免 NaN，但中心文字要显示真实的 0 而不是借位的 1
-      const total = rawTotal > 0 ? rawTotal : 1;
+      if (!items.length || rawTotal <= 0) return this.drawEmpty();
+      const total = rawTotal;
       const cx = w / 2;
       const cy = h / 2;
-      const r = Math.min(w, h) / 2 - 12;
-      const ir = r * 0.58;
+      // 小屏留出边距：之前按 min(w,h)/2 - 12 会顶到容器边，图例/圆环容易被裁
+      const r = Math.max(30, Math.min(w, h) / 2 - 26);
+      const ir = r * 0.6;
       let start = -Math.PI / 2;
       items.forEach((it) => {
         const ang = (it.value / total) * Math.PI * 2;
@@ -205,8 +218,8 @@ Component({
       ctx.fillStyle = '#1F2430';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = 'bold 20px sans-serif';
-      ctx.fillText(rawTotal > 0 ? rawTotal : 0, cx, cy - 8);
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText(rawTotal, cx, cy - 8);
       ctx.fillStyle = '#A6ABC0';
       ctx.font = '10px sans-serif';
       ctx.fillText('总人数', cx, cy + 12);
@@ -216,6 +229,7 @@ Component({
     drawRadar() {
       const ctx = this._ctx, w = this._w, h = this._h;
       const { labels = [], values = [], max: dMax } = this.data.data || {};
+      if (!labels.length || !values.length) return this.drawEmpty();
       const n = labels.length || 1;
       const cx = w / 2;
       const cy = h / 2 + 4;

@@ -57,5 +57,9 @@ exports.main = async (event) => {
       createdAt: db.serverDate()
     }
   });
+
+  // 新考试会改变「最近一次考试」，让看板缓存失效
+  await db.collection('class_stats').doc(user.classId).remove().catch(() => null);
+
   return { ok: true, examId: add._id };
 };

@@ -3,7 +3,6 @@
 const cloud = require('wx-server-sdk');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
-const _ = db.command;
 const guard = require('./_invite-guard');
 
 exports.main = async (event) => {
@@ -42,16 +41,13 @@ exports.main = async (event) => {
   await db.collection('users').doc(user._id).update({
     data: { classId: cls._id, className: cls.name, role: 'student' }
   });
-  await db.collection('classes').doc(cls._id).update({
-    data: { studentCount: _.inc(1) }
-  });
-  // 换班时旧班人数要减回去，否则 studentCount 只增不减、越用越虚
+  // 班级人数不再维护 studentCount 副本：页面统一按 users 表实时 count，
+  // 避免转班/删号后计数只增不减，出现两套对不上的人数
+
+  // 人数变化会影响数据看板，清掉缓存让下次进入重新计算
+  await db.collection('class_stats').doc(cls._id).remove().catch(() => null);
   if (oldClassId) {
-    await db
-      .collection('classes')
-      .doc(oldClassId)
-      .update({ data: { studentCount: _.inc(-1) } })
-      .catch(() => null); // 旧班可能已被删除，不阻断加入流程
+    await db.collection('class_stats').doc(oldClassId).remove().catch(() => null);
   }
 
   return { ok: true, classId: cls._id, className: cls.name };

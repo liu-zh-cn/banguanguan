@@ -115,11 +115,29 @@ async function cleanup() {
       const rows = res.data || [];
       if (!rows.length) break;
       const fileList = rows.map((x) => x.fileID).filter(Boolean);
-      if (fileList.length) await cloud.deleteFile({ fileList }).catch(() => null);
-      for (const x of rows) {
-        await db.collection('tts_cache').doc(x._id).remove().catch(() => null);
+      let deleted = null;
+      if (fileList.length) {
+        deleted = await cloud.deleteFile({ fileList }).catch(() => null);
       }
-      removed += rows.length;
+      // deleteFile 可能部分失败；失败的记录必须保留，否则文件会变成
+      // 没有 tts_cache 指向的孤儿，之后再也无法被定时任务发现和清理
+      const okFiles = new Set(
+        ((deleted && deleted.fileList) || [])
+          .filter((x) => x.status === 0)
+          .map((x) => x.fileID)
+      );
+      let failed = false;
+      for (const x of rows) {
+        // 没有 fileID 的记录直接删；有 fileID 但没删成功的一律保留重试
+        if (x.fileID && !okFiles.has(x.fileID)) {
+          failed = true;
+          continue;
+        }
+        await db.collection('tts_cache').doc(x._id).remove().catch(() => null);
+        removed++;
+      }
+      // 文件删除失败时不再继续翻页，避免 20 轮反复撞同一批失败记录
+      if (failed) break;
       if (rows.length < 100) break;
     }
 

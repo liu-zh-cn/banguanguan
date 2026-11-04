@@ -71,9 +71,14 @@ Page({
       placeholderText: '可填写答案要点 / 说明（选填）',
       success: (res) => {
         if (!res.confirm) return;
+        const content = res.content || '';
+        if (content.length > 2000) {
+          wx.showToast({ title: '内容不能超过 2000 字', icon: 'none' });
+          return;
+        }
         wx.showLoading({ title: '提交中' });
         app
-          .cloudSubmitHomework(id, res.content || '')
+          .cloudSubmitHomework(id, content)
           .then((r) => {
             wx.hideLoading();
             if (r.ok) {

@@ -45,7 +45,7 @@
     <view class="my-item">
       <view class="flex-1">
         <view class="my-name">{{myClass.name}}</view>
-        <view class="muted">班主任 {{myClass.teacher}} · 邀请码 {{myClass.inviteCode || '—'}}</view>
+        <view class="muted">班主任 {{myClass.teacher}} · 邀请码 {{myClass.inviteCode || '—'}}{{myClass.expectedCount ? ' · 预计 ' + myClass.expectedCount + ' 人' : ''}}</view>
       </view>
       <text class="code-link" wx:if="{{myClass.inviteCode}}" data-code="{{myClass.inviteCode}}" catchtap="copyCode">复制</text>
     </view>

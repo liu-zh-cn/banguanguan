@@ -1,7 +1,8 @@
 // 大屏页：凭邀请码轮询本班最新广播。
 // 为什么不用 db.watch：broadcasts 集合需要「所有用户可读」才能前端监听，
 // 那等于任何人都能读全部班级的广播。改走云函数后集合可收紧为「仅创建者可读写」。
-const POLL_MS = 5000; // 5 秒一轮；太密会吃云函数调用配额，5 秒对"请学生到办公室"够用
+const POLL_MS = 5000; // 有新消息后的基础间隔；太密会吃云函数调用配额
+const POLL_MAX_MS = 30000; // 长时间没有新消息时退避到这个上限
 
 Page({
   data: {
@@ -115,9 +116,11 @@ Page({
   },
 
   startPolling() {
-    if (this._timer) return;
+    if (this._pollActive) return;
     if (!this._inviteCode) return;
+    this._pollActive = true;
     this._polling = false;
+    this._pollDelay = POLL_MS;
     // 首次拿到的是"当前状态"（可能含进页面之前就存在的旧广播），只显示不朗读；想听点「重播」。
     // 注意：只有"从未就绪"才建立静默基线。息屏/切后台（onHide 停轮询）回来恢复时要保留
     // _lastTs，否则隐藏期间收到的新广播回来后只显示不播报——语音播报就白做了
@@ -127,28 +130,37 @@ Page({
     }
     this.setData({ status: '正在连接…', connected: false });
     this.poll();
-    this._timer = setInterval(() => this.poll(), POLL_MS);
   },
 
   stopPolling() {
+    this._pollActive = false;
     if (this._timer) {
-      clearInterval(this._timer);
+      clearTimeout(this._timer);
       this._timer = null;
     }
   },
 
+  // 没有新广播时逐步退避到 30 秒，收到新消息立即回到 5 秒：
+  // 大屏常开一天，固定 5 秒轮询是上万次调用；退避后新消息最迟 30 秒上屏
+  scheduleNext(delay) {
+    if (!this._pollActive || this._unloaded) return;
+    this._pollDelay = delay;
+    if (this._timer) clearTimeout(this._timer);
+    this._timer = setTimeout(() => this.poll(), delay);
+  },
+
   poll() {
-    if (this._unloaded || this._polling) return;
+    if (this._unloaded || this._polling || !this._pollActive) return;
     this._polling = true;
     getApp()
       .cloudGetBroadcast(this._inviteCode)
       .then((r) => {
         this._polling = false;
-        if (this._unloaded) return;
+        if (this._unloaded || !this._pollActive) return;
         if (!r || !r.ok) {
           const msg = (r && r.msg) || '获取广播失败';
           // 邀请码失效（班级被删/码被改）属于不可恢复错误：
-          // 继续每 5 秒轮询只会整夜白烧云函数调用配额，停轮询让用户重新绑定。
+          // 继续轮询只会整夜白烧云函数调用配额，停轮询让用户重新绑定。
           // 优先按云函数返回的 code 判断；msg 兜底兼容尚未重新部署的旧云函数
           const fatalCode = r && (r.code === 'INVALID_INVITE' || r.code === 'MISSING_INVITE_CODE');
           const legacyFatal = msg === '邀请码无效' || msg === '缺少邀请码';
@@ -166,6 +178,7 @@ Page({
             return;
           }
           this.setData({ connected: false, status: msg });
+          this.scheduleNext(Math.min(this._pollDelay * 2, POLL_MAX_MS));
           return;
         }
         if (r.className && r.className !== this.data.className) {
@@ -184,18 +197,23 @@ Page({
           this._speakReady = true;
           this._lastTs = b ? b.ts || 0 : 0;
           if (b) this.setData({ text: b.text || '' });
+          this.scheduleNext(POLL_MS);
           return;
         }
         if (b && b.ts && b.ts !== this._lastTs) {
           this._lastTs = b.ts;
           this.setData({ text: b.text || '' });
           this.speak(b.text);
+          this.scheduleNext(POLL_MS);
+          return;
         }
+        this.scheduleNext(Math.min(this._pollDelay * 2, POLL_MAX_MS));
       })
       .catch(() => {
         this._polling = false;
-        if (this._unloaded) return;
+        if (this._unloaded || !this._pollActive) return;
         this.setData({ connected: false, status: '网络异常，重试中…' });
+        this.scheduleNext(Math.min(this._pollDelay * 2, POLL_MAX_MS));
       });
   },
 

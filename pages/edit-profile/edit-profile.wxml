@@ -14,7 +14,7 @@
     <picker mode="selector" range="{{genders}}" value="{{genderIndex}}" bindchange="onGender">
       <view class="f-row">
         <text class="f-label">性别</text>
-        <view class="f-input f-picker">{{profile.gender}} ›</view>
+        <view class="f-input f-picker">{{profile.gender || '未设置'}} ›</view>
       </view>
     </picker>
 

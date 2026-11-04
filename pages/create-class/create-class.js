@@ -1,4 +1,5 @@
 const app = getApp();
+const { markDirty, clearDirty } = require('../../utils/guard');
 
 Page({
   data: {
@@ -37,7 +38,8 @@ Page({
           myClass: {
             name: r.class.name || '未命名班级',
             inviteCode: r.class.inviteCode || '',
-            teacher: (r.user && r.user.name) || ''
+            teacher: (r.user && r.user.name) || '',
+            expectedCount: Number(r.class.expectedCount) || 0
           }
         });
       })
@@ -45,10 +47,12 @@ Page({
   },
 
   onInput(e) {
+    markDirty(this, '班级还没创建，确定离开吗？');
     this.setData({ [e.currentTarget.dataset.field]: e.detail.value });
   },
 
   onGrade(e) {
+    markDirty(this, '班级还没创建，确定离开吗？');
     this.setData({ gradeIndex: Number(e.detail.value) });
   },
 
@@ -90,12 +94,14 @@ Page({
           return;
         }
         if (!res.ok) return this.warn(res.msg || '创建失败');
+        clearDirty(this);
         // 直接用服务端返回的结果展示，不再写本机缓存
         this.setData({
           myClass: {
             name: fullName,
             inviteCode: res.inviteCode || '',
-            teacher: teacher.trim()
+            teacher: teacher.trim(),
+            expectedCount: Math.max(0, Math.floor(Number(count) || 0))
           },
           name: '',
           count: '',

@@ -22,7 +22,8 @@ exports.main = async (event) => {
   if (user.role !== 'student') return { ok: false, msg: '仅学生可提交作业' };
   if (!user.classId) return { ok: false, msg: '请先加入班级' };
 
-  const content = String(event.content == null ? '' : event.content);
+  // 与 assignHomework 的 2000 字上限对齐：超长内容直接截断，不让它无上限入库
+  const content = String(event.content == null ? '' : event.content).slice(0, 2000);
 
   // 校验作业属于自己班：否则手工构造 homeworkId 就能往别班作业里塞提交记录
   const hw = await db.collection('homeworks').doc(homeworkId).get().catch(() => null);

@@ -1,6 +1,5 @@
 const app = getApp();
-
-const PALETTE = ['#5B7CFF', '#24C8A0', '#FFB020', '#7E5BFF', '#FF5A5F', '#00B8D9'];
+const { PALETTE } = require('../../../utils/constants');
 
 Page({
   data: {
@@ -9,6 +8,7 @@ Page({
     keyword: '',
     filter: 'all',
     className: '未设置班级',
+    expectedCount: 0,
     // 分数线跟着试卷满分走，拿到 classStats 后再刷新
     passLine: 60,
     excellentLine: 90
@@ -26,7 +26,10 @@ Page({
       .cloudMyClass()
       .then((r) => {
         if (seq !== this._seq) return; // 过期响应，丢弃
-        if (r.class && r.class.name) this.setData({ className: r.class.name });
+        this.setData({
+          className: (r.class && r.class.name) || this.data.className,
+          expectedCount: Number(r.class && r.class.expectedCount) || 0
+        });
         if (r.class && r.class.inviteCode) this._inviteCode = r.class.inviteCode;
         const students = (r.students || []).map((s, i) => ({
           id: s._id,

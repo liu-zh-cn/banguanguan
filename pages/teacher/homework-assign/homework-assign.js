@@ -1,8 +1,10 @@
 const app = getApp();
+const { markDirty, clearDirty } = require('../../../utils/guard');
+const { DEFAULT_SUBJECTS } = require('../../../utils/constants');
 
 Page({
   data: {
-    subjects: ['语文', '数学', '英语', '物理', '化学', '生物'],
+    subjects: DEFAULT_SUBJECTS,
     subjectIndex: 0,
     title: '',
     content: '',
@@ -38,15 +40,19 @@ Page({
   },
 
   onSubject(e) {
+    markDirty(this, '作业还没发布，确定离开吗？');
     this.setData({ subjectIndex: Number(e.detail.value) });
   },
   onTitle(e) {
+    markDirty(this, '作业还没发布，确定离开吗？');
     this.setData({ title: e.detail.value });
   },
   onContent(e) {
+    markDirty(this, '作业还没发布，确定离开吗？');
     this.setData({ content: e.detail.value });
   },
   onDate(e) {
+    markDirty(this, '作业还没发布，确定离开吗？');
     this.setData({ deadline: e.detail.value });
   },
 
@@ -74,6 +80,7 @@ Page({
           wx.showToast({ title: res.msg || '发布失败', icon: 'none' });
           return;
         }
+        clearDirty(this);
         this.setData({ title: '', content: '', deadline: '' });
         wx.showToast({ title: '布置成功', icon: 'success' });
         this.loadList();

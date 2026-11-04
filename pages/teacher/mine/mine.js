@@ -25,8 +25,8 @@ Page({
     app
       .cloudMyClass()
       .then((r) => {
-        const student = r.students ? r.students.length : (r.class && r.class.studentCount) || 0;
-        this.setData({ 'stats.student': student });
+        // 只认 users 表返回的名单，不再读 classes.studentCount 副本
+        this.setData({ 'stats.student': (r.students || []).length });
       })
       .catch(() => app.showError('班级信息加载失败'));
     app

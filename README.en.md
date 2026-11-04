@@ -62,8 +62,9 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 ├── components/
 │   ├── bottom-nav/        # Bottom navigation (teacher / student variants)
 │   └── chart/             # Hand-drawn Canvas charts (bar / line / pie / radar)
+├── utils/                 # Shared constants / time formatting / unsaved-changes guard
 ├── assets/                # Images
-└── cloudfunctions/        # 24 cloud functions
+└── cloudfunctions/        # 25 cloud functions
 ```
 
 ## Getting Started
@@ -71,11 +72,11 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 1. Import the project into WeChat DevTools
 2. Enable Cloud Base and set `CLOUD_ENV` at the top of `app.js` to your environment ID
 3. In the Cloud Console → Database, create the collections below following *Data Model & Permissions* (permissions and indexes included)
-4. For each of the 24 cloud functions under `cloudfunctions/`: right-click → *Upload and Deploy: Cloud Install Dependencies*
+4. For each of the 25 cloud functions under `cloudfunctions/`: right-click → *Upload and Deploy: Cloud Install Dependencies*
 5. Compile and run
 
 > **Two most common pitfalls**
-> 1. All **11 collections must use "read/write by creator only"** — no exception is needed. The screen reads broadcasts through a cloud function; the frontend never touches the database directly.
+> 1. All **12 collections must use "read/write by creator only"** — no exception is needed. The screen reads broadcasts through a cloud function; the frontend never touches the database directly.
 > 2. After editing a cloud function you must **re-upload that cloud function** — uploading the mini program alone does not update it.
 
 ## Data Model & Permissions
@@ -94,10 +95,11 @@ Built on WeChat Cloud Base (cloud functions + cloud database + cloud storage) �
 | `broadcasts` | Screen broadcast messages | cloud functions only | read/write by creator only |
 | `code_fails` | Rate-limit records for consecutive wrong invite codes (auto-cleaned) | cloud functions only | read/write by creator only |
 | `tts_cache` | MD5 of spoken text → cloud-storage fileID; each text is synthesized only once | cloud functions only | read/write by creator only |
-| `rate_limits` | Generic rate-limit counters (currently `tts`), bucketed per minute, cleaned by timer | cloud functions only | read/write by creator only |
+| `rate_limits` | Generic rate-limit counters (`tts` / `sendBroadcast`), bucketed per minute, cleaned by timer | cloud functions only | read/write by creator only |
+| `class_stats` | 30-second dashboard cache: `classId → computed result`; invalidated on score entry / exam creation / class transfer / exam deletion | cloud functions only | read/write by creator only |
 
 > **Why the strictest permission still works**
-> Cloud functions run with admin privileges and **bypass collection permission rules entirely**. Every read/write in this project happens inside cloud functions (the screen included: the `getBroadcast` function reads broadcasts while the page only polls it), so all 11 collections can safely use "read/write by creator only".
+> Cloud functions run with admin privileges and **bypass collection permission rules entirely**. Every read/write in this project happens inside cloud functions (the screen included: the `getBroadcast` function reads broadcasts while the page only polls it), so all 12 collections can safely use "read/write by creator only".
 
 ### Suggested indexes
 
@@ -117,7 +119,7 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 | `code_fails` | `key` | unique | Rate-limit record lookup |
 | `rate_limits` | `ts` | normal | Timer cleanup of expired counters |
 
-## Cloud Functions (24)
+## Cloud Functions (25)
 
 | Group | Function | Responsibility |
 |------|--------|------|
@@ -133,17 +135,18 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 | | `submitHomework` | Student submits homework |
 | | `deleteHomework` | Withdraw homework and clean up submissions |
 | Exams / Scores | `createExam` | Create an exam (with subject list) |
+| | `deleteExam` | Delete an exam that has no scores and is unpublished |
 | | `listExams` | Exam list (teachers get averages and score counts) |
 | | `inputScores` | Upsert per-student per-subject scores |
 | | `getExamScores` | Input page data: exam + roster + entered scores |
 | | `setExamPublished` | Publish / unpublish scores |
 | | `myScores` | Student's own scores, class averages, ranks |
-| | `classStats` | Dashboard: overview + 4 charts + per-student latest average |
+| | `classStats` | Dashboard: overview + 4 charts + per-student latest average (30s cache) |
 | Reviews | `addReview` | Teacher writes a review |
 | | `listReviews` | Review list (by role) |
 | | `replyReview` | Student replies to a received review (own reviews only, editable) |
 | Screen | `sendBroadcast` | Send a broadcast (class taken from the sender) |
-| | `getBroadcast` | Screen gets the latest broadcast by invite code (5s polling) |
+| | `getBroadcast` | Screen gets the latest broadcast by invite code (starts at 5s, backs off to 30s when idle) |
 | | `tts` | Text-to-speech: caches audio by text MD5, cross-instance rate limiting, timer cleanup of audio older than 30 days |
 
 ### Security design
@@ -151,10 +154,13 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 - **Roles come from the server-side `users` collection** — a `role` sent by the frontend is never trusted. Every teacher-only action (score entry, exam creation, publishing, homework assignment, reviews, dashboard, broadcast) checks `user.role === 'teacher'`; students get "teacher only" errors. Students therefore cannot modify their own scores.
 - **Invite-code rate limiting**: `getClassByCode` / `joinClass` / `getBroadcast` share `_invite-guard.js` (duplicated per function since cloud functions deploy independently). **5 wrong attempts within 10 minutes lock the openid for 15 minutes**; success resets the counter. `getBroadcast` is guarded too — otherwise it could be brute-forced directly, bypassing the other two. To unlock manually, set `blockedUntil` to `0` in the matching `code_fails` record.
 - **Register role rules**: existing students stay students forever (no privilege escalation via re-registering); existing users only update their profile; first-time registration uses the frontend choice, defaulting to teacher.
-- **Trust model (read this)**: the teacher role has **no approval workflow** — any WeChat user can self-register as a teacher and create a class. Isolation is per class: a self-proclaimed teacher only sees data of the class they created and of students who voluntarily joined with the invite code. This fits an internal class tool's trust assumptions (codes are handed out by the real teacher in person) and is **not suited to adversarial settings**; if someone impersonates a teacher, rebuild the class to rotate the invite code.
+- **Trust model (read this)**: the teacher role has **no approval workflow by default** — any WeChat user can self-register as a teacher and create a class. Isolation is per class: a self-proclaimed teacher only sees data of the class they created and of students who voluntarily joined with the invite code. This fits an internal class tool's trust assumptions (codes are handed out by the real teacher in person) and is **not suited to adversarial settings**; if someone impersonates a teacher, rebuild the class to rotate the invite code.
+- **Optional teacher approval gate**: setting the environment variable `REQUIRE_TEACHER_APPROVAL=1` on the `createClass` function makes class creation require `users.verifiedTeacher === true`. It stays off by default so the self-service flow is unchanged; when enabled, an administrator flips `verifiedTeacher: true` on approved teachers in the database.
 - **Re-create-class guard**: when the teacher already has a class, `createClass` rejects with `needForce`; the frontend asks for explicit confirmation ("the old class will no longer be managed by you") before rebuilding, preventing accidental orphan classes.
+- **sendBroadcast rate limiting**: one teacher can send at most 6 broadcasts per minute; counters live in `rate_limits`, work across function instances, and return `code: RATE_LIMITED` when exceeded — a compromised account cannot flood the screen.
 - **tts rate limiting & caching**: the `tts` function has no login identity to check (screen devices may be unregistered), so it keeps counters in the `rate_limits` collection for **cross-instance** limiting (6 syntheses per openid per minute, even with multiple function instances) to protect the Baidu TTS endpoint and cloud storage from scripted abuse. Audio is cached as `tts/<md5>.mp3` and recorded in `tts_cache`, so repeating the same text no longer calls the third-party endpoint or takes extra storage.
 - **updateProfile field whitelist**: teachers may edit `name / gender / title / subject / signature / className`; students may edit `name / gender / studentNo / signature`. `openid`, `role` and `classId` are always ignored. Empty string deletes the field; omitted fields keep their values. **No phone number or other contact info is collected in this version.**
+- **Text length caps**: homework title 100, homework requirement 2000, student submission 2000, review 500, student reply 200, broadcast 200, TTS 200 characters. The server truncates or rejects; the frontend only shows hints.
 - **Data isolation**: `myClass` returns the roster to teachers only (students always get an empty `students` list and a class object without the invite code); `getExamScores` / `classStats` and other whole-class endpoints require `role === 'teacher'`; students only ever read their own scores and reviews.
 - **Privacy consent**: no phone number or other contact info is collected in this version; the registration page has a mandatory "I have read and agree to the User Agreement and Privacy Policy" checkbox including a statement that minors have guardian consent. See `pages/privacy/`.
 - **Demo login** (`quickDemo`) only appears in **develop / trial versions** — decided by `wx.getAccountInfoSync().miniProgram.envVersion`; the whole entry is hidden in `release`. It bypasses WeChat identity checks and must stay disabled in production.
@@ -165,8 +171,14 @@ Without indexes everything still works at small scale, but indexes cut scans sig
 - Audio from `tts` is uploaded to the `tts/` directory, named by text MD5 and recorded in `tts_cache`. A timer trigger in `tts/config.json` runs daily at 04:00 and deletes audio plus cache records older than 30 days (keep the trigger config when uploading the `tts` function). **Audio uploaded by older versions (`timestamp_random.mp3`) is not in `tts_cache`; clean it once manually in the cloud storage console after upgrading. If you manually delete the new cached files under `tts/`, clear the `tts_cache` collection too, otherwise the cache will point to deleted audio.**
 - Default subjects are six (Chinese / Math / English / Physics / Chemistry / Biology); a new exam accepts custom subjects separated by commas or 、.
 - The "latest score" in the roster is the average of the most recent exam; shows "—" before any score is entered.
+- **Statistics caliber**: the class average uses **all recorded scores** of the most recent exam; the excellence / pass rates count **per-student averages**. Absent students and "not entered yet" both currently show as "not participating" and stay out of the denominator (the page states this explicitly).
 - **Full score**: on the "Publish scores" page you can pick 100 / 120 / 150 / 200 (default 150, auto-following the most recent exam); it is stored in `exams.fullScore` at exam creation. Input validation (0 ≤ score ≤ full score), bar & radar chart Y axes, detail progress bars, excellence (90%) and pass (60%) rates, and the class-page excellent / at-risk filters are all scaled by it. Old exams without the field fall back to 100. Not editable after creation.
 - List queries now fetch in batches: up to 1000 students, 500 homework / exam / review rows, and 200 exams in the student exam switcher. When a cap is hit the response carries `truncated: true` and the page shows "showing the latest N only" instead of silently dropping data.
+- **Class size has a single source**: the real headcount always comes from the `users` table; `classes.expectedCount` only stores the "expected size" the teacher typed at creation and is displayed on the class and create-class pages. The old `classes.studentCount` field is no longer maintained.
+- **Deleting an exam**: only exams that are **unpublished and have no scores** can be deleted; once a score exists the entry disappears and the server refuses as well, so student scores cannot vanish silently.
+- **Unsaved-changes guard**: leaving the edit-profile / assign-homework / create-class pages after edits pops a "not saved yet" confirmation; saving or publishing clears it. It is skipped silently below base library 2.12.0.
+- **No fake default profile**: fields a new account never filled show "not set" instead of placeholder names such as "刘同学 / 李老师".
+- **Search indexing**: `sitemap.json` is set to `disallow *` — an internal class tool should not be indexed by WeChat.
 
 ## Suggested regression checklist
 
@@ -178,12 +190,17 @@ After changing cloud functions, focus on these:
 - [ ] Edit profile: no phone field is shown (removed in this version); the class field is read-only
 - [ ] Score entry: **clear a score → save → switch subject and back → still empty**
 - [ ] Release build: the login page shows no "demo login"
-- [ ] Screen: status shows "connected", and does **not** replay the previous broadcast; a new broadcast appears within 5 seconds
+- [ ] Screen: status shows "connected", and does **not** replay the previous broadcast; a new broadcast appears within 5 seconds (up to 30 seconds after idle back-off)
 - [ ] Invite code: 5 wrong attempts → "too many attempts" toast
 - [ ] Full score: create a 150-point exam → entering 160 is rejected → chart axes, progress bars and the "excellent" filter scale by 150
 - [ ] Withdraw homework: it disappears from the list and student submissions are deleted
 - [ ] Due date: set it to yesterday → the student sees "expired / submit late" → after submitting, "late" appears for the student and the teacher's progress shows "late 1"
 - [ ] TTS cache: send the same broadcast twice → the second one skips Baidu (`tts_cache` hit) and cloud storage keeps a single file
+- [ ] Broadcast rate limit: send 7 messages within a minute → the 7th is rejected as "too frequent"
+- [ ] Delete exam: a new empty exam can be deleted; after entering one score the entry disappears and a forced call is refused
+- [ ] Form guard: change one character in edit-profile then go back → "not saved" prompt; after saving it no longer prompts
+- [ ] Default profile: a fresh account shows no sample name / signature on "Me"
+- [ ] Dashboard cache: enter scores then open stats immediately → numbers are fresh (writes invalidate the cache)
 - [ ] Review reply: student replies → teacher sees the highlighted reply under "Me → My reviews" → student edits the reply and the teacher side updates
 - [ ] Re-create class: with an existing class, tapping "Create class" shows a confirmation warning that the old class will no longer be managed by you
 - [ ] Screen: bind, background the app for 30s, have the teacher send a broadcast → returning to the screen page should speak the new broadcast automatically
@@ -191,12 +208,13 @@ After changing cloud functions, focus on these:
 
 ## Known limitations
 
-- **Screen is polling, not push**: the `screen` page calls `getBroadcast` every 5 seconds, so broadcasts may be up to 5 seconds late; polling stops automatically while the page is hidden (`onHide`) to save cloud-function calls. Increase `POLL_MS` in `screen.js` to save more.
+- **Screen is polling, not push**: the `screen` page starts at one `getBroadcast` call every 5 seconds and backs off to 30 seconds while no new broadcast arrives, returning to 5 seconds as soon as one appears; polling stops automatically while the page is hidden (`onHide`) to save cloud-function calls. The trade-off is up to 30 seconds of latency when idle.
+- **Bottom navigation uses `reLaunch` instead of the native tabBar**: teacher (5) and student (4) pages have different paths while the native tabBar list is global and capped at 5 entries, so both sets cannot coexist; moving to `custom-tab-bar` would require merging both sets into container pages — a structural rewrite. The current cost is losing the page stack and form state when switching tabs.
 - **No automated tests** — regression relies on the checklist above.
 
 ## Requirements
 
-- WeChat DevTools (base library 3.0.0+)
+- WeChat DevTools (base library 3.16.3+; the unsaved-changes guard needs 2.12.0+)
 - Cloud Base enabled (cloud functions + cloud database + cloud storage)
 
 ## Tech Stack

@@ -1,9 +1,10 @@
 const app = getApp();
+const { markDirty, clearDirty } = require('../../utils/guard');
 
 Page({
   data: {
     role: 'teacher',
-    genders: ['男', '女'],
+    genders: ['未设置', '男', '女'],
     genderIndex: 0,
     profile: {}
   },
@@ -14,19 +15,22 @@ Page({
     this.setData({
       role,
       profile,
-      genderIndex: profile.gender === '女' ? 1 : 0
+      genderIndex: profile.gender === '女' ? 2 : (profile.gender === '男' ? 1 : 0)
     });
     wx.setNavigationBarTitle({ title: '编辑资料' });
   },
 
   onInput(e) {
     const field = e.currentTarget.dataset.field;
+    markDirty(this, '资料还没保存，确定离开吗？');
     this.setData({ ['profile.' + field]: e.detail.value });
   },
 
   onGender(e) {
     const idx = Number(e.detail.value);
-    this.setData({ genderIndex: idx, 'profile.gender': this.data.genders[idx] });
+    markDirty(this, '资料还没保存，确定离开吗？');
+    // 第一项是「未设置」，存空字符串而不是把"未设置"写进资料
+    this.setData({ genderIndex: idx, 'profile.gender': idx === 0 ? '' : this.data.genders[idx] });
   },
 
   save() {
@@ -73,6 +77,7 @@ Page({
           wx.showToast({ title: r.msg || '保存失败', icon: 'none' });
           return;
         }
+        clearDirty(this);
         wx.showToast({ title: '已保存', icon: 'success' });
         setTimeout(() => wx.navigateBack(), 600);
       })

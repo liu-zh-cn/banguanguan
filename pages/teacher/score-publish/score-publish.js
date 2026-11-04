@@ -1,11 +1,12 @@
 const app = getApp();
+const { FULL_SCORES } = require('../../../utils/constants');
 
 Page({
   data: {
     exams: [],
     truncated: false,
     // 试卷满分：录入 / 图表 / 进度条都按它换算，避免把 150 分卷当成 100 分
-    fullScores: [100, 120, 150, 200],
+    fullScores: FULL_SCORES,
     fullScoreIndex: 2
   },
 
@@ -83,6 +84,38 @@ Page({
           content: (err && err.errMsg) || String(err),
           showCancel: false
         });
+      }
+    });
+  },
+
+  // 删除空考试：有成绩或已发布时云函数会拒绝，避免学生成绩凭空消失
+  removeExam(e) {
+    const id = e.currentTarget.dataset.id;
+    const exam = this.data.exams.find((x) => x.id === id);
+    if (!exam) return;
+    wx.showModal({
+      title: '删除考试',
+      content: '确定删除「' + exam.name + '」？\n只有还没有成绩的考试可以删除，删除后无法恢复。',
+      confirmText: '删除',
+      confirmColor: '#E23B41',
+      success: (res) => {
+        if (!res.confirm) return;
+        wx.showLoading({ title: '删除中' });
+        app
+          .cloudDeleteExam(id)
+          .then((r) => {
+            wx.hideLoading();
+            if (!r.ok) {
+              wx.showToast({ title: r.msg || '删除失败', icon: 'none' });
+              return;
+            }
+            wx.showToast({ title: '已删除', icon: 'success' });
+            this.load();
+          })
+          .catch(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '网络/云函数错误', icon: 'none' });
+          });
       }
     });
   },

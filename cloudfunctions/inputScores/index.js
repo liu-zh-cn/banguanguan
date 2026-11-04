@@ -129,5 +129,11 @@ exports.main = async (event) => {
     }
     saved++;
   }
+
+  // 成绩变了，看板缓存必须失效；没有实际写入时不用多一次删除
+  if (saved || cleared) {
+    await db.collection('class_stats').doc(user.classId).remove().catch(() => null);
+  }
+
   return { ok: true, saved, cleared, skipped };
 };

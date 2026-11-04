@@ -34,6 +34,13 @@ exports.main = async (event) => {
   const user = u.data[0];
   if (user.role !== 'teacher') return { ok: false, msg: '仅老师可创建班级' };
 
+  // 可选闸门：云函数环境变量 REQUIRE_TEACHER_APPROVAL=1 时，
+  // 只有 users.verifiedTeacher === true 的老师才能建班。
+  // 默认不开启，保持现有自助注册流程；需要审核时在云函数配置里加这个变量即可
+  if (process.env.REQUIRE_TEACHER_APPROVAL === '1' && user.verifiedTeacher !== true) {
+    return { ok: false, msg: '教师身份尚未审核，请联系管理员' };
+  }
+
   const { name, grade, motto, studentCount } = event;
   const cleanName = String(name || '').trim().slice(0, 50);
   if (!cleanName) return { ok: false, msg: '班级名称不能为空' };
@@ -67,10 +74,8 @@ exports.main = async (event) => {
       motto: cleanStr(motto),
       inviteCode,
       ownerOpenid: OPENID,
-      // studentCount 由 joinClass 递减/递增维护，是"实际加入人数"；
-      // 老师建班时填的是"预计人数"，另存 expectedCount，两者不能混用
-      studentCount: 0,
-      // 预计人数取非负整数，防止 -5 / 3.5 之类原样入库
+      // 只存老师填的"预计人数"。实际人数统一按 users 表 count，
+      // 不再维护 studentCount 副本，避免两个数字长期对不上
       expectedCount: Math.max(0, Math.floor(Number(studentCount) || 0)),
       createdAt: db.serverDate()
     }

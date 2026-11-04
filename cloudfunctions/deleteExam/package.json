@@ -1,0 +1,9 @@
+{
+  "name": "deleteExam",
+  "version": "1.0.0",
+  "description": "删除没有成绩的考试",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

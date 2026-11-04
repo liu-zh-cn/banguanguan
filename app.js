@@ -4,7 +4,7 @@ const CLOUD_ENV = 'cloud1-d2gehv836076eaf14';
 App({
   globalData: {
     role: '',
-    teacherName: '李老师',
+    teacherName: '',
     className: '',
     classId: '',
     openid: '',
@@ -173,6 +173,14 @@ App({
       .then((res) => (res && res.result) || {});
   },
 
+  // 删除一场还没有成绩的考试
+  cloudDeleteExam(examId) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud
+      .callFunction({ name: 'deleteExam', data: { examId } })
+      .then((res) => (res && res.result) || {});
+  },
+
   // 列出本班考试（老师含平均分）
   cloudListExams() {
     if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
@@ -248,23 +256,25 @@ App({
 
   // ---------- 用户资料：本地缓存只负责展示，真实资料以云端 users 表为准 ----------
   // 注意：className 对学生只用于本地展示，学生真实班级由 joinClass 决定
+  // 不预填任何"示例姓名/签名"：新用户没填过的字段就留空，
+  // 由页面显示"未设置"，避免把别人的名字当成自己的
   defaultProfile(role) {
     if (role === 'student') {
       return {
-        name: '刘同学',
-        gender: '男',
+        name: '',
+        gender: '',
         studentNo: '',
         className: '',
-        signature: '好好学习，天天向上～'
+        signature: ''
       };
     }
     return {
-      name: '李老师',
-      gender: '女',
-      title: '班主任',
+      name: '',
+      gender: '',
+      title: '',
       subject: '',
       className: '',
-      signature: '用心带好每一个班。'
+      signature: ''
     };
   },
 
