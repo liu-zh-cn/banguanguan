@@ -16,6 +16,7 @@
     "pages/teacher/reviews/reviews",
     "pages/teacher/mine/mine",
     "pages/screen/screen",
+    "pages/timetable/timetable",
     "pages/student/homework/homework",
     "pages/student/score/score",
     "pages/student/review/review",

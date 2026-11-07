@@ -1,0 +1,35 @@
+<view class="tt-page">
+  <view class="tt-head">
+    <view class="tt-title">{{className}}</view>
+    <view class="tt-sub" wx:if="{{loading}}">加载中…</view>
+    <view class="tt-sub" wx:elif="{{isTeacher}}">点格子编辑 · 长按清空 · 已有 {{filled}} 节课</view>
+    <view class="tt-sub" wx:else>课程表由老师维护 · 已有 {{filled}} 节课</view>
+  </view>
+
+  <view class="tt-grid">
+    <view class="tt-corner">节次</view>
+    <view class="tt-day" wx:for="{{days}}" wx:key="*this">{{item}}</view>
+
+    <block wx:for="{{rows}}" wx:for-item="row" wx:key="key">
+      <view class="tt-period">{{row.no}}</view>
+      <view
+        class="tt-cell {{cell.text ? 'is-on' : ''}}"
+        wx:for="{{row.cells}}"
+        wx:for-item="cell"
+        wx:key="key"
+        data-r="{{cell.r}}"
+        data-c="{{cell.c}}"
+        bindtap="onCell"
+        bindlongpress="onClear"
+      >{{cell.text}}</view>
+    </block>
+  </view>
+
+  <view class="tt-foot" wx:if="{{isTeacher}}">
+    <text wx:if="{{saving}}">保存中…</text>
+    <text wx:elif="{{lastSaved}}">{{lastSaved}}</text>
+    <text wx:else>改动会自动保存</text>
+  </view>
+
+  <view class="tt-note">第 1 节到第 8 节，周一到周五；空格子表示这节课没安排。</view>
+</view>

@@ -9,6 +9,7 @@ Page({
       { icon: '📇', label: '我的资料', extra: '查看 / 编辑', action: 'edit' },
       { icon: '✅', label: '我的作业', action: 'homework' },
       { icon: '🏆', label: '我的成绩', action: 'score' },
+      { icon: '📅', label: '课程表', extra: '查看本周', action: 'timetable' },
       { icon: '💬', label: '老师点评', action: 'review' },
       { icon: '⚙️', label: '设置', action: 'setting' }
     ]
@@ -91,6 +92,10 @@ Page({
     }
     if (action === 'setting') {
       wx.navigateTo({ url: '/pages/setting/setting' });
+      return;
+    }
+    if (action === 'timetable') {
+      wx.navigateTo({ url: '/pages/timetable/timetable' });
     }
   },
 

@@ -117,6 +117,14 @@ App({
     );
   },
 
+  // 保存本班课程表（写入 classes.timetable，读取走 cloudMyClass 返回的 class）
+  cloudSaveTimetable(grid) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud.callFunction({ name: 'saveTimetable', data: { grid } }).then(
+      (res) => (res && res.result) || {}
+    );
+  },
+
   // 拉取当前用户的班级上下文（classId / 班级信息 / 学生名单）
   cloudMyClass() {
     if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
