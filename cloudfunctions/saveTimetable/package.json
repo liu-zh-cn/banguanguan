@@ -1,0 +1,9 @@
+{
+  "name": "saveTimetable",
+  "version": "1.0.0",
+  "description": "老师保存本班课程表（存在 classes 文档的 timetable 字段）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
