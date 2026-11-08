@@ -7,6 +7,8 @@ Page({
     avg: 0,
     rank: 0,
     barData: {},
+    trendData: {},
+    trendReady: false,
     exams: [],
     truncated: false,
     examId: '',
@@ -37,6 +39,9 @@ Page({
           diff: Number((s.score - s.classAvg).toFixed(1)),
           barPct: Math.round((s.score / (r.fullScore || 100)) * 100)
         }));
+        // 历次考试均分折线：至少要两次考试才画得出来
+        const hist = r.history || [];
+        const trendReady = hist.length >= 2;
         this.setData({
           hasExam: true,
           exams: r.exams || [],
@@ -48,6 +53,14 @@ Page({
           total: r.total || 0,
           avg: r.avg || 0,
           rank: r.rank || 0,
+          trendReady,
+          trendData: trendReady
+            ? {
+                labels: hist.map((h) => h.name),
+                values: hist.map((h) => h.avg),
+                max: r.fullScore || 100
+              }
+            : {},
           barData: {
             labels: rows.map((s) => s.subject),
             values: rows.map((s) => s.score),

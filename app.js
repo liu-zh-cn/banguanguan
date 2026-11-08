@@ -197,10 +197,10 @@ App({
       .then((res) => (res && res.result) || {});
   },
 
-  cloudSubmitHomework(homeworkId, content) {
+  cloudSubmitHomework(homeworkId, content, images) {
     if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
     return wx.cloud
-      .callFunction({ name: 'submitHomework', data: { homeworkId, content } })
+      .callFunction({ name: 'submitHomework', data: { homeworkId, content, images: images || [] } })
       .then((res) => (res && res.result) || {});
   },
 

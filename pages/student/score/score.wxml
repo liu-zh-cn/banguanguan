@@ -35,6 +35,13 @@
     <chart type="bar" data="{{barData}}" />
   </view>
 
+  <!-- 历次考试均分：至少两次考试才有曲线 -->
+  <view class="card" wx:if="{{trendReady}}">
+    <view class="section-title">我的成绩趋势</view>
+    <view class="muted" style="font-size:22rpx;margin-bottom:6rpx;">最近 {{trendData.values.length}} 次已发布考试的单次均分</view>
+    <chart type="line" data="{{trendData}}" />
+  </view>
+
   <view class="card" wx:if="{{hasExam && scores.length}}">
     <view class="section-title">成绩明细</view>
     <view class="sc-item" wx:for="{{scores}}" wx:key="subject">

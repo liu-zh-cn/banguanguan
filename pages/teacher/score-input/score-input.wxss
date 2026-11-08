@@ -52,3 +52,52 @@
   box-shadow: 0 -8rpx 30rpx rgba(31, 36, 48, 0.06);
 }
 .si-save { width: 100%; }
+
+/* 批量操作条 + 粘贴面板 */
+.si-tools {
+  display: flex;
+  gap: 18rpx;
+  padding: 22rpx 28rpx 0;
+}
+.si-tool {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  background: #fff;
+  border-radius: 18rpx;
+  font-size: 26rpx;
+  color: var(--primary-deep);
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+.si-batch { margin-top: 22rpx; }
+.si-batch-input {
+  width: 100%;
+  height: 260rpx;
+  padding: 20rpx;
+  margin-top: 12rpx;
+  background: #F5F6FA;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+.si-batch-tip {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: #8A90A2;
+  line-height: 1.5;
+}
+.si-batch-bar {
+  display: flex;
+  gap: 18rpx;
+  margin-top: 20rpx;
+}
+.si-btn {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.si-btn--ghost { background: #F0F2F8; color: #6B7180; }
+.si-btn--primary { background: var(--primary); color: #fff; }

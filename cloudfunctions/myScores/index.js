@@ -72,6 +72,24 @@ exports.main = async (event) => {
     .map((arr) => arr.reduce((a, b) => a + b, 0));
   const rank = my ? totals.filter((t) => t > myTotal).length + 1 : 0;
 
+  // 历史趋势：最近 8 场已发布考试里「我」的均分。
+  // exams 是倒序的，先取最新的 8 场，再翻回正序给折线图用
+  const history = [];
+  for (const e of exams.slice(0, 8)) {
+    const hs = await db
+      .collection('scores')
+      .where({ examId: e._id, studentOpenid: OPENID })
+      .limit(1)
+      .get();
+    const doc = (hs.data || [])[0];
+    if (!doc || !doc.scores) continue;
+    const vals = Object.values(doc.scores).filter((v) => typeof v === 'number');
+    if (!vals.length) continue;
+    const sum = vals.reduce((a, b) => a + b, 0);
+    history.push({ name: e.name || '考试', avg: Number((sum / vals.length).toFixed(1)) });
+  }
+  history.reverse();
+
   return {
     ok: true,
     hasExam: true,
@@ -84,6 +102,7 @@ exports.main = async (event) => {
     rows,
     total: myTotal,
     avg: mean(rows.map((r) => r.score)),
-    rank: my ? rank : 0
+    rank: my ? rank : 0,
+    history
   };
 };

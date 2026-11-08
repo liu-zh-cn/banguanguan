@@ -16,6 +16,28 @@
     >{{item}}</view>
   </view>
 
+  <!-- 批量操作：粘贴录入 / 导出整张表 -->
+  <view class="si-tools">
+    <view class="si-tool" bindtap="openBatch">📋 批量粘贴</view>
+    <view class="si-tool" bindtap="copyScores">📤 复制成绩表</view>
+  </view>
+
+  <view class="card si-batch" wx:if="{{batchOpen}}">
+    <view class="section-title">批量粘贴 · {{subject}}</view>
+    <textarea
+      class="si-batch-input"
+      value="{{batchText}}"
+      bindinput="onBatchInput"
+      maxlength="-1"
+      placeholder="每行一条，例如：&#10;01 95&#10;02 88&#10;（也可以只写分数，按名单顺序从上往下填）"
+    />
+    <view class="si-batch-tip">学号+分数 或 只写分数；空格、逗号、Tab 都认。填进表格后还要点保存才生效。</view>
+    <view class="si-batch-bar">
+      <view class="si-btn si-btn--ghost" bindtap="closeBatch">取消</view>
+      <view class="si-btn si-btn--primary" bindtap="applyBatch">填进表格</view>
+    </view>
+  </view>
+
   <!-- 学生成绩列表 -->
   <view class="card">
     <view class="section-title">{{subject}} · 共 {{rows.length}} 人</view>

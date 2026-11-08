@@ -93,45 +93,18 @@ Page({
   },
 
   // 撤回作业：连带学生提交记录一起删，删前必须确认
-  // 点进度看未交名单：一次弹窗，确认即复制全部姓名（上屏只显示前 20 个，避免弹窗被撑爆）
-  showMissing(e) {
+  // 点进度进「提交详情」：未交名单、已交的文字和图片都在那一页
+  openDetail(e) {
     const id = e.currentTarget.dataset.id;
     const title = e.currentTarget.dataset.title || '作业';
     if (!id) return;
-
-    wx.showLoading({ title: '统计中', mask: true });
-    app
-      .cloudHomeworkDetail(id)
-      .then((r) => {
-        wx.hideLoading();
-        if (!r || !r.ok) {
-          wx.showToast({ title: (r && r.msg) || '查询失败', icon: 'none' });
-          return;
-        }
-        const missing = r.missing || [];
-        if (!missing.length) {
-          wx.showModal({
-            title: '未交名单',
-            content: '「' + title + '」全班 ' + r.total + ' 人都交了 👍',
-            showCancel: false
-          });
-          return;
-        }
-        const full = missing.map((x) => (x.no ? x.no + ' ' : '') + x.name).join('、');
-        const shown = missing.slice(0, 20).map((x) => (x.no ? x.no + ' ' : '') + x.name).join('、');
-        wx.showModal({
-          title: '未交 ' + missing.length + '/' + r.total + ' 人',
-          content: shown + (missing.length > 20 ? ' 等 ' + missing.length + ' 人' : ''),
-          confirmText: '复制名单',
-          success: (res) => {
-            if (res.confirm) wx.setClipboardData({ data: full });
-          }
-        });
-      })
-      .catch(() => {
-        wx.hideLoading();
-        app.showError('查询失败，请检查网络');
-      });
+    wx.navigateTo({
+      url:
+        '/pages/teacher/homework-submissions/homework-submissions?homeworkId=' +
+        encodeURIComponent(id) +
+        '&title=' +
+        encodeURIComponent(title)
+    });
   },
 
   remove(e) {
