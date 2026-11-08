@@ -4,6 +4,7 @@ Page({
   data: {
     profile: {},
     stats: { rank: '—', todo: '—', review: '—' },
+    quitPending: null,
     menus: [
       { icon: '➕', label: '加入班级', extra: '输入邀请码', action: 'join' },
       { icon: '🚪', label: '退出班级', extra: '离开当前班', action: 'quit' },
@@ -49,22 +50,27 @@ Page({
       .catch(() => app.showError('点评加载失败'));
   },
 
-  // 本地缓存只用于展示，姓名 / 班级以云端 users 表为准（每个页面生命周期同步一次）
+  // 本地缓存只用于展示，姓名 / 班级以云端 users 表为准。
+  // 每次进页面都同步一次：老师可能在别处把退班申请批了、或被班主任移出班级，
+  // 本地缓存不刷新就会一直显示旧班级。
   syncProfile() {
-    if (this._synced) return;
-    this._synced = true;
+    if (this._syncing) return;
+    this._syncing = true;
     app
       .cloudMyClass()
       .then((r) => {
+        this._syncing = false;
         if (!r || !r.user) return;
         const p = app.getProfile('student');
         if (r.user.name) p.name = r.user.name;
-        if (r.user.className) p.className = r.user.className;
+        // 班级可能被清空（退班通过 / 被移出），这里要能跟着变空
+        p.className = r.user.className || '';
         app.saveProfile('student', p);
         this.setData({ profile: p });
+        this.setQuitPending(r.pendingQuit || null);
       })
       .catch(() => {
-        this._synced = false; // 同步失败，下次进来再试
+        this._syncing = false;
       });
   },
 
@@ -135,46 +141,76 @@ Page({
     });
   },
 
-  // 退出当前班级：退掉之后看不到本班作业 / 成绩 / 点评，可以凭邀请码重新加入
+  // 退班需要老师同意：已提交过就显示「审核中」，可以撤销
   quitClass() {
     const p = this.data.profile || {};
     if (!p.className) {
       wx.showToast({ title: '你还不在任何班级中', icon: 'none' });
       return;
     }
+    if (this.data.quitPending) {
+      wx.showModal({
+        title: '退班申请审核中',
+        content: '你已申请退出「' + (this.data.quitPending.className || p.className) + '」，老师同意后才会生效。',
+        confirmText: '撤销申请',
+        success: (res) => {
+          if (!res.confirm) return;
+          wx.showLoading({ title: '撤销中', mask: true });
+          app
+            .cloudQuitClass('cancel')
+            .then((r) => {
+              wx.hideLoading();
+              if (!r || !r.ok) {
+                wx.showToast({ title: (r && r.msg) || '撤销失败', icon: 'none' });
+                return;
+              }
+              this.setQuitPending(null);
+              wx.showToast({ title: '已撤销申请', icon: 'success' });
+            })
+            .catch(() => {
+              wx.hideLoading();
+              app.showError('撤销失败，请检查网络');
+            });
+        }
+      });
+      return;
+    }
     wx.showModal({
-      title: '退出班级',
-      content: '确定退出「' + p.className + '」吗？退出后看不到本班的作业、成绩和点评，之后可以凭邀请码重新加入。',
-      confirmText: '退出',
-      confirmColor: '#E23B41',
+      title: '申请退出班级',
+      content: '向老师申请退出「' + p.className + '」？需要老师同意，同意后你就看不到本班的作业、成绩和点评了。',
+      confirmText: '提交申请',
       success: (res) => {
         if (!res.confirm) return;
-        wx.showLoading({ title: '处理中', mask: true });
+        wx.showLoading({ title: '提交中', mask: true });
         app
           .cloudQuitClass('leave')
           .then((r) => {
             wx.hideLoading();
             if (!r || !r.ok) {
-              wx.showToast({ title: (r && r.msg) || '退出失败', icon: 'none' });
+              wx.showToast({ title: (r && r.msg) || '提交失败', icon: 'none' });
               return;
             }
-            const next = app.getProfile('student');
-            next.className = '';
-            app.saveProfile('student', next);
-            app.globalData.classId = '';
-            app.globalData.className = '';
-            this.setData({
-              profile: next,
-              stats: { rank: '—', todo: '—', review: '—' }
+            this.setQuitPending({
+              classId: r.classId || '',
+              className: p.className,
+              ts: Date.now()
             });
-            wx.showToast({ title: '已退出班级', icon: 'success' });
+            wx.showToast({ title: '已提交申请', icon: 'success' });
           })
           .catch(() => {
             wx.hideLoading();
-            app.showError('退出失败，请检查网络');
+            app.showError('提交失败，请检查网络');
           });
       }
     });
+  },
+
+  // 申请状态同时反映在菜单右侧的说明上，避免用户以为点了没反应
+  setQuitPending(pending) {
+    const menus = (this.data.menus || []).map((m) =>
+      m.action === 'quit' ? { ...m, extra: pending ? '审核中' : '离开当前班' } : m
+    );
+    this.setData({ quitPending: pending || null, menus });
   },
 
   switchRole() {

@@ -1,7 +1,10 @@
 // 云函数：quitClass —— 退出 / 移除 / 解散，三种「离开班级」的操作都收在这里
-//   leave    ：本人退出当前班级（学生、老师都能用；班主任必须先转让）
-//   kick     ：班主任把本班某个学生移出班级
-//   dissolve ：班主任解散一个空班（没有学生、没有其他老师、没有考试和作业）
+//   leave       ：本人申请退出当前班级。学生只登记申请（等班主任审批），老师直接退出
+//   cancel      ：学生撤销自己提交的退班申请
+//   approveQuit ：班主任同意退班申请（真正把学生移出）
+//   rejectQuit  ：班主任拒绝退班申请
+//   kick        ：班主任直接把一个学生移出班级
+//   dissolve    ：班主任解散一个空班（没有学生、没有其他老师、没有考试和作业）
 // 解散只允许空班，是为了不在这里做级联删除——删考试、删作业已经各有云函数，
 // 让老师先清干净再解散，既安全又不会误删别人录的数据。
 const cloud = require('wx-server-sdk');
@@ -39,13 +42,23 @@ exports.main = async (event) => {
   if (!OPENID) return { ok: false, msg: '未登录' };
 
   const action = String(event.action || 'leave');
-  if (['leave', 'kick', 'dissolve'].indexOf(action) === -1) {
+  if (['leave', 'kick', 'dissolve', 'cancel', 'approveQuit', 'rejectQuit'].indexOf(action) === -1) {
     return { ok: false, msg: '参数错误' };
   }
 
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
   if (!u.data.length) return { ok: false, msg: '未注册' };
   const user = u.data[0];
+
+  // ---------- cancel：学生撤销自己的退班申请 ----------
+  if (action === 'cancel') {
+    if (!user.quitClassId) return { ok: false, msg: '没有待处理的退班申请' };
+    await db.collection('users').doc(user._id).update({
+      data: { quitClassId: '', quitClassName: '', quitTs: 0 }
+    });
+    return { ok: true, msg: '已撤销退班申请' };
+  }
+
   const classId = user.classId || '';
   if (!classId) return { ok: false, msg: '你当前没有加入任何班级' };
 
@@ -63,6 +76,13 @@ exports.main = async (event) => {
     }
     if (c.data.ownerOpenid === OPENID) {
       return { ok: false, msg: '你是本班班主任，请先转让班主任或解散班级' };
+    }
+    // 学生退班需要班主任同意：这里只登记申请，真正移出交给 approveQuit
+    if (user.role === 'student') {
+      await db.collection('users').doc(user._id).update({
+        data: { quitClassId: classId, quitClassName: c.data.name || '', quitTs: Date.now() }
+      });
+      return { ok: true, pending: true, msg: '已提交退班申请，等待老师同意' };
     }
     const nextClassId = await detach(user, classId);
     await db.collection('class_stats').doc(classId).remove().catch(() => null);
@@ -92,8 +112,36 @@ exports.main = async (event) => {
     if (memberIds(target).indexOf(classId) === -1) return { ok: false, msg: '该学生不在本班' };
 
     await detach(target, classId);
+    // 顺手清掉他可能提交过的退班申请，否则申请列表里会留一条点不动的记录
+    await db
+      .collection('users')
+      .doc(target._id)
+      .update({ data: { quitClassId: '', quitClassName: '', quitTs: 0 } })
+      .catch(() => null);
     await db.collection('class_stats').doc(classId).remove().catch(() => null);
     return { ok: true, msg: '已把「' + (target.name || '该学生') + '」移出班级' };
+  }
+
+  // ---------- approveQuit / rejectQuit：处理学生提交的退班申请 ----------
+  if (action === 'approveQuit' || action === 'rejectQuit') {
+    const targetOpenid = String(event.openid || '');
+    if (!targetOpenid) return { ok: false, msg: '参数错误' };
+
+    const t = await db.collection('users').where({ openid: targetOpenid }).limit(1).get();
+    if (!t.data.length) return { ok: false, msg: '该用户不存在' };
+    const target = t.data[0];
+    if (target.quitClassId !== classId) return { ok: false, msg: '该申请已失效' };
+
+    const cleared = { quitClassId: '', quitClassName: '', quitTs: 0 };
+    if (action === 'rejectQuit') {
+      await db.collection('users').doc(target._id).update({ data: cleared });
+      return { ok: true, msg: '已拒绝退班申请' };
+    }
+
+    await detach(target, classId);
+    await db.collection('users').doc(target._id).update({ data: cleared });
+    await db.collection('class_stats').doc(classId).remove().catch(() => null);
+    return { ok: true, msg: '已同意「' + (target.name || '该学生') + '」退班' };
   }
 
   // ---------- dissolve：解散空班 ----------
@@ -141,6 +189,20 @@ exports.main = async (event) => {
     .field({ openid: true })
     .limit(100)
     .get();
+  // 以及挂在退班队列里的申请：班都没了，申请也该失效
+  const quitting = await db
+    .collection('users')
+    .where({ quitClassId: classId })
+    .field({ openid: true })
+    .limit(100)
+    .get();
+  for (const q of quitting.data || []) {
+    await db
+      .collection('users')
+      .where({ openid: q.openid })
+      .update({ data: { quitClassId: '', quitClassName: '', quitTs: 0 } })
+      .catch(() => null);
+  }
   for (const a of applying.data || []) {
     await db
       .collection('users')

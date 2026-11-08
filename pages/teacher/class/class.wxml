@@ -49,6 +49,19 @@
     </view>
   </view>
 
+  <!-- 学生退班申请：学生提交、班主任审批，同意之前学生仍在本班 -->
+  <view class="card" wx:if="{{isOwner && pendingQuit.length}}">
+    <view class="section-title">退班申请（{{pendingQuit.length}}）</view>
+    <view class="teacher-item" wx:for="{{pendingQuit}}" wx:key="openid">
+      <view class="flex-1">
+        <view class="stu-name">{{item.name}}</view>
+        <view class="muted">学号 {{item.no || '—'}} · {{item.timeText}}</view>
+      </view>
+      <view class="mini-btn mini-btn--primary" data-openid="{{item.openid}}" data-name="{{item.name}}" catchtap="approveQuit">同意</view>
+      <view class="mini-btn mini-btn--danger" data-openid="{{item.openid}}" data-name="{{item.name}}" catchtap="rejectQuit">拒绝</view>
+    </view>
+  </view>
+
   <!-- 筛选 -->
   <view class="filter-row">
     <view class="chip {{filter === 'all' ? 'chip--on' : ''}}" data-filter="all" bindtap="setFilter">全部</view>

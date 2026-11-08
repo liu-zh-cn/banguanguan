@@ -14,6 +14,8 @@ Page({
     isOwner: false,
     teachers: [],
     pending: [],
+    // 学生提交的退班申请：只有班主任能处理
+    pendingQuit: [],
     classes: [],
     // 分数线跟着试卷满分走，拿到 classStats 后再刷新
     passLine: 60,
@@ -38,6 +40,7 @@ Page({
           isOwner: !!r.isOwner,
           teachers: r.teachers || [],
           pending: (r.pending || []).map((p) => ({ ...p, timeText: fmtTime(p.ts) })),
+          pendingQuit: (r.quitRequests || []).map((p) => ({ ...p, timeText: fmtTime(p.ts) })),
           classes: r.classes || []
         });
         if (r.class && r.class.inviteCode) this._inviteCode = r.class.inviteCode;
@@ -270,6 +273,55 @@ Page({
         if (r.confirm) this.doManage('reject', openid);
       }
     });
+  },
+
+  // ---------- 学生退班申请（学生提交，班主任审批） ----------
+  approveQuit(e) {
+    const { openid, name } = e.currentTarget.dataset;
+    if (!openid) return;
+    wx.showModal({
+      title: '同意退班',
+      content: '同意「' + name + '」退出本班？同意后他立刻看不到本班的学生、作业和成绩。',
+      success: (r) => {
+        if (r.confirm) this.doQuitManage('approveQuit', openid);
+      }
+    });
+  },
+
+  rejectQuit(e) {
+    const { openid, name } = e.currentTarget.dataset;
+    if (!openid) return;
+    wx.showModal({
+      title: '拒绝退班',
+      content: '拒绝「' + name + '」的退班申请？对方会继续留在本班。',
+      confirmColor: '#E23B41',
+      success: (r) => {
+        if (r.confirm) this.doQuitManage('rejectQuit', openid);
+      }
+    });
+  },
+
+  doQuitManage(action, openid) {
+    if (this._managing) return;
+    this._managing = true;
+    wx.showLoading({ title: '处理中', mask: true });
+    app
+      .cloudQuitClass(action, openid)
+      .then((r) => {
+        wx.hideLoading();
+        this._managing = false;
+        if (!r || !r.ok) {
+          wx.showToast({ title: (r && r.msg) || '操作失败', icon: 'none' });
+          return;
+        }
+        wx.showToast({ title: r.msg || '已处理', icon: 'success' });
+        this.onShow();
+      })
+      .catch(() => {
+        wx.hideLoading();
+        this._managing = false;
+        wx.showToast({ title: '网络/云函数错误', icon: 'none' });
+      });
   },
 
   doManage(action, openid) {
