@@ -5,6 +5,7 @@ Page({
     all: [],
     list: [],
     truncated: false,
+    dueTip: null,
     tab: 'all',
     className: '未设置班级',
     name: '',
@@ -37,7 +38,7 @@ Page({
           late: !!h.myLate,
           expired: !!h.expired
         }));
-        this.setData({ all: list, truncated: !!r.truncated });
+        this.setData({ all: list, truncated: !!r.truncated, dueTip: this.buildDueTip(list) });
         this.applyTab();
       })
       .catch(() => app.showError('作业加载失败'));
@@ -54,6 +55,27 @@ Page({
   setTab(e) {
     this.setData({ tab: e.currentTarget.dataset.key });
     this.applyTab();
+  },
+
+  // 今天的截止提醒：只数「今天/明天截止且还没交」的，超过两天的不打扰
+  buildDueTip(list) {
+    const pad = (n) => String(n).padStart(2, '0');
+    const fmt = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    const now = new Date();
+    const today = fmt(now);
+    const tomorrow = fmt(new Date(now.getTime() + 24 * 3600 * 1000));
+
+    let dueToday = 0;
+    let dueTomorrow = 0;
+    list.forEach((h) => {
+      if (h.status === '已提交' || !h.deadline) return;
+      if (h.deadline === today) dueToday++;
+      else if (h.deadline === tomorrow) dueTomorrow++;
+    });
+
+    if (dueToday > 0) return { text: '今天有 ' + dueToday + ' 份作业截止', urgent: true };
+    if (dueTomorrow > 0) return { text: '明天有 ' + dueTomorrow + ' 份作业截止', urgent: false };
+    return null;
   },
 
   applyTab() {

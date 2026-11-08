@@ -23,8 +23,17 @@
 .filter-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 20rpx;
   padding: 28rpx 28rpx 4rpx;
+}
+.roster-btn {
+  margin-left: auto;
+  padding: 14rpx 24rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: var(--primary-deep);
+  background: var(--primary-light);
 }
 .chip {
   padding: 14rpx 34rpx;

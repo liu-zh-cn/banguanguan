@@ -45,3 +45,18 @@
 
 .empty { text-align: center; color: #A6ABC0; padding: 100rpx 0; }
 .done-tip { margin-top: 12rpx; text-align: right; }
+
+/* 截止提醒：今天截止用警示色，明天截止用信息色 */
+.due-tip {
+  margin: 24rpx 28rpx 0;
+  padding: 20rpx 26rpx;
+  border-radius: 18rpx;
+  font-size: 26rpx;
+  background: var(--primary-light);
+  color: var(--primary-deep);
+  font-weight: 600;
+}
+.due-tip--urgent {
+  background: #FFF1F1;
+  color: #E23B41;
+}

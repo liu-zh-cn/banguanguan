@@ -131,6 +131,17 @@ Page({
     this.applyFilter();
   },
 
+  // 复制整份名单（学号 + 姓名，制表符分隔），粘进 Excel 直接分两列
+  copyRoster() {
+    const all = this.data.all || [];
+    if (!all.length) {
+      wx.showToast({ title: '班里还没有学生', icon: 'none' });
+      return;
+    }
+    const lines = all.map((s) => (s.no || '') + '\t' + (s.name || ''));
+    wx.setClipboardData({ data: lines.join('\n') });
+  },
+
   setFilter(e) {
     this.setData({ filter: e.currentTarget.dataset.filter });
     this.applyFilter();

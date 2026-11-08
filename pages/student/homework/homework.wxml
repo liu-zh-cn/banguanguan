@@ -4,6 +4,8 @@
     <view class="hero-sub">{{className}} · {{name}}</view>
   </view>
 
+  <view class="due-tip {{dueTip.urgent ? 'due-tip--urgent' : ''}}" wx:if="{{dueTip}}">⏰ {{dueTip.text}}</view>
+
   <view class="tab-row">
     <view
       wx:for="{{tabs}}"
