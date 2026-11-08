@@ -8,10 +8,10 @@
 }
 .si-chip {
   padding: 14rpx 30rpx;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 999rpx;
   font-size: 26rpx;
-  color: #6B7180;
+  color: var(--text-2);
   box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.04);
 }
 .si-chip--on { background: var(--primary); color: #fff; font-weight: 700; }
@@ -20,15 +20,15 @@
   display: flex;
   align-items: center;
   padding: 22rpx 0;
-  border-bottom: 2rpx solid #F2F3F7;
+  border-bottom: 2rpx solid var(--line);
 }
 .si-row:last-child { border-bottom: none; }
-.si-no { width: 70rpx; color: #A6ABC0; font-size: 26rpx; }
+.si-no { width: 70rpx; color: var(--text-3); font-size: 26rpx; }
 .si-name { flex: 1; font-size: 30rpx; font-weight: 600; }
 .si-input {
   width: 170rpx;
   height: 68rpx;
-  background: #F5F6FA;
+  background: var(--page-bg);
   border-radius: 16rpx;
   text-align: center;
   font-size: 30rpx;
@@ -37,7 +37,7 @@
 
 .si-empty {
   text-align: center;
-  color: #A6ABC0;
+  color: var(--text-3);
   padding: 60rpx 0;
   font-size: 26rpx;
 }
@@ -63,7 +63,7 @@
   flex: 1;
   text-align: center;
   padding: 20rpx 0;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 18rpx;
   font-size: 26rpx;
   color: var(--primary-deep);
@@ -75,7 +75,7 @@
   height: 260rpx;
   padding: 20rpx;
   margin-top: 12rpx;
-  background: #F5F6FA;
+  background: var(--page-bg);
   border-radius: 16rpx;
   font-size: 26rpx;
   line-height: 1.6;
@@ -83,7 +83,7 @@
 .si-batch-tip {
   margin-top: 12rpx;
   font-size: 22rpx;
-  color: #8A90A2;
+  color: var(--text-sub);
   line-height: 1.5;
 }
 .si-batch-bar {
@@ -99,5 +99,5 @@
   font-size: 28rpx;
   font-weight: 600;
 }
-.si-btn--ghost { background: #F0F2F8; color: #6B7180; }
+.si-btn--ghost { background: var(--fill); color: var(--text-2); }
 .si-btn--primary { background: var(--primary); color: #fff; }

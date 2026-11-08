@@ -1,6 +1,6 @@
-.reg { min-height: 100vh; background: #fff; }
+.reg { min-height: 100vh; background: var(--card-bg); }
 .reg-hero {
-  background: linear-gradient(135deg, #5B7CFF 0%, #7E5BFF 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--brand-2) 100%);
   padding: 70rpx 48rpx 130rpx;
   color: #fff;
 }
@@ -11,7 +11,7 @@
   position: relative;
   z-index: 2;
   margin: -90rpx 32rpx 40rpx;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 32rpx;
   padding: 40rpx 36rpx 48rpx;
   box-shadow: 0 16rpx 50rpx rgba(61, 90, 254, 0.12);
@@ -19,7 +19,7 @@
 
 .role-seg {
   display: flex;
-  background: #F0F2F8;
+  background: var(--fill);
   border-radius: 20rpx;
   padding: 8rpx;
   margin-bottom: 36rpx;
@@ -29,13 +29,13 @@
   text-align: center;
   padding: 20rpx 0;
   font-size: 28rpx;
-  color: #6B7180;
+  color: var(--text-2);
   border-radius: 16rpx;
   transition: all 0.2s;
 }
 .role-seg-item.on {
-  background: #fff;
-  color: #3D5AFE;
+  background: var(--card-bg);
+  color: var(--primary-deep);
   font-weight: 700;
   box-shadow: 0 6rpx 16rpx rgba(61, 90, 254, 0.15);
 }
@@ -43,7 +43,7 @@
 .field {
   display: flex;
   align-items: center;
-  border-bottom: 2rpx solid #F0F2F7;
+  border-bottom: 2rpx solid var(--fill-4);
   padding: 8rpx 0;
   margin-bottom: 12rpx;
 }
@@ -51,20 +51,20 @@
 .field-input { flex: 1; font-size: 30rpx; padding: 24rpx 0; }
 .code-btn {
   font-size: 24rpx;
-  color: #3D5AFE;
-  background: #EAEEFF;
+  color: var(--primary-deep);
+  background: var(--primary-light);
   padding: 14rpx 24rpx;
   border-radius: 999rpx;
   white-space: nowrap;
 }
-.code-btn.disabled { color: #A6ABC0; background: #F0F2F7; }
+.code-btn.disabled { color: var(--text-3); background: var(--fill-4); }
 
 .agree { display: flex; align-items: flex-start; margin: 24rpx 0 30rpx; }
 .checkbox {
   width: 36rpx;
   height: 36rpx;
   border-radius: 50%;
-  border: 2rpx solid #C7CBDA;
+  border: 2rpx solid var(--line-2);
   margin-right: 14rpx;
   margin-top: 4rpx;
   display: flex;
@@ -75,14 +75,14 @@
   flex-shrink: 0;
 }
 .checkbox.checked { background: var(--primary); border-color: var(--primary); }
-.agree-text { font-size: 24rpx; color: #8A90A2; flex: 1; line-height: 1.6; }
-.link { color: #3D5AFE; }
+.agree-text { font-size: 24rpx; color: var(--text-sub); flex: 1; line-height: 1.6; }
+.link { color: var(--primary-deep); }
 
 .submit { margin-top: 10rpx; }
-.to-login { text-align: center; font-size: 26rpx; color: #8A90A2; margin-top: 30rpx; }
+.to-login { text-align: center; font-size: 26rpx; color: var(--text-sub); margin-top: 30rpx; }
 
 .wx-note { display: flex; align-items: center; gap: 8rpx; font-size: 22rpx; margin: 8rpx 0 24rpx; }
 .wx-note-text { flex: 1; line-height: 1.5; }
 
 /* 隐私政策 / 用户服务协议链接（审核要求） */
-.pp-link { color: #5B7CFF; font-weight: 600; }
+.pp-link { color: var(--primary); font-weight: 600; }

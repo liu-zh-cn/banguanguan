@@ -18,7 +18,7 @@
   padding: 16rpx 28rpx;
 }
 .search-ico { font-size: 30rpx; margin-right: 12rpx; }
-.search-input { flex: 1; font-size: 28rpx; color: #1F2430; }
+.search-input { flex: 1; font-size: 28rpx; color: var(--text); }
 
 .filter-row {
   display: flex;
@@ -37,10 +37,10 @@
 }
 .chip {
   padding: 14rpx 34rpx;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 999rpx;
   font-size: 26rpx;
-  color: #6B7180;
+  color: var(--text-2);
   box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.04);
 }
 .chip--on { background: var(--primary); color: #fff; font-weight: 700; }
@@ -68,10 +68,10 @@
   border-radius: 999rpx;
 }
 .stu-score { text-align: right; }
-.score-num { font-size: 40rpx; font-weight: 800; color: #1F2430; }
+.score-num { font-size: 40rpx; font-weight: 800; color: var(--text); }
 .score-warn { color: var(--danger); }
 
-.empty { text-align: center; color: #A6ABC0; padding: 80rpx 0; }
+.empty { text-align: center; color: var(--text-3); padding: 80rpx 0; }
 
 .fab {
   position: fixed;
@@ -80,7 +80,7 @@
   width: 108rpx;
   height: 108rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #5B7CFF, #3D5AFE);
+  background: linear-gradient(135deg, var(--primary), var(--primary-deep));
   color: #fff;
   font-size: 60rpx;
   display: flex;
@@ -95,7 +95,7 @@
   display: flex;
   align-items: center;
   padding: 20rpx 0;
-  border-bottom: 1rpx solid #F0F2F8;
+  border-bottom: 1rpx solid var(--fill);
 }
 .teacher-item:last-child { border-bottom: none; }
 .t-avatar {
@@ -114,8 +114,8 @@
   padding: 14rpx 26rpx;
   border-radius: 999rpx;
   font-size: 24rpx;
-  background: #F0F2F8;
-  color: #5A6072;
+  background: var(--fill);
+  color: var(--text-5);
   margin-left: 12rpx;
 }
 .mini-btn--primary { background: var(--primary-light); color: var(--primary-deep); font-weight: 600; }

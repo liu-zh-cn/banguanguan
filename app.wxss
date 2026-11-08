@@ -10,6 +10,19 @@ page {
   --text-sub: #8A90A2;
   --card-bg: #FFFFFF;
   --page-bg: #F5F6FA;
+  /* 二级/三级文字与分隔线、填充色：亮色值与原写死色完全一致，页面视觉不变 */
+  --brand-2: #7E5BFF;
+  --text-2: #6B7180;
+  --text-3: #A6ABC0;
+  --text-4: #3A4152;
+  --text-5: #5A6072;
+  --text-6: #4A5060;
+  --line: #F2F3F7;
+  --line-2: #C7CBDA;
+  --fill: #F0F2F8;
+  --fill-2: #EEF0F5;
+  --fill-3: #F7F8FC;
+  --fill-4: #F0F2F7;
   background: var(--page-bg);
   color: var(--text);
   font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
@@ -102,4 +115,43 @@ view, text, button { box-sizing: border-box; }
 .row { display: flex; align-items: center; }
 .row-between { display: flex; align-items: center; justify-content: space-between; }
 .flex-1 { flex: 1; }
+
+/* ============ 深色模式 ============
+   只在这换变量：页面里所有颜色都已经走 var()，所以不用逐个页面改。
+   需要在 app.json 里开 "darkmode": true，WXSS 的 prefers-color-scheme 才会生效。 */
+@media (prefers-color-scheme: dark) {
+  page {
+    --primary: #7D95FF;
+    --primary-deep: #9DB0FF;
+    --primary-light: #232C45;
+    --accent: #35D6AE;
+    --text: #E8EBF3;
+    --text-sub: #98A1B6;
+    --text-2: #AEB6C8;
+    --text-3: #8B93A8;
+    --text-4: #D5DAE6;
+    --text-5: #B6BDCD;
+    --text-6: #C9CFDC;
+    --line: #2A2F3D;
+    --line-2: #3B4252;
+    --fill: #232836;
+    --fill-2: #1F2430;
+    --fill-3: #1C212B;
+    --fill-4: #202531;
+    --card-bg: #1B1F29;
+    --page-bg: #12151C;
+  }
+
+  /* 卡片阴影在深色下会变成一圈脏边，换成更淡的描边 */
+  .card {
+    box-shadow: none;
+    border: 1rpx solid #262B38;
+  }
+
+  /* 标签底色在深色下要压暗，否则一排亮色块很刺眼 */
+  .tag-blue { background: #232C45; }
+  .tag-green { background: #14312A; color: #4FE0B6; }
+  .tag-orange { background: #352914; color: #FFC24D; }
+  .tag-red { background: #3A1C1F; color: #FF8A8E; }
+}
 .strong { font-weight: 700; }

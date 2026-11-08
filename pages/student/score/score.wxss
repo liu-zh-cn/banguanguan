@@ -1,8 +1,8 @@
 .score-banner { display: flex; padding: 30rpx 0; margin-bottom: 0; }
 .sb-cell { flex: 1; text-align: center; }
-.sb-num { font-size: 48rpx; font-weight: 800; color: #1F2430; }
+.sb-num { font-size: 48rpx; font-weight: 800; color: var(--text); }
 .sb-accent { color: var(--primary-deep); }
-.sb-lb { font-size: 24rpx; color: #8A90A2; margin-top: 6rpx; }
+.sb-lb { font-size: 24rpx; color: var(--text-sub); margin-top: 6rpx; }
 
 /* 考试切换 chips */
 .exam-chips {
@@ -13,10 +13,10 @@
 }
 .ec-chip {
   padding: 14rpx 30rpx;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 999rpx;
   font-size: 26rpx;
-  color: #6B7180;
+  color: var(--text-2);
   box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.04);
 }
 .ec-chip--on { background: var(--primary); color: #fff; font-weight: 700; }
@@ -26,19 +26,19 @@
   align-items: center;
   justify-content: space-between;
   padding: 24rpx 0;
-  border-bottom: 2rpx solid #F2F3F7;
+  border-bottom: 2rpx solid var(--line);
 }
 .sc-item:last-child { border-bottom: none; }
 .sc-left { flex: 1; margin-right: 24rpx; }
 .sc-subject { font-size: 28rpx; font-weight: 600; }
 .sc-bar {
   height: 14rpx;
-  background: #EEF0F5;
+  background: var(--fill-2);
   border-radius: 999rpx;
   margin-top: 12rpx;
   overflow: hidden;
 }
-.sc-bar-in { height: 100%; background: linear-gradient(90deg, #5B7CFF, #7E5BFF); border-radius: 999rpx; }
+.sc-bar-in { height: 100%; background: linear-gradient(90deg, var(--primary), var(--brand-2)); border-radius: 999rpx; }
 .sc-right { text-align: right; min-width: 150rpx; }
 .sc-score { font-size: 36rpx; font-weight: 800; }
 .sc-diff { font-size: 22rpx; margin-left: 8rpx; }
@@ -47,4 +47,4 @@
 .sc-rank { display: block; margin-top: 4rpx; }
 .sc-tip { margin-top: 20rpx; text-align: center; }
 
-.empty { text-align: center; color: #A6ABC0; padding: 80rpx 0; }
+.empty { text-align: center; color: var(--text-3); padding: 80rpx 0; }

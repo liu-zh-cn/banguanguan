@@ -18,4 +18,4 @@
   border-radius: 6rpx;
   margin-right: 10rpx;
 }
-.legend-text { font-size: 24rpx; color: #6B7180; }
+.legend-text { font-size: 24rpx; color: var(--text-2); }

@@ -7,7 +7,7 @@
 
 .pp-tabs {
   display: flex;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20rpx;
   padding: 8rpx;
   margin-bottom: 24rpx;
@@ -18,18 +18,18 @@
   text-align: center;
   padding: 20rpx 0;
   font-size: 28rpx;
-  color: #6B7180;
+  color: var(--text-2);
   border-radius: 14rpx;
 }
 .pp-tab.on {
-  background: linear-gradient(135deg, #5B7CFF, #7E5BFF);
+  background: linear-gradient(135deg, var(--primary), var(--brand-2));
   color: #fff;
   font-weight: 600;
 }
 
 .pp-card {
   padding: 36rpx 32rpx 44rpx;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 24rpx;
   box-shadow: 0 8rpx 24rpx rgba(31, 36, 48, 0.05);
 }
@@ -37,7 +37,7 @@
 .pp-title {
   font-size: 38rpx;
   font-weight: 800;
-  color: #1F2430;
+  color: var(--text);
   margin-bottom: 12rpx;
 }
 .pp-meta {
@@ -48,16 +48,16 @@
 .pp-h {
   font-size: 30rpx;
   font-weight: 700;
-  color: #1F2430;
+  color: var(--text);
   margin: 36rpx 0 14rpx;
   padding-left: 16rpx;
-  border-left: 6rpx solid #5B7CFF;
+  border-left: 6rpx solid var(--primary);
   line-height: 1.4;
 }
 
 .pp-p {
   font-size: 26rpx;
-  color: #4A5060;
+  color: var(--text-6);
   line-height: 1.85;
   margin-bottom: 12rpx;
   text-align: justify;
@@ -65,7 +65,7 @@
 
 .pp-li {
   font-size: 26rpx;
-  color: #4A5060;
+  color: var(--text-6);
   line-height: 1.85;
   margin-bottom: 8rpx;
   padding-left: 8rpx;
@@ -83,17 +83,17 @@
 }
 .pp-tr:last-child { border-bottom: none; }
 .pp-th {
-  background: #F5F6FA;
+  background: var(--page-bg);
   font-weight: 700;
 }
 .pp-td {
   padding: 16rpx 10rpx;
   font-size: 22rpx;
-  color: #4A5060;
+  color: var(--text-6);
   line-height: 1.6;
   word-break: break-all;
 }
-.pp-th .pp-td { color: #1F2430; }
+.pp-th .pp-td { color: var(--text); }
 .pp-td.c1 { width: 22%; }
 .pp-td.c2 { width: 26%; }
 .pp-td.c3 { width: 36%; }

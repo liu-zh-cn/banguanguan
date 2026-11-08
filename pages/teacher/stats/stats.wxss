@@ -20,17 +20,17 @@
   top: 12rpx;
   bottom: 12rpx;
   width: 2rpx;
-  background: #EEF0F5;
+  background: var(--fill-2);
 }
-.stat-num { font-size: 46rpx; font-weight: 800; color: #1F2430; }
+.stat-num { font-size: 46rpx; font-weight: 800; color: var(--text); }
 .stat-num.text-green { color: #0F9D77; }
-.stat-num.text-blue { color: #3D5AFE; }
-.stat-label { font-size: 24rpx; color: #8A90A2; margin-top: 8rpx; }
+.stat-num.text-blue { color: var(--primary-deep); }
+.stat-label { font-size: 24rpx; color: var(--text-sub); margin-top: 8rpx; }
 
 /* 图表切换入口 */
 .switch-bar {
   display: flex;
-  background: #F0F2F8;
+  background: var(--fill);
   border-radius: 20rpx;
   padding: 8rpx;
   margin-bottom: 28rpx;
@@ -40,13 +40,13 @@
   text-align: center;
   padding: 16rpx 0;
   font-size: 26rpx;
-  color: #6B7180;
+  color: var(--text-2);
   border-radius: 16rpx;
   transition: all 0.2s;
 }
 .switch-item--on {
-  background: #fff;
-  color: #3D5AFE;
+  background: var(--card-bg);
+  color: var(--primary-deep);
   font-weight: 700;
   box-shadow: 0 6rpx 16rpx rgba(61, 90, 254, 0.15);
 }
@@ -57,7 +57,7 @@
   margin-bottom: 10rpx;
 }
 .chart-title { font-size: 30rpx; font-weight: 700; }
-.chart-desc { font-size: 22rpx; color: #A6ABC0; }
+.chart-desc { font-size: 22rpx; color: var(--text-3); }
 
 /* 快捷操作 */
 .quick-row { display: flex; }
@@ -68,7 +68,7 @@
   align-items: center;
   gap: 12rpx;
   font-size: 24rpx;
-  color: #5A6072;
+  color: var(--text-5);
 }
 .quick-ico {
   width: 92rpx;
