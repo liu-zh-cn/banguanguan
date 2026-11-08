@@ -1,4 +1,5 @@
 const app = getApp();
+const { applyTheme } = require('../../../utils/theme');
 
 Page({
   data: {
@@ -24,6 +25,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     const p = app.getProfile('student');
     this.setData({
       className: p.className || '未设置班级',

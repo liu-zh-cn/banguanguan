@@ -1,4 +1,4 @@
-<view class="bc-page">
+<view class="bc-page {{themeClass}}">
   <view class="hero">
     <view class="hero-title">大屏广播</view>
     <view class="hero-sub">发送到：{{className || '未创建班级'}} · 大屏绑定同班邀请码才会收到</view>

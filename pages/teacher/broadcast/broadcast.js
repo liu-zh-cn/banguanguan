@@ -1,4 +1,5 @@
 const app = getApp();
+const { applyTheme } = require('../../../utils/theme');
 
 Page({
   data: {
@@ -12,6 +13,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     app.cloudMyClass()
       .then((r) => {
         if (r.user) {

@@ -1,4 +1,4 @@
-<view class="reg">
+<view class="reg {{themeClass}}">
   <view class="reg-hero">
     <view class="reg-title">创建账号</view>
     <view class="reg-sub">绑定微信身份，几秒完成注册（免费）</view>

@@ -1,4 +1,4 @@
-<view class="set-page">
+<view class="set-page {{themeClass}}">
   <view class="card acc-card">
     <view class="row-between">
       <text class="acc-label">当前身份</text>
@@ -25,6 +25,9 @@
   <view class="card menu-card">
     <view class="s-item" bindtap="goEdit">
       <text class="s-ico">📝</text><text class="s-label">修改资料</text><text class="s-arrow">›</text>
+    </view>
+    <view class="s-item" bindtap="pickTheme">
+      <text class="s-ico">🌗</text><text class="s-label">主题</text><text class="s-val">{{themeText}}</text><text class="s-arrow">›</text>
     </view>
     <view class="s-item" bindtap="clearCache">
       <text class="s-ico">🧹</text><text class="s-label">清除本地缓存</text><text class="s-arrow">›</text>

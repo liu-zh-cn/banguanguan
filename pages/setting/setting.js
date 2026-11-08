@@ -1,4 +1,5 @@
 const app = getApp();
+const { applyTheme, getMode, setMode } = require('../../utils/theme');
 
 // 当前小程序版本 / 环境：正式版有 version，开发版和体验版取不到，用环境标识兜底
 function getVersionInfo() {
@@ -20,19 +21,45 @@ Page({
     profile: {},
     openidShort: '',
     version: '未知',
-    envText: ''
+    envText: '',
+    themeMode: 'auto',
+    themeText: '跟随系统'
   },
 
   onShow() {
+    applyTheme(this);
     const role = wx.getStorageSync('role') || 'teacher';
     const openid = app.globalData.openid || wx.getStorageSync('openid') || '';
     const ver = getVersionInfo();
+    const mode = getMode();
     this.setData({
       role,
       profile: app.getProfile(role),
       openidShort: openid ? openid.slice(0, 12) + '…' : '未登录',
       version: ver.version,
-      envText: ver.envText
+      envText: ver.envText,
+      themeMode: mode,
+      themeText: { auto: '跟随系统', dark: '深色', light: '浅色' }[mode]
+    });
+  },
+
+  // 主题：跟随系统 / 深色 / 浅色。改完立刻应用到当前页，返回其它页时 onShow 也会重新应用
+  pickTheme() {
+    const list = ['跟随系统', '深色', '浅色'];
+    const keys = ['auto', 'dark', 'light'];
+    wx.showActionSheet({
+      itemList: list,
+      success: (res) => {
+        const mode = keys[res.tapIndex];
+        if (!mode || mode === this.data.themeMode) return;
+        setMode(mode);
+        applyTheme(this);
+        this.setData({
+          themeMode: mode,
+          themeText: list[res.tapIndex]
+        });
+        wx.showToast({ title: '已切换为' + list[res.tapIndex], icon: 'none' });
+      }
     });
   },
 

@@ -1,4 +1,5 @@
 const app = getApp();
+const { applyTheme } = require('../../utils/theme');
 
 Page({
   data: {
@@ -9,6 +10,7 @@ Page({
   },
 
   onLoad() {
+    applyTheme(this);
     let env = 'develop';
     try {
       env = (wx.getAccountInfoSync() || {}).miniProgram.envVersion || 'develop';

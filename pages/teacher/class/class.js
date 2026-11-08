@@ -1,6 +1,7 @@
 const app = getApp();
 const { PALETTE } = require('../../../utils/constants');
 const { fmtTime } = require('../../../utils/format');
+const { applyTheme } = require('../../../utils/theme');
 
 Page({
   data: {
@@ -23,6 +24,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     this._inviteCode = '';
     // 请求序号：快速切页时 bottom-nav 走 reLaunch、onShow 重入，
     // 若旧的 myClass 响应晚于新的 stats 合并落地，会把已显示的分数刷回「—」

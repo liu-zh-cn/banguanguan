@@ -1,4 +1,5 @@
 const app = getApp();
+const { applyTheme } = require('../../../utils/theme');
 
 Page({
   data: {
@@ -13,6 +14,7 @@ Page({
   },
 
   onLoad(options) {
+    applyTheme(this);
     const homeworkId = (options && options.homeworkId) || '';
     if (!homeworkId) {
       wx.showToast({ title: '缺少作业参数', icon: 'none' });

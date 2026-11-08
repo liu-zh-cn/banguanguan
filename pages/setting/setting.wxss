@@ -16,6 +16,7 @@
 .s-item:last-child { border-bottom: none; }
 .s-ico { font-size: 40rpx; margin-right: 24rpx; }
 .s-label { flex: 1; font-size: 30rpx; }
+.s-val { font-size: 26rpx; color: var(--text-sub); margin-right: 12rpx; }
 .s-arrow { color: var(--line-2); font-size: 40rpx; }
 
 .logout { text-align: center; color: var(--danger); font-size: 30rpx; font-weight: 600; padding: 6rpx 0; }

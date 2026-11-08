@@ -1,5 +1,6 @@
 // 课程表：数据存在 classes 文档的 timetable 字段里，读取走 myClass，写入走 saveTimetable
 const app = getApp();
+const { applyTheme } = require('../../utils/theme');
 
 const DAYS = ['周一', '周二', '周三', '周四', '周五'];
 const PERIODS = 8;
@@ -45,6 +46,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     // 从别的页面切回来（比如老师换了班级）时重新拉一次
     if (this._loaded) this.load();
   },

@@ -3,6 +3,7 @@
 // 那等于任何人都能读全部班级的广播。改走云函数后集合可收紧为「仅创建者可读写」。
 const POLL_MS = 5000; // 有新消息后的基础间隔；太密会吃云函数调用配额
 const POLL_MAX_MS = 30000; // 长时间没有新消息时退避到这个上限
+const { applyTheme } = require('../../utils/theme');
 
 Page({
   data: {
@@ -32,6 +33,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     if (this.data.bound) this.startPolling();
   },
 

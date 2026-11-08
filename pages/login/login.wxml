@@ -1,4 +1,4 @@
-<view class="reg">
+<view class="reg {{themeClass}}">
   <view class="reg-hero">
     <view class="reg-title">欢迎回来</view>
     <view class="reg-sub">登录班管管，继续管理你的班级</view>

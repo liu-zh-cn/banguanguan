@@ -1,4 +1,5 @@
 const app = getApp();
+const { applyTheme } = require('../../utils/theme');
 
 Page({
   data: {
@@ -14,6 +15,7 @@ Page({
   },
 
   onLoad(options) {
+    applyTheme(this);
     if (options && (options.role === 'teacher' || options.role === 'student')) {
       this.setData({ role: options.role });
     }

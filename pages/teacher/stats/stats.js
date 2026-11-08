@@ -1,4 +1,5 @@
 const app = getApp();
+const { applyTheme } = require('../../../utils/theme');
 
 const SEGMENTS = [
   { key: 'bar', label: '柱状图' },
@@ -21,6 +22,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     const p = app.getProfile('teacher');
     this.setData({ className: p.className || '未设置班级' });
     app

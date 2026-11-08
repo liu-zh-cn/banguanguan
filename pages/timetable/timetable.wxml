@@ -1,4 +1,4 @@
-<view class="tt-page">
+<view class="tt-page {{themeClass}}">
   <view class="tt-head">
     <view class="tt-title">{{className}}</view>
     <view class="tt-sub" wx:if="{{loading}}">加载中…</view>
