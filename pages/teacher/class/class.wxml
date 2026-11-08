@@ -56,10 +56,10 @@
     <view class="chip {{filter === 'warn' ? 'chip--on' : ''}}" data-filter="warn" bindtap="setFilter">低于 {{passLine}}</view>
   </view>
 
-  <!-- 学生列表（点一下给 TA 写点评） -->
+  <!-- 学生列表（点一下给 TA 写点评，班主任长按可移出班级） -->
   <view class="stu-list">
     <view class="stu-item card" wx:for="{{list}}" wx:key="id"
-          data-openid="{{item.openid}}" data-name="{{item.name}}" bindtap="onTapStudent">
+          data-openid="{{item.openid}}" data-name="{{item.name}}" bindtap="onTapStudent" bindlongpress="onStudentLong">
       <view class="avatar" style="background: {{item.avatarColor}}">{{item.name[0]}}</view>
       <view class="stu-main">
         <view class="row">

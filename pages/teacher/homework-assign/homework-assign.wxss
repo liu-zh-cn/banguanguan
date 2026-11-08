@@ -33,3 +33,6 @@
   background: linear-gradient(90deg, #5B7CFF, #24C8A0);
 }
 .progress-text { font-size: 22rpx; color: #6B7180; margin-left: 16rpx; }
+
+/* 「查看未交」入口：低调但可点，避免和整行的其它信息抢注意力 */
+.hw-link { color: #5B7CFF; }

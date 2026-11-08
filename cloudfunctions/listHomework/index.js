@@ -13,13 +13,84 @@ function todayStr() {
   return d.getUTCFullYear() + '-' + p(d.getUTCMonth() + 1) + '-' + p(d.getUTCDate());
 }
 
-exports.main = async () => {
+exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const u = await db.collection('users').where({ openid: OPENID }).limit(1).get();
   if (!u.data.length) return { ok: false, msg: '未注册' };
   const user = u.data[0];
   const classId = user.classId || '';
   if (!classId) return { ok: true, role: user.role, list: [], total: 0 };
+
+  // 老师点某份作业的进度，看「谁交了、谁没交」（页面用来一键复制未交名单）
+  const detailId = event && event.homeworkId ? String(event.homeworkId) : '';
+  if (detailId && user.role === 'teacher') {
+    const hw = await db.collection('homeworks').doc(detailId).get().catch(() => null);
+    if (!hw || !hw.data) return { ok: false, msg: '作业不存在' };
+    if (hw.data.classId !== classId) return { ok: false, msg: '无权查看其它班级的作业' };
+
+    const PAGE = 1000;
+    const students = [];
+    for (let skip = 0; skip < 5000; skip += PAGE) {
+      const s = await db
+        .collection('users')
+        .where({ classId, role: 'student' })
+        .field({ openid: true, name: true, studentNo: true })
+        .skip(skip)
+        .limit(PAGE)
+        .get();
+      (s.data || []).forEach((x) => students.push(x));
+      if (!s.data || s.data.length < PAGE) break;
+    }
+
+    const subs = [];
+    for (let skip = 0; skip < 5000; skip += PAGE) {
+      const s = await db
+        .collection('submissions')
+        .where({ homeworkId: detailId, status: '已提交' })
+        .field({ studentOpenid: true, late: true })
+        .skip(skip)
+        .limit(PAGE)
+        .get();
+      (s.data || []).forEach((x) => subs.push(x));
+      if (!s.data || s.data.length < PAGE) break;
+    }
+    const subMap = {};
+    subs.forEach((x) => {
+      subMap[x.studentOpenid] = x;
+    });
+
+    const missing = [];
+    const done = [];
+    students.forEach((s) => {
+      const sub = subMap[s.openid];
+      const row = {
+        openid: s.openid,
+        name: s.name || '未命名',
+        no: s.studentNo || '',
+        late: !!(sub && sub.late)
+      };
+      if (sub) done.push(row);
+      else missing.push(row);
+    });
+    // 未交的按学号排，老师照着念名单方便
+    missing.sort((a, b) => String(a.no).localeCompare(String(b.no)) || a.name.localeCompare(b.name));
+
+    return {
+      ok: true,
+      detail: true,
+      homework: {
+        id: hw.data._id,
+        title: hw.data.title || '',
+        subject: hw.data.subject || '',
+        deadline: hw.data.deadline || ''
+      },
+      total: students.length,
+      doneCount: done.length,
+      lateCount: done.filter((x) => x.late).length,
+      missing,
+      done
+    };
+  }
 
   // 分页拉全：limit(100) 会让第 101 条以后的作业静默消失。
   // 500 条是给学生端渲染留的硬上限，命中时回传 truncated 让页面明示

@@ -12,6 +12,8 @@ Page({
       { icon: '💬', label: '我的点评', extra: '看学生回复', action: 'reviews' },
       { icon: '📢', label: '大屏广播', action: 'broadcast' },
       { icon: '📈', label: '发布成绩', action: 'score' },
+      { icon: '🚪', label: '退出班级', action: 'quit' },
+      { icon: '🗑️', label: '解散班级', extra: '仅限空班', action: 'dissolve' },
       { icon: '⚙️', label: '设置', action: 'setting' }
     ]
   },
@@ -97,6 +99,14 @@ Page({
       wx.navigateTo({ url: '/pages/timetable/timetable' });
       return;
     }
+    if (action === 'quit') {
+      this.quitClass();
+      return;
+    }
+    if (action === 'dissolve') {
+      this.dissolveClass();
+      return;
+    }
     if (action === 'setting') {
       wx.navigateTo({ url: '/pages/setting/setting' });
     }
@@ -123,6 +133,73 @@ Page({
       .catch(() => {
         wx.hideLoading();
         wx.showToast({ title: '查询失败', icon: 'none' });
+      });
+  },
+
+  // 退出当前班级：班主任要先转让或解散
+  quitClass() {
+    const p = this.data.profile || {};
+    if (!p.className) {
+      wx.showToast({ title: '你还没有加入班级', icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: '退出班级',
+      content: '确定退出「' + p.className + '」吗？之后看不到本班的学生、作业和成绩。班主任需要先转让班主任或解散班级。',
+      confirmText: '退出',
+      confirmColor: '#E23B41',
+      success: (res) => {
+        if (res.confirm) this.doQuit('leave');
+      }
+    });
+  },
+
+  // 解散班级：只允许空班，避免在这里做级联删除
+  dissolveClass() {
+    const p = this.data.profile || {};
+    if (!p.className) {
+      wx.showToast({ title: '你还没有班级', icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: '解散班级',
+      content: '解散「' + p.className + '」不可恢复。\n只能解散空班：需要先移除所有学生和老师、删掉全部考试和作业。',
+      confirmText: '解散',
+      confirmColor: '#E23B41',
+      success: (res) => {
+        if (res.confirm) this.doQuit('dissolve');
+      }
+    });
+  },
+
+  doQuit(action) {
+    if (this._quitting) return;
+    this._quitting = true;
+    wx.showLoading({ title: '处理中', mask: true });
+    app
+      .cloudQuitClass(action)
+      .then((r) => {
+        wx.hideLoading();
+        this._quitting = false;
+        if (!r || !r.ok) {
+          wx.showToast({ title: (r && r.msg) || '操作失败', icon: 'none' });
+          return;
+        }
+        const next = app.getProfile('teacher');
+        next.className = r.className || '';
+        app.saveProfile('teacher', next);
+        app.globalData.classId = r.classId || '';
+        app.globalData.className = r.className || '';
+        this.setData({
+          profile: next,
+          stats: { student: '—', homework: '—', exam: '—' }
+        });
+        wx.showToast({ title: r.msg || '已处理', icon: 'success' });
+      })
+      .catch(() => {
+        wx.hideLoading();
+        this._quitting = false;
+        app.showError('操作失败，请检查网络');
       });
   },
 

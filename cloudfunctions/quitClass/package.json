@@ -1,0 +1,9 @@
+{
+  "name": "quitClass",
+  "version": "1.0.0",
+  "description": "退出班级 / 班主任移除学生 / 班主任解散空班",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
