@@ -1,0 +1,41 @@
+.hs-page { padding-bottom: calc(60rpx + env(safe-area-inset-bottom)); }
+
+.hs-copy {
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: var(--primary-deep);
+  background: var(--primary-light);
+}
+
+.hs-miss {
+  margin-top: 14rpx;
+  font-size: 28rpx;
+  line-height: 1.9;
+}
+
+.hs-name { font-size: 30rpx; font-weight: 600; }
+
+.hs-content {
+  margin-top: 14rpx;
+  font-size: 27rpx;
+  line-height: 1.7;
+  color: #3A4052;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.hs-imgs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 16rpx;
+}
+.hs-img {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 14rpx;
+  background: #F0F2F8;
+}
+
+.empty { text-align: center; color: #A6ABC0; padding: 100rpx 0; }

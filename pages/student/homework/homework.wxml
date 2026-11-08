@@ -31,13 +31,46 @@
     </view>
     <view class="muted hw-deadline">⏰ 截止 {{item.deadline}}</view>
     <view class="hw-foot" wx:if="{{item.status !== '已提交'}}">
-      <view class="submit-mini" data-id="{{item.id}}" catchtap="onSubmit">{{item.expired ? '补交' : '去提交'}}</view>
+      <view class="submit-mini" data-id="{{item.id}}" data-title="{{item.title}}" catchtap="openSubmit">{{item.expired ? '补交' : '去提交'}}</view>
     </view>
     <view class="muted done-tip" wx:else>✅ 已提交</view>
   </view>
 
   <view class="empty" wx:if="{{!list.length}}">该分类下暂无作业 🎉</view>
   <view class="muted" style="text-align:center;padding:24rpx 0;" wx:if="{{truncated}}">作业较多，仅显示最近 500 条</view>
+
+  <!-- 提交面板：文字 + 图片附件 -->
+  <view class="sub-mask" wx:if="{{submitOpen}}" bindtap="closeSubmit"></view>
+  <view class="sub-panel" wx:if="{{submitOpen}}">
+    <view class="sub-head">
+      <text class="sub-title">提交作业</text>
+      <text class="sub-close" bindtap="closeSubmit">关闭</text>
+    </view>
+    <view class="muted sub-name">{{submitTitle}}</view>
+
+    <textarea
+      class="sub-text"
+      value="{{submitText}}"
+      bindinput="onSubmitText"
+      maxlength="2000"
+      placeholder="写答案要点 / 说明（选填）"
+    />
+
+    <view class="sub-imgs">
+      <view class="sub-img" wx:for="{{submitImages}}" wx:key="*this">
+        <image src="{{item}}" mode="aspectFill" data-src="{{item}}" bindtap="previewImage" />
+        <text class="sub-img-del" data-index="{{index}}" catchtap="removeImage">×</text>
+      </view>
+      <view class="sub-img-add" wx:if="{{submitImages.length < 3}}" bindtap="pickImage">
+        <text>＋</text>
+        <text class="sub-img-tip">{{submitImages.length}}/3</text>
+      </view>
+    </view>
+
+    <button class="btn-primary sub-btn" bindtap="doSubmit" disabled="{{submitting}}">
+      {{submitting ? '提交中…' : '提交'}}
+    </button>
+  </view>
 
   <bottom-nav role="student" active="{{0}}" />
 </view>

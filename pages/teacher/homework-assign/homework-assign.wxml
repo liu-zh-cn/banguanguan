@@ -46,7 +46,7 @@
         </view>
         <text class="del" data-id="{{item.id}}" catchtap="remove">撤回</text>
       </view>
-      <view class="hw-meta muted" data-id="{{item.id}}" data-title="{{item.title}}" bindtap="showMissing">截止 {{item.deadline || '未设置'}} · 已交 {{item.done}}/{{item.total}}{{item.lateCount ? ' · 迟交 ' + item.lateCount : ''}} · <text class="hw-link">查看未交 ›</text></view>
+      <view class="hw-meta muted" data-id="{{item.id}}" data-title="{{item.title}}" bindtap="openDetail">截止 {{item.deadline || '未设置'}} · 已交 {{item.done}}/{{item.total}}{{item.lateCount ? ' · 迟交 ' + item.lateCount : ''}} · <text class="hw-link">查看提交 ›</text></view>
       <view class="progress-row">
         <view class="progress-track">
           <view class="progress-bar" style="width: {{item.pct}}%"></view>

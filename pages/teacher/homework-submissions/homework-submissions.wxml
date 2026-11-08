@@ -1,0 +1,37 @@
+<view class="page hs-page">
+  <view class="hero">
+    <view class="hero-title">{{title}}</view>
+    <view class="hero-sub">已交 {{doneCount}}/{{total}}{{lateCount ? ' · 迟交 ' + lateCount : ''}} · 未交 {{missing.length}}</view>
+  </view>
+
+  <view class="card" wx:if="{{missing.length}}">
+    <view class="row-between">
+      <view class="section-title" style="margin-bottom:0;">未交 {{missing.length}} 人</view>
+      <view class="hs-copy" bindtap="copyMissing">复制名单</view>
+    </view>
+    <view class="hs-miss" wx:for="{{missing}}" wx:key="openid">{{item.no}} {{item.name}}</view>
+  </view>
+
+  <view class="card" wx:for="{{done}}" wx:key="openid">
+    <view class="row-between">
+      <view class="hs-name">{{item.no}} {{item.name}}</view>
+      <text class="tag tag-red" wx:if="{{item.late}}">迟交</text>
+    </view>
+    <view class="hs-content" wx:if="{{item.content}}">{{item.content}}</view>
+    <view class="hs-imgs" wx:if="{{item.images.length}}">
+      <image
+        wx:for="{{item.images}}"
+        wx:for-item="img"
+        wx:key="*this"
+        class="hs-img"
+        src="{{img}}"
+        mode="aspectFill"
+        data-urls="{{item.images}}"
+        data-current="{{img}}"
+        bindtap="previewImage"
+      />
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{!loading && !done.length}}">还没有人提交</view>
+</view>

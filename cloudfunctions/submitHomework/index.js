@@ -25,6 +25,12 @@ exports.main = async (event) => {
   // 与 assignHomework 的 2000 字上限对齐：超长内容直接截断，不让它无上限入库
   const content = String(event.content == null ? '' : event.content).slice(0, 2000);
 
+  // 图片附件：最多 3 张，只认本环境云存储的 fileID（cloud:// 开头），
+  // 其它字符串一律丢弃，避免把外部 URL 写进数据库后被当成图片直接渲染
+  const images = (Array.isArray(event.images) ? event.images : [])
+    .filter((x) => typeof x === 'string' && x.indexOf('cloud://') === 0)
+    .slice(0, 3);
+
   // 校验作业属于自己班：否则手工构造 homeworkId 就能往别班作业里塞提交记录
   const hw = await db.collection('homeworks').doc(homeworkId).get().catch(() => null);
   if (!hw || !hw.data) return { ok: false, msg: '作业不存在' };
@@ -48,6 +54,7 @@ exports.main = async (event) => {
       data: {
         status: '已提交',
         content,
+        images,
         late,
         submittedAt: db.serverDate(),
         ts: Date.now()
@@ -66,6 +73,7 @@ exports.main = async (event) => {
           studentName: user.name || '',
           status: '已提交',
           content,
+          images,
           late,
           submittedAt: db.serverDate(),
           ts: Date.now()
@@ -79,7 +87,7 @@ exports.main = async (event) => {
         .get();
       if (!again.data.length) throw e;
       await db.collection('submissions').doc(again.data[0]._id).update({
-        data: { status: '已提交', content, late, submittedAt: db.serverDate(), ts: Date.now() }
+        data: { status: '已提交', content, images, late, submittedAt: db.serverDate(), ts: Date.now() }
       });
     }
   }

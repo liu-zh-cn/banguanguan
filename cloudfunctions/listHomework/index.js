@@ -47,7 +47,7 @@ exports.main = async (event) => {
       const s = await db
         .collection('submissions')
         .where({ homeworkId: detailId, status: '已提交' })
-        .field({ studentOpenid: true, late: true })
+        .field({ studentOpenid: true, late: true, content: true, images: true, ts: true })
         .skip(skip)
         .limit(PAGE)
         .get();
@@ -69,8 +69,12 @@ exports.main = async (event) => {
         no: s.studentNo || '',
         late: !!(sub && sub.late)
       };
-      if (sub) done.push(row);
-      else missing.push(row);
+      if (sub) {
+        row.content = sub.content || '';
+        row.images = Array.isArray(sub.images) ? sub.images.slice(0, 3) : [];
+        row.ts = sub.ts || 0;
+        done.push(row);
+      } else missing.push(row);
     });
     // 未交的按学号排，老师照着念名单方便
     missing.sort((a, b) => String(a.no).localeCompare(String(b.no)) || a.name.localeCompare(b.name));

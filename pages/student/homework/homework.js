@@ -6,6 +6,13 @@ Page({
     list: [],
     truncated: false,
     dueTip: null,
+    // 提交面板
+    submitOpen: false,
+    submitId: '',
+    submitTitle: '',
+    submitText: '',
+    submitImages: [],
+    submitting: false,
     tab: 'all',
     className: '未设置班级',
     name: '',
@@ -85,37 +92,91 @@ Page({
     });
   },
 
-  onSubmit(e) {
-    const id = e.currentTarget.dataset.id;
-    wx.showModal({
-      title: '提交作业',
-      editable: true,
-      placeholderText: '可填写答案要点 / 说明（选填）',
+  openSubmit(e) {
+    const { id, title } = e.currentTarget.dataset;
+    if (!id) return;
+    this.setData({
+      submitOpen: true,
+      submitId: id,
+      submitTitle: title || '',
+      submitText: '',
+      submitImages: []
+    });
+  },
+
+  closeSubmit() {
+    if (this.data.submitting) return;
+    this.setData({ submitOpen: false });
+  },
+
+  onSubmitText(e) {
+    this.setData({ submitText: e.detail.value });
+  },
+
+  // 最多 3 张：拍作业、拍试卷都够用，再多上传会很慢
+  pickImage() {
+    const left = 3 - this.data.submitImages.length;
+    if (left <= 0) return;
+    wx.chooseMedia({
+      count: left,
+      mediaType: ['image'],
+      sizeType: ['compressed'],
       success: (res) => {
-        if (!res.confirm) return;
-        const content = res.content || '';
-        if (content.length > 2000) {
-          wx.showToast({ title: '内容不能超过 2000 字', icon: 'none' });
-          return;
-        }
-        wx.showLoading({ title: '提交中' });
-        app
-          .cloudSubmitHomework(id, content)
-          .then((r) => {
-            wx.hideLoading();
-            if (r.ok) {
-              // 截止日之后再提交不拦，但要明确告诉学生这是迟交
-              wx.showToast({ title: r.late ? '已提交（迟交）' : '已提交', icon: 'success' });
-              this.load();
-            } else {
-              wx.showToast({ title: r.msg || '提交失败', icon: 'none' });
-            }
-          })
-          .catch(() => {
-            wx.hideLoading();
-            wx.showToast({ title: '网络/云函数错误', icon: 'none' });
-          });
+        const paths = (res.tempFiles || []).map((f) => f.tempFilePath);
+        this.setData({ submitImages: this.data.submitImages.concat(paths).slice(0, 3) });
       }
     });
+  },
+
+  removeImage(e) {
+    const i = Number(e.currentTarget.dataset.index);
+    const list = this.data.submitImages.slice();
+    list.splice(i, 1);
+    this.setData({ submitImages: list });
+  },
+
+  previewImage(e) {
+    const src = e.currentTarget.dataset.src;
+    if (src) wx.previewImage({ current: src, urls: this.data.submitImages });
+  },
+
+  // 先传图拿到 fileID，再提交；任何一张失败就整单中止，避免"提交成功但图没了"
+  doSubmit() {
+    if (this.data.submitting) return;
+    const content = this.data.submitText || '';
+    if (content.length > 2000) {
+      wx.showToast({ title: '内容不能超过 2000 字', icon: 'none' });
+      return;
+    }
+    const images = this.data.submitImages.slice();
+    const homeworkId = this.data.submitId;
+
+    this.setData({ submitting: true });
+    wx.showLoading({ title: images.length ? '上传图片中' : '提交中', mask: true });
+
+    const uploadOne = (path, i) => {
+      const ext = (path.match(/\.[a-zA-Z0-9]+$/) || ['.jpg'])[0];
+      const cloudPath = 'homework/' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 8) + ext;
+      return wx.cloud.uploadFile({ cloudPath, filePath: path }).then((r) => r.fileID);
+    };
+
+    Promise.all(images.map((p, i) => uploadOne(p, i)))
+      .then((fileIDs) => app.cloudSubmitHomework(homeworkId, content, fileIDs))
+      .then((r) => {
+        wx.hideLoading();
+        this.setData({ submitting: false });
+        if (!r || !r.ok) {
+          wx.showToast({ title: (r && r.msg) || '提交失败', icon: 'none' });
+          return;
+        }
+        this.setData({ submitOpen: false });
+        wx.showToast({ title: r.late ? '已提交（迟交）' : '已提交', icon: 'success' });
+        this.load();
+      })
+      .catch(() => {
+        wx.hideLoading();
+        this.setData({ submitting: false });
+        wx.showToast({ title: '上传或提交失败，请重试', icon: 'none' });
+      });
   }
 });

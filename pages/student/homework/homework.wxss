@@ -60,3 +60,84 @@
   background: #FFF1F1;
   color: #E23B41;
 }
+
+/* 提交面板 */
+.sub-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 24, 35, 0.45);
+  z-index: 20;
+}
+.sub-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 21;
+  padding: 28rpx 28rpx calc(28rpx + env(safe-area-inset-bottom));
+  background: var(--card-bg);
+  border-top-left-radius: 28rpx;
+  border-top-right-radius: 28rpx;
+}
+.sub-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sub-title { font-size: 32rpx; font-weight: 700; }
+.sub-close { font-size: 26rpx; color: var(--text-sub); }
+.sub-name { margin-top: 6rpx; font-size: 24rpx; }
+
+.sub-text {
+  width: 100%;
+  height: 200rpx;
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background: #F5F6FA;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+.sub-imgs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+.sub-img {
+  position: relative;
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 14rpx;
+  overflow: hidden;
+  background: #F0F2F8;
+}
+.sub-img image { width: 100%; height: 100%; }
+.sub-img-del {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+}
+.sub-img-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 150rpx;
+  height: 150rpx;
+  border: 2rpx dashed #D5D9E6;
+  border-radius: 14rpx;
+  color: var(--text-sub);
+  font-size: 36rpx;
+}
+.sub-img-tip { font-size: 22rpx; margin-top: 4rpx; }
+
+.sub-btn { margin-top: 28rpx; width: 100%; }
