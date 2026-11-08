@@ -36,7 +36,7 @@
   width: 8rpx;
   height: 8rpx;
   border-radius: 50%;
-  background: #5B7CFF;
+  background: var(--primary);
 }
-.nav-text { font-size: 22rpx; color: #1F2430; }
-.nav-item--active .nav-text { color: #3D5AFE; font-weight: 700; }
+.nav-text { font-size: 22rpx; color: var(--text); }
+.nav-item--active .nav-text { color: var(--primary-deep); font-weight: 700; }

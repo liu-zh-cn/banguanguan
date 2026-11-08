@@ -1,6 +1,6 @@
 .welcome {
   min-height: 100vh;
-  background: linear-gradient(160deg, #5B7CFF 0%, #7E5BFF 55%, #9B5BFF 100%);
+  background: linear-gradient(160deg, var(--primary) 0%, var(--brand-2) 55%, #9B5BFF 100%);
   padding: 120rpx 48rpx 60rpx;
   display: flex;
   flex-direction: column;
@@ -24,7 +24,7 @@
 .choose-tip { color: rgba(255, 255, 255, 0.85); font-size: 26rpx; margin-bottom: 24rpx; }
 
 .role-card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 32rpx;
   padding: 40rpx 36rpx;
   display: flex;
@@ -42,12 +42,12 @@
   font-size: 52rpx;
   margin-right: 28rpx;
 }
-.role-teacher .role-icon { background: #EAEEFF; }
+.role-teacher .role-icon { background: var(--primary-light); }
 .role-student .role-icon { background: #D8F6EE; }
 .role-info { flex: 1; }
-.role-title { font-size: 36rpx; font-weight: 700; color: #1F2430; }
-.role-desc { font-size: 24rpx; color: #8A90A2; margin-top: 8rpx; }
-.role-arrow { font-size: 52rpx; color: #C7CBDA; }
+.role-title { font-size: 36rpx; font-weight: 700; color: var(--text); }
+.role-desc { font-size: 24rpx; color: var(--text-sub); margin-top: 8rpx; }
+.role-arrow { font-size: 52rpx; color: var(--line-2); }
 
 .reg-entry {
   text-align: center;

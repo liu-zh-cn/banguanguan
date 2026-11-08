@@ -24,12 +24,14 @@
     "pages/student/mine/mine"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#5B7CFF",
+    "navigationBarBackgroundColor": "@navBgColor",
     "navigationBarTitleText": "班管管",
-    "navigationBarTextStyle": "white",
-    "backgroundColor": "#F5F6FA",
+    "navigationBarTextStyle": "@navTxtStyle",
+    "backgroundColor": "@bgColor",
     "backgroundTextStyle": "light"
   },
+  "darkmode": true,
+  "themeLocation": "theme.json",
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }

@@ -5,10 +5,10 @@
 }
 .tab {
   padding: 14rpx 32rpx;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 999rpx;
   font-size: 26rpx;
-  color: #6B7180;
+  color: var(--text-2);
   box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.04);
 }
 .tab--on { background: var(--primary); color: #fff; font-weight: 700; }
@@ -21,17 +21,17 @@
 .progress-track {
   flex: 1;
   height: 16rpx;
-  background: #EEF0F5;
+  background: var(--fill-2);
   border-radius: 999rpx;
   overflow: hidden;
 }
 .progress-bar {
   height: 100%;
   border-radius: 999rpx;
-  background: linear-gradient(90deg, #5B7CFF, #24C8A0);
+  background: linear-gradient(90deg, var(--primary), var(--accent));
 }
 .bar-red { background: linear-gradient(90deg, #FF8A5B, #FF5A5F); }
-.progress-text { font-size: 22rpx; color: #6B7180; margin-left: 16rpx; }
+.progress-text { font-size: 22rpx; color: var(--text-2); margin-left: 16rpx; }
 
 .hw-foot { display: flex; justify-content: flex-end; margin-top: 20rpx; }
 .submit-mini {
@@ -43,7 +43,7 @@
   font-weight: 600;
 }
 
-.empty { text-align: center; color: #A6ABC0; padding: 100rpx 0; }
+.empty { text-align: center; color: var(--text-3); padding: 100rpx 0; }
 .done-tip { margin-top: 12rpx; text-align: right; }
 
 /* 截止提醒：今天截止用警示色，明天截止用信息色 */
@@ -93,7 +93,7 @@
   height: 200rpx;
   margin-top: 20rpx;
   padding: 20rpx;
-  background: #F5F6FA;
+  background: var(--page-bg);
   border-radius: 16rpx;
   font-size: 28rpx;
   line-height: 1.6;
@@ -111,7 +111,7 @@
   height: 150rpx;
   border-radius: 14rpx;
   overflow: hidden;
-  background: #F0F2F8;
+  background: var(--fill);
 }
 .sub-img image { width: 100%; height: 100%; }
 .sub-img-del {

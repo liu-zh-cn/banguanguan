@@ -20,7 +20,7 @@
   background: #ff5a5f;
   margin-right: 10rpx;
 }
-.scr-status.on .dot { background: #24C8A0; }
+.scr-status.on .dot { background: var(--accent); }
 .scr-status.on { color: #7fe9cf; }
 
 .scr-body {
@@ -46,7 +46,7 @@
 .scr-wave .bar {
   width: 12rpx;
   height: 20rpx;
-  background: linear-gradient(#5B7CFF, #24C8A0);
+  background: linear-gradient(var(--primary), var(--accent));
   border-radius: 8rpx;
 }
 .scr-wave.playing .bar { animation: bounce 0.9s ease-in-out infinite; }
@@ -94,7 +94,7 @@
 }
 .bind-btn {
   width: 560rpx;
-  background: linear-gradient(135deg, #5B7CFF, #24C8A0);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
   color: #fff;
   font-size: 32rpx;
   font-weight: 700;

@@ -35,7 +35,7 @@
   width: 200rpx;
   height: 200rpx;
   border-radius: 14rpx;
-  background: #F0F2F8;
+  background: var(--fill);
 }
 
-.empty { text-align: center; color: #A6ABC0; padding: 100rpx 0; }
+.empty { text-align: center; color: var(--text-3); padding: 100rpx 0; }
