@@ -27,6 +27,8 @@ exports.main = async () => {
   let pending = [];
   let classes = [];
   let pendingApply = null;
+  let pendingQuit = null;
+  let quitRequests = [];
   let isOwner = false;
 
   // 老师的成员数组懒回填：只有 classId 的老数据，在下次进页面时升级成 classIds
@@ -130,6 +132,21 @@ exports.main = async () => {
           subject: x.subject || '',
           ts: x.applyTs || 0
         }));
+
+        // 学生提交的退班申请：同样只给班主任
+        const q = await db
+          .collection('users')
+          .where({ role: 'student', quitClassId: user.classId })
+          .field({ openid: true, name: true, studentNo: true, quitTs: true })
+          .limit(100)
+          .get()
+          .catch(() => ({ data: [] }));
+        quitRequests = (q.data || []).map((x) => ({
+          openid: x.openid,
+          name: x.name || '未设置姓名',
+          no: x.studentNo || '',
+          ts: x.quitTs || 0
+        }));
       }
 
       // 我加入的班级列表（切换用）。班级被删的自动跳过
@@ -165,6 +182,15 @@ exports.main = async () => {
     }
   }
 
+  // 学生自己那条退班申请：只回班级名和时间，页面据此显示「审核中」并允许撤销
+  if (user && user.role === 'student' && user.quitClassId) {
+    pendingQuit = {
+      classId: user.quitClassId,
+      className: user.quitClassName || (cls && cls.name) || '',
+      ts: user.quitTs || 0
+    };
+  }
+
   return {
     ok: true,
     user,
@@ -174,6 +200,8 @@ exports.main = async () => {
     pending,
     classes,
     pendingApply,
+    pendingQuit,
+    quitRequests,
     isOwner
   };
 };
