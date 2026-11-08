@@ -155,3 +155,67 @@ view, text, button { box-sizing: border-box; }
   .tag-red { background: #3A1C1F; color: #FF8A8E; }
 }
 .strong { font-weight: 700; }
+
+/* ============ 手动主题 ============
+   用户在上设置里选了「深色 / 浅色」时，页面根节点会挂上对应类。
+   类选择器优先级高于 page，因此能压过系统的 prefers-color-scheme。
+   选「跟随系统」时不挂类，走上面的 @media。 */
+.theme-dark,
+.theme-light {
+  min-height: 100vh;
+  background: var(--page-bg);
+  color: var(--text);
+}
+
+.theme-dark {
+  --primary: #7D95FF;
+  --primary-deep: #9DB0FF;
+  --primary-light: #232C45;
+  --accent: #35D6AE;
+  --text: #E8EBF3;
+  --text-sub: #98A1B6;
+  --text-2: #AEB6C8;
+  --text-3: #8B93A8;
+  --text-4: #D5DAE6;
+  --text-5: #B6BDCD;
+  --text-6: #C9CFDC;
+  --line: #2A2F3D;
+  --line-2: #3B4252;
+  --fill: #232836;
+  --fill-2: #1F2430;
+  --fill-3: #1C212B;
+  --fill-4: #202531;
+  --card-bg: #1B1F29;
+  --page-bg: #12151C;
+}
+.theme-dark .card {
+  box-shadow: none;
+  border: 1rpx solid #262B38;
+}
+.theme-dark .tag-blue { background: #232C45; }
+.theme-dark .tag-green { background: #14312A; color: #4FE0B6; }
+.theme-dark .tag-orange { background: #352914; color: #FFC24D; }
+.theme-dark .tag-red { background: #3A1C1F; color: #FF8A8E; }
+
+.theme-light {
+  --primary: #5B7CFF;
+  --primary-deep: #3D5AFE;
+  --primary-light: #EAEEFF;
+  --accent: #24C8A0;
+  --brand-2: #7E5BFF;
+  --text: #1F2430;
+  --text-sub: #8A90A2;
+  --text-2: #6B7180;
+  --text-3: #A6ABC0;
+  --text-4: #3A4152;
+  --text-5: #5A6072;
+  --text-6: #4A5060;
+  --line: #F2F3F7;
+  --line-2: #C7CBDA;
+  --fill: #F0F2F8;
+  --fill-2: #EEF0F5;
+  --fill-3: #F7F8FC;
+  --fill-4: #F0F2F7;
+  --card-bg: #FFFFFF;
+  --page-bg: #F5F6FA;
+}

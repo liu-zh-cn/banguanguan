@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page {{themeClass}}">
   <view class="hero">
     <view class="hero-title">老师点评</view>
     <view class="hero-sub">共收到 {{list.length}} 条点评</view>

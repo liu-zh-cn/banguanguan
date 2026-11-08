@@ -1,4 +1,5 @@
 const app = getApp();
+const { applyTheme } = require('../../../utils/theme');
 
 Page({
   data: {
@@ -18,6 +19,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     this.load('');
   },
 

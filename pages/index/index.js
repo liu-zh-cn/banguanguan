@@ -1,6 +1,11 @@
 const app = getApp();
+const { applyTheme } = require('../../utils/theme');
 
 Page({
+  onShow() {
+    applyTheme(this);
+  },
+
   data: {},
 
   go(url) {

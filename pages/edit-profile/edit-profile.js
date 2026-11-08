@@ -1,5 +1,6 @@
 const app = getApp();
 const { markDirty, clearDirty } = require('../../utils/guard');
+const { applyTheme } = require('../../utils/theme');
 
 Page({
   data: {
@@ -10,6 +11,7 @@ Page({
   },
 
   onLoad(options) {
+    applyTheme(this);
     const role = options.role || wx.getStorageSync('role') || 'teacher';
     const profile = app.getProfile(role);
     this.setData({

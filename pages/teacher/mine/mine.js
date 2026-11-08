@@ -1,4 +1,5 @@
 const app = getApp();
+const { applyTheme } = require('../../../utils/theme');
 
 Page({
   data: {
@@ -19,6 +20,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     this.setData({ profile: app.getProfile('teacher') });
     this.loadStats();
     this.syncProfile();

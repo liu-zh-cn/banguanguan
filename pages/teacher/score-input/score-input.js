@@ -1,4 +1,5 @@
 const app = getApp();
+const { applyTheme } = require('../../../utils/theme');
 
 Page({
   data: {
@@ -16,6 +17,7 @@ Page({
   },
 
   onLoad(options) {
+    applyTheme(this);
     const examId = (options && options.examId) || '';
     if (!examId) {
       wx.showToast({ title: '缺少考试参数', icon: 'none' });

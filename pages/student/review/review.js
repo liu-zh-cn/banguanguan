@@ -1,6 +1,7 @@
 const app = getApp();
 const { TYPE_MAP } = require('../../../utils/constants');
 const { fmtTime } = require('../../../utils/format');
+const { applyTheme } = require('../../../utils/theme');
 
 Page({
   data: {
@@ -9,6 +10,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     this.loadList();
   },
 

@@ -1,5 +1,6 @@
 const app = getApp();
 const { markDirty, clearDirty } = require('../../utils/guard');
+const { applyTheme } = require('../../utils/theme');
 
 Page({
   data: {
@@ -27,6 +28,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     this.syncMyClass();
   },
 

@@ -1,4 +1,4 @@
-<view class="cc-page">
+<view class="cc-page {{themeClass}}">
   <view class="hero">
     <view class="hero-title">创建班级</view>
     <view class="hero-sub">建立你自己的班级，生成邀请码招学生</view>

@@ -1,4 +1,4 @@
-<view class="page hs-page">
+<view class="page hs-page {{themeClass}}">
   <view class="hero">
     <view class="hero-title">{{title}}</view>
     <view class="hero-sub">已交 {{doneCount}}/{{total}}{{lateCount ? ' · 迟交 ' + lateCount : ''}} · 未交 {{missing.length}}</view>

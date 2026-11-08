@@ -1,3 +1,4 @@
+const { applyTheme } = require('../../utils/theme');
 // 页面：privacy —— 用户服务协议 & 隐私政策
 // 审核要求：收集手机号等个人信息前，须以《用户服务协议》及《隐私政策》明确告知
 Page({
@@ -6,6 +7,7 @@ Page({
   },
 
   onLoad(options) {
+    applyTheme(this);
     const opts = options || {};
     if (opts.tab === 'agreement') {
       this.setData({ tab: 'agreement' });

@@ -1,6 +1,7 @@
 const app = getApp();
 const { markDirty, clearDirty } = require('../../../utils/guard');
 const { DEFAULT_SUBJECTS } = require('../../../utils/constants');
+const { applyTheme } = require('../../../utils/theme');
 
 Page({
   data: {
@@ -15,6 +16,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     this.loadList();
   },
 

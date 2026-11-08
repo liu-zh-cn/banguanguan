@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page {{themeClass}}">
   <view class="hero">
     <view class="hero-title">发布成绩</view>
     <view class="hero-sub">录入并管理各次考试成绩的发布状态</view>

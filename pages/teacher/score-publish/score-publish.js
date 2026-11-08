@@ -1,5 +1,6 @@
 const app = getApp();
 const { FULL_SCORES } = require('../../../utils/constants');
+const { applyTheme } = require('../../../utils/theme');
 
 Page({
   data: {
@@ -13,6 +14,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this);
     this.load();
   },
 
