@@ -6,6 +6,7 @@ Page({
     stats: { rank: '—', todo: '—', review: '—' },
     menus: [
       { icon: '➕', label: '加入班级', extra: '输入邀请码', action: 'join' },
+      { icon: '🚪', label: '退出班级', extra: '离开当前班', action: 'quit' },
       { icon: '📇', label: '我的资料', extra: '查看 / 编辑', action: 'edit' },
       { icon: '✅', label: '我的作业', action: 'homework' },
       { icon: '🏆', label: '我的成绩', action: 'score' },
@@ -96,6 +97,10 @@ Page({
     }
     if (action === 'timetable') {
       wx.navigateTo({ url: '/pages/timetable/timetable' });
+      return;
+    }
+    if (action === 'quit') {
+      this.quitClass();
     }
   },
 
@@ -125,6 +130,48 @@ Page({
           .catch(() => {
             wx.hideLoading();
             wx.showToast({ title: '网络/云函数错误', icon: 'none' });
+          });
+      }
+    });
+  },
+
+  // 退出当前班级：退掉之后看不到本班作业 / 成绩 / 点评，可以凭邀请码重新加入
+  quitClass() {
+    const p = this.data.profile || {};
+    if (!p.className) {
+      wx.showToast({ title: '你还不在任何班级中', icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: '退出班级',
+      content: '确定退出「' + p.className + '」吗？退出后看不到本班的作业、成绩和点评，之后可以凭邀请码重新加入。',
+      confirmText: '退出',
+      confirmColor: '#E23B41',
+      success: (res) => {
+        if (!res.confirm) return;
+        wx.showLoading({ title: '处理中', mask: true });
+        app
+          .cloudQuitClass('leave')
+          .then((r) => {
+            wx.hideLoading();
+            if (!r || !r.ok) {
+              wx.showToast({ title: (r && r.msg) || '退出失败', icon: 'none' });
+              return;
+            }
+            const next = app.getProfile('student');
+            next.className = '';
+            app.saveProfile('student', next);
+            app.globalData.classId = '';
+            app.globalData.className = '';
+            this.setData({
+              profile: next,
+              stats: { rank: '—', todo: '—', review: '—' }
+            });
+            wx.showToast({ title: '已退出班级', icon: 'success' });
+          })
+          .catch(() => {
+            wx.hideLoading();
+            app.showError('退出失败，请检查网络');
           });
       }
     });

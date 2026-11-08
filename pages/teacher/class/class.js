@@ -82,6 +82,47 @@ Page({
       .catch(() => app.showError('班级数据加载失败'));
   },
 
+  // 班主任长按学生：写点评 / 移出班级
+  onStudentLong(e) {
+    if (!this.data.isOwner) return;
+    const { openid, name } = e.currentTarget.dataset;
+    if (!openid) return;
+    wx.showActionSheet({
+      itemList: ['写点评', '移出班级'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          this.onTapStudent(e);
+          return;
+        }
+        wx.showModal({
+          title: '移出班级',
+          content: '把「' + name + '」移出本班？对方之后看不到本班的作业、成绩和点评，可以凭邀请码重新加入。',
+          confirmText: '移出',
+          confirmColor: '#E23B41',
+          success: (r) => {
+            if (!r.confirm) return;
+            wx.showLoading({ title: '处理中', mask: true });
+            app
+              .cloudQuitClass('kick', openid)
+              .then((x) => {
+                wx.hideLoading();
+                if (!x || !x.ok) {
+                  wx.showToast({ title: (x && x.msg) || '操作失败', icon: 'none' });
+                  return;
+                }
+                wx.showToast({ title: '已移出', icon: 'success' });
+                this.onShow();
+              })
+              .catch(() => {
+                wx.hideLoading();
+                app.showError('操作失败，请检查网络');
+              });
+          }
+        });
+      }
+    });
+  },
+
   onSearch(e) {
     this.setData({ keyword: e.detail.value });
     this.applyFilter();

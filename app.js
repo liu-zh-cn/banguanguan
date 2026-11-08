@@ -125,6 +125,22 @@ App({
     );
   },
 
+  // 退出班级 / 班主任移除学生 / 解散空班：action = leave / kick / dissolve
+  cloudQuitClass(action, openid) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud.callFunction({ name: 'quitClass', data: { action, openid } }).then(
+      (res) => (res && res.result) || {}
+    );
+  },
+
+  // 老师看某份作业的未交名单（复用 listHomework 的 homeworkId 分支）
+  cloudHomeworkDetail(homeworkId) {
+    if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
+    return wx.cloud.callFunction({ name: 'listHomework', data: { homeworkId } }).then(
+      (res) => (res && res.result) || {}
+    );
+  },
+
   // 拉取当前用户的班级上下文（classId / 班级信息 / 学生名单）
   cloudMyClass() {
     if (!wx.cloud) return Promise.reject(new Error('cloud-not-supported'));
