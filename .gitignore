@@ -3,20 +3,12 @@
 Thumbs.db
 $RECYCLE.BIN/
 
-# macOS
-.DS_Store
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-
-# Node.js
+# 依赖
 node_modules/
 
-# 微信开发者工具：本机私有配置（含本机路径、开发者工具设置，不应入库）
+# 微信开发者工具：本机私有配置，含本机路径，不应入库
 project.private.config.json
 
 # 编辑器临时文件
 *.swp
 *.swo
-.swp
