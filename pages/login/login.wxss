@@ -1,6 +1,6 @@
 .reg { min-height: 100vh; background: var(--card-bg); }
 .reg-hero {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--brand-2) 100%);
+  background: var(--hero-gradient);
   padding: 70rpx 48rpx 130rpx;
   color: #fff;
 }

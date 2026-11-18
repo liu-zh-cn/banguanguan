@@ -8,10 +8,10 @@
 }
 .nav-inner {
   height: 110rpx;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--bar-bg);
   backdrop-filter: blur(20rpx);
   border-radius: 32rpx;
-  box-shadow: 0 -6rpx 40rpx rgba(61, 90, 254, 0.12);
+  box-shadow: var(--bar-shadow);
   display: flex;
   align-items: center;
 }

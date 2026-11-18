@@ -48,7 +48,7 @@
   right: 0;
   bottom: 0;
   padding: 20rpx 28rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--bar-bg-strong);
   box-shadow: 0 -8rpx 30rpx rgba(31, 36, 48, 0.06);
 }
 .si-save { width: 100%; }
