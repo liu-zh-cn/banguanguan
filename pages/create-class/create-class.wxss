@@ -18,7 +18,7 @@
 .f-textarea { width: 100%; height: 120rpx; font-size: 28rpx; }
 
 .code-card {
-  background: linear-gradient(135deg, var(--primary-light), #F3EEFF);
+  background: linear-gradient(135deg, var(--primary-light), var(--tint));
   border-radius: 24rpx;
   padding: 36rpx;
   text-align: center;

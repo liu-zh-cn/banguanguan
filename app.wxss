@@ -23,6 +23,15 @@ page {
   --fill-2: #EEF0F5;
   --fill-3: #F7F8FC;
   --fill-4: #F0F2F7;
+  /* 悬浮条（底部导航、保存栏）的底与阴影：这几个是半透明白，深色下必须换掉，
+     否则整条工具栏在夜里就是一块发光板 */
+  --bar-bg: rgba(255, 255, 255, 0.92);
+  --bar-bg-strong: rgba(255, 255, 255, 0.96);
+  --bar-shadow: 0 -6rpx 40rpx rgba(61, 90, 254, 0.12);
+  --tint: #F3EEFF;
+  /* 大面积品牌渐变：深色下必须压暗，否则顶部 hero 就是一整块发光板 */
+  --hero-gradient: linear-gradient(135deg, #5B7CFF 0%, #7E5BFF 100%);
+  --hero-gradient-welcome: linear-gradient(160deg, #5B7CFF 0%, #7E5BFF 55%, #9B5BFF 100%);
   background: var(--page-bg);
   color: var(--text);
   font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
@@ -40,7 +49,7 @@ view, text, button { box-sizing: border-box; }
 
 /* 渐变头部 */
 .hero {
-  background: linear-gradient(135deg, #5B7CFF 0%, #7E5BFF 100%);
+  background: var(--hero-gradient);
   padding: 40rpx 36rpx 90rpx;
   color: #fff;
   border-bottom-left-radius: 40rpx;
@@ -140,6 +149,12 @@ view, text, button { box-sizing: border-box; }
     --fill-4: #202531;
     --card-bg: #1B1F29;
     --page-bg: #12151C;
+    --bar-bg: rgba(27, 31, 41, 0.92);
+    --bar-bg-strong: rgba(27, 31, 41, 0.96);
+    --bar-shadow: 0 -6rpx 40rpx rgba(0, 0, 0, 0.45);
+    --tint: #2A2340;
+    --hero-gradient: linear-gradient(135deg, #33407F 0%, #3E2F82 100%);
+    --hero-gradient-welcome: linear-gradient(160deg, #2F3B75 0%, #3A2C7A 55%, #4A3080 100%);
   }
 
   /* 卡片阴影在深色下会变成一圈脏边，换成更淡的描边 */
@@ -187,6 +202,12 @@ view, text, button { box-sizing: border-box; }
   --fill-4: #202531;
   --card-bg: #1B1F29;
   --page-bg: #12151C;
+  --bar-bg: rgba(27, 31, 41, 0.92);
+  --bar-bg-strong: rgba(27, 31, 41, 0.96);
+  --bar-shadow: 0 -6rpx 40rpx rgba(0, 0, 0, 0.45);
+  --tint: #2A2340;
+  --hero-gradient: linear-gradient(135deg, #33407F 0%, #3E2F82 100%);
+  --hero-gradient-welcome: linear-gradient(160deg, #2F3B75 0%, #3A2C7A 55%, #4A3080 100%);
 }
 .theme-dark .card {
   box-shadow: none;
@@ -218,4 +239,10 @@ view, text, button { box-sizing: border-box; }
   --fill-4: #F0F2F7;
   --card-bg: #FFFFFF;
   --page-bg: #F5F6FA;
+  --bar-bg: rgba(255, 255, 255, 0.92);
+  --bar-bg-strong: rgba(255, 255, 255, 0.96);
+  --bar-shadow: 0 -6rpx 40rpx rgba(61, 90, 254, 0.12);
+  --tint: #F3EEFF;
+  --hero-gradient: linear-gradient(135deg, #5B7CFF 0%, #7E5BFF 100%);
+  --hero-gradient-welcome: linear-gradient(160deg, #5B7CFF 0%, #7E5BFF 55%, #9B5BFF 100%);
 }

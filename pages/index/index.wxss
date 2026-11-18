@@ -1,6 +1,6 @@
 .welcome {
   min-height: 100vh;
-  background: linear-gradient(160deg, var(--primary) 0%, var(--brand-2) 55%, #9B5BFF 100%);
+  background: var(--hero-gradient-welcome);
   padding: 120rpx 48rpx 60rpx;
   display: flex;
   flex-direction: column;
